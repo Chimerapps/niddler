@@ -4,10 +4,16 @@ package com.icapps.niddler;
  * @author Nicola Verbeeck
  * @date 10/11/16.
  */
-public interface Niddler {
+public final class Niddler {
 
-	void addRequest(final NiddlerRequest request);
+	private Niddler() {
+		//No direct instantiation
+	}
 
-	void addResponse(final NiddlerResponse response);
+	public void addRequest(final NiddlerRequest request) {
+	}
+
+	public void addResponse(final NiddlerResponse response) {
+	}
 
 }
