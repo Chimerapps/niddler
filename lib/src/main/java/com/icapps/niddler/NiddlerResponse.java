@@ -1,5 +1,6 @@
 package com.icapps.niddler;
 
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -9,10 +10,12 @@ import java.util.Map;
  */
 public interface NiddlerResponse {
 
-	String getId();
+	String getRequestId();
 
 	Map<String, List<String>> getHeaders();
 
 	Integer getStatusCode();
+
+	void writeBody(final OutputStream stream);
 
 }
