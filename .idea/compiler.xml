@@ -22,8 +22,8 @@
     <bytecodeTargetLevel>
       <module name="niddler-niddler_main" target="1.7" />
       <module name="niddler-niddler_test" target="1.7" />
-      <module name="niddler-ui_main" target="1.8" />
-      <module name="niddler-ui_test" target="1.8" />
+      <module name="niddler-ui_main" target="1.7" />
+      <module name="niddler-ui_test" target="1.7" />
     </bytecodeTargetLevel>
   </component>
 </project>
