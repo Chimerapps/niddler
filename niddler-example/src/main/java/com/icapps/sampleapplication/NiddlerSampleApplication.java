@@ -38,4 +38,8 @@ public class NiddlerSampleApplication extends Application {
             e.printStackTrace();
         }
     }
+
+    public Niddler getNiddler() {
+        return mNiddler;
+    }
 }
