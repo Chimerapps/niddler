@@ -1,12 +1,14 @@
 package com.icapps.niddler.ui.form
 
 import com.google.gson.Gson
-import com.icapps.niddler.ui.MessageListener
 import com.icapps.niddler.ui.NiddlerClient
+import com.icapps.niddler.ui.NiddlerClientListener
 import com.icapps.niddler.ui.adb.ADBBootstrap
 import com.icapps.niddler.ui.model.NiddlerMessage
 import se.vidstige.jadb.JadbDevice
 import java.net.URI
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import javax.swing.JFrame
 import javax.swing.SwingUtilities
 
@@ -14,7 +16,7 @@ import javax.swing.SwingUtilities
  * @author Nicola Verbeeck
  * @date 14/11/16.
  */
-class NiddlerWindow : JFrame(), MessageListener {
+class NiddlerWindow : JFrame(), NiddlerClientListener {
 
     private val windowContents = MainWindow()
     private val adbConnection = ADBBootstrap()
@@ -35,6 +37,8 @@ class NiddlerWindow : JFrame(), MessageListener {
 
         pack()
         isVisible = true
+
+        onDeviceSelectionChanged()
     }
 
     private fun onDeviceSelectionChanged() {
@@ -58,10 +62,34 @@ class NiddlerWindow : JFrame(), MessageListener {
         niddlerClient?.connectBlocking()
     }
 
-    override fun onMessage(msg: String) {
-        val message = Gson().fromJson(msg, NiddlerMessage::class.java)
+    override fun onConnected() {
+        val timestamp = ZonedDateTime.now()
+        val formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
+
         SwingUtilities.invokeLater {
-            windowContents.dummyContentPanel.append("\n\n${message.method} : ${message.url} - ${message.requestId}")
+            windowContents.dummyContentPanel.append("${timestamp.format(formatter)}: Connected to ${niddlerClient?.connection?.remoteSocketAddress}\n\n")
+        }
+    }
+
+    override fun onMessage(msg: String) {
+        val timestamp = ZonedDateTime.now()
+        val formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
+        val message = Gson().fromJson(msg, NiddlerMessage::class.java)
+
+        SwingUtilities.invokeLater {
+            if (message.isRequest) {
+                windowContents.dummyContentPanel.append("${timestamp.format(formatter)}: REQ  ${message.requestId} | ${message.method} ${message.url}\n")
+            } else {
+
+                if (message.body != null) {
+                    windowContents.dummyContentPanel.append("${timestamp.format(formatter)}: RESP ${message.requestId} | ${message.statusCode} ${message.headers} ${message.getBodyAsString}\n")
+                } else {
+                    windowContents.dummyContentPanel.append("${timestamp.format(formatter)}: RESP ${message.requestId} | ${message.statusCode} ${message.headers} - No body\n")
+                }
+
+            }
+
+            windowContents.dummyContentPanel.append("\n")
         }
     }
 

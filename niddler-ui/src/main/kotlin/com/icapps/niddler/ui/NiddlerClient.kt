@@ -11,10 +11,13 @@ import java.util.*
  */
 class NiddlerClient(serverURI: URI?) : WebSocketClient(serverURI) {
 
-    private val listeners: MutableSet<MessageListener> = HashSet()
+    private val listeners: MutableSet<NiddlerClientListener> = HashSet()
 
     override fun onOpen(handshakedata: ServerHandshake?) {
         Log.d("Connection succeeded: " + connection.remoteSocketAddress)
+        synchronized(listeners) {
+            listeners.forEach { it.onConnected() }
+        }
     }
 
     override fun onClose(code: Int, reason: String?, remote: Boolean) {
@@ -32,13 +35,13 @@ class NiddlerClient(serverURI: URI?) : WebSocketClient(serverURI) {
         Log.d(ex.toString())
     }
 
-    fun registerListener(listener: MessageListener) {
+    fun registerListener(listener: NiddlerClientListener) {
         synchronized(listeners) {
             listeners.add(listener)
         }
     }
 
-    fun unregisterListener(listener: MessageListener) {
+    fun unregisterListener(listener: NiddlerClientListener) {
         synchronized(listeners) {
             listeners.remove(listener)
         }
@@ -46,6 +49,7 @@ class NiddlerClient(serverURI: URI?) : WebSocketClient(serverURI) {
 
 }
 
-interface MessageListener {
+interface NiddlerClientListener {
     fun onMessage(msg: String)
+    fun onConnected()
 }
