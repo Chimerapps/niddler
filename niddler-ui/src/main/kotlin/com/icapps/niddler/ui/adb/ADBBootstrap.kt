@@ -1,13 +1,15 @@
 package com.icapps.niddler.ui.adb
 
 import com.icapps.niddler.ui.prefixList
+import se.vidstige.jadb.JadbConnection
+import se.vidstige.jadb.JadbDevice
 import java.io.File
 
 /**
  * @author Nicola Verbeeck
  * @date 10/11/16.
  */
-class ADBInterface {
+class ADBBootstrap {
 
     companion object {
         private fun determineExecutablePath(name: String): String {
@@ -33,15 +35,16 @@ class ADBInterface {
 
     private var pathToAdb: String = findADB()
 
-    fun bootStrap() {
+    fun bootStrap(): JadbConnection {
         executeADBCommand("start-server")
+        return JadbConnection()
     }
 
-    fun forwardPort(localPort: Int, remotePort: Int) {
-        executeADBCommand("forward", "tcp:$localPort", "tcp:$remotePort")
+    fun extend(device: JadbDevice): ADBExt {
+        return ADBExt(device, this)
     }
 
-    private fun executeADBCommand(vararg commands: String) {
+    internal fun executeADBCommand(vararg commands: String) {
         val builder = ProcessBuilder(pathToAdb.prefixList(commands))
         val process = builder.start()
         process.waitFor()
