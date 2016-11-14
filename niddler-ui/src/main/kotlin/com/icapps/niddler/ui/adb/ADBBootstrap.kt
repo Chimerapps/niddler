@@ -40,7 +40,8 @@ class ADBBootstrap {
         return JadbConnection()
     }
 
-    fun extend(device: JadbDevice): ADBExt {
+    fun extend(device: JadbDevice?): ADBExt? {
+        if (device == null) return null
         return ADBExt(device, this)
     }
 

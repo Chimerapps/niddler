@@ -23,7 +23,9 @@
       </configuration>
     </facet>
   </component>
-  <component name="NewModuleRootManager" inherit-compiler-output="true">
+  <component name="NewModuleRootManager" inherit-compiler-output="false">
+    <output url="file://$MODULE_DIR$/../../../niddler-example/build/intermediates/classes/debug" />
+    <output-test url="file://$MODULE_DIR$/../../../niddler-example/build/intermediates/classes/test/debug" />
     <exclude-output />
     <content url="file://$MODULE_DIR$/../../../niddler-example">
       <sourceFolder url="file://$MODULE_DIR$/../../../niddler-example/build/generated/source/r/debug" isTestSource="false" generated="true" />
@@ -114,5 +116,6 @@
     <orderEntry type="library" exported="" name="support-vector-drawable-25.0.0" level="project" />
     <orderEntry type="library" exported="" name="support-core-utils-25.0.0" level="project" />
     <orderEntry type="module" module-name="niddler-lib" exported="" />
+    <orderEntry type="library" exported="" name="android-android-25" level="project" />
   </component>
 </module>

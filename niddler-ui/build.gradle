@@ -14,6 +14,7 @@ buildscript {
 }
 
 apply plugin: 'kotlin'
+apply plugin: 'java'
 apply plugin: 'application'
 
 sourceCompatibility = 1.7
@@ -23,6 +24,7 @@ defaultTasks 'run'
 
 sourceSets {
     main.kotlin.srcDirs += 'src/main/kotlin'
+    main.java.srcDirs += "src/main/kotlin"
 }
 
 repositories {
@@ -37,4 +39,5 @@ dependencies {
     compile "com.github.vidstige:jadb:v1.0.1"
     compile 'org.java-websocket:Java-WebSocket:1.3.0'
     compile 'co.trikita:log:1.1.5'
+    compile 'com.google.code.gson:gson:2.8.0'
 }
