@@ -27,8 +27,8 @@ class ADBInterface {
         return pathToAdb != null
     }
 
-    fun test() {
-        executeADBCommand("devices")
+    fun bindTCPPort() {
+        executeADBCommand("forward", "tcp:6555", "tcp:6555")
     }
 
     private fun executeADBCommand(vararg commands: String) {
