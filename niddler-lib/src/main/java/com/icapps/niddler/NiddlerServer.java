@@ -7,7 +7,6 @@ import org.java_websocket.server.WebSocketServer;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Collection;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -27,22 +26,22 @@ public class NiddlerServer extends WebSocketServer {
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
-        LOG.log(Level.FINE, "Connection opened: " + handshake.getResourceDescriptor());
+        System.out.println("Connection opened: " + handshake.getResourceDescriptor());
     }
 
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
-        LOG.log(Level.FINE, "Connection closed: " + conn);
+        System.out.println("Connection closed: " + conn);
     }
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        LOG.log(Level.FINEST, conn + ": " + message);
+        System.out.println(conn + ": " + message);
     }
 
     @Override
     public void onError(WebSocket conn, Exception ex) {
-        LOG.log(Level.SEVERE, ex.toString());
+        ex.printStackTrace();
     }
 
     /**

@@ -9,6 +9,7 @@ import com.icapps.niddler.NiddlerRequest;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
@@ -33,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public Map<String, String> getHeaders() {
+                    public Map<String, List<String>> getHeaders() {
                         return new HashMap<>(0);
                     }
 

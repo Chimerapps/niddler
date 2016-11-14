@@ -20,7 +20,7 @@ public class NiddlerSampleApplication extends Application {
 
         try {
             mNiddler = new Niddler.Builder()
-                    .setPort(1234)
+                    .setPort(6555)
                     .build();
 
             mNiddler.start();

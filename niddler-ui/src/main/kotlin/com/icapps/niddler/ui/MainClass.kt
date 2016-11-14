@@ -13,15 +13,16 @@ fun main(args: Array<String>) {
     adbConnection.forwardPort(6555, 6555)
 
     print("Connecting to localhost:6555 ...")
-    val client = NiddlerClient(URI.create("http://localhost:6555"))
-    client.connectBlocking()
+    val client = NiddlerClient(URI.create("ws://127.0.0.1:6555"))
+    client.connect()
 
     while (!client.connection.isOpen) {
+        print("Not connected :'(")
+        Thread.sleep(1000)
     }
 
     print("Connected!")
 
     while (client.connection.isOpen) {
-        Thread.sleep(100);
     }
 }
