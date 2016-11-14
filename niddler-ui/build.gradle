@@ -26,8 +26,12 @@ sourceSets {
 
 repositories {
     mavenCentral()
+    maven {
+        url "https://jitpack.io"
+    }
 }
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile "com.github.vidstige:jadb:v1.0.1"
 }

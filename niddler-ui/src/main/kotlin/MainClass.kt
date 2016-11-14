@@ -1,4 +1,4 @@
-import com.icapps.niddler.ui.adb.ADBInterface
+import com.icapps.niddler.ui.adb.ADBBootstrap
 
 /**
  * @author Nicola Verbeeck
@@ -6,5 +6,7 @@ import com.icapps.niddler.ui.adb.ADBInterface
  */
 
 fun main(args: Array<String>) {
-    ADBInterface().test()
+    val adbConnection = ADBBootstrap().bootStrap()
+    
+    adbConnection.devices.forEach(::print)
 }
