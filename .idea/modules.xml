@@ -3,8 +3,9 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/niddler.iml" filepath="$PROJECT_DIR$/niddler.iml" />
-      <module fileurl="file://$PROJECT_DIR$/lib/niddler-lib.iml" filepath="$PROJECT_DIR$/lib/niddler-lib.iml" />
-      <module fileurl="file://$PROJECT_DIR$/sampleapplication/sampleapplication.iml" filepath="$PROJECT_DIR$/sampleapplication/sampleapplication.iml" />
+      <module fileurl="file://$PROJECT_DIR$/niddler-example/niddler-example.iml" filepath="$PROJECT_DIR$/niddler-example/niddler-example.iml" />
+      <module fileurl="file://$PROJECT_DIR$/niddler-lib/niddler-lib.iml" filepath="$PROJECT_DIR$/niddler-lib/niddler-lib.iml" />
+      <module fileurl="file://$PROJECT_DIR$/niddler-ui/niddler-ui.iml" filepath="$PROJECT_DIR$/niddler-ui/niddler-ui.iml" />
     </modules>
   </component>
 </project>

@@ -1,7 +1,6 @@
 package com.icapps.niddler;
 
 import java.io.OutputStream;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -14,7 +13,7 @@ public interface NiddlerRequest {
 
 	String getUrl();
 
-	Map<String, List<String>> getHeaders();
+	Map<String, String> getHeaders();
 
 	String getMethod();
 
