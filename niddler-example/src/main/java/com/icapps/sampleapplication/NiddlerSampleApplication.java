@@ -4,6 +4,7 @@ import android.app.Application;
 
 import com.icapps.niddler.core.Niddler;
 import com.icapps.niddler.interceptor.NiddlerOkHttpInterceptor;
+import com.icapps.sampleapplication.api.ExampleApi;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
@@ -18,7 +19,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class NiddlerSampleApplication extends Application {
 
     private Niddler mNiddler;
-    private JsonPlaceholderApi mApi;
+    private ExampleApi mApi;
 
     @Override
     public void onCreate() {
@@ -41,7 +42,7 @@ public class NiddlerSampleApplication extends Application {
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
 
-            mApi = retrofit.create(JsonPlaceholderApi.class);
+            mApi = retrofit.create(ExampleApi.class);
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
@@ -57,11 +58,7 @@ public class NiddlerSampleApplication extends Application {
         }
     }
 
-    public Niddler getNiddler() {
-        return mNiddler;
-    }
-
-    public JsonPlaceholderApi getJsonPlaceholderApi() {
+    public ExampleApi getJsonPlaceholderApi() {
         return mApi;
     }
 }

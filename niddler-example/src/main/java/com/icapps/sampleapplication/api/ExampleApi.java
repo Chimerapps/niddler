@@ -1,4 +1,4 @@
-package com.icapps.sampleapplication;
+package com.icapps.sampleapplication.api;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ import retrofit2.http.Path;
 /**
  * Created by maartenvangiel on 14/11/2016.
  */
-public interface JsonPlaceholderApi {
+public interface ExampleApi {
 
     @GET("/posts")
     Call<List<Post>> getPosts();

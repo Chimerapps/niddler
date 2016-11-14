@@ -1,8 +1,13 @@
-package com.icapps.sampleapplication;
+package com.icapps.sampleapplication.activity;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+
+import com.icapps.sampleapplication.NiddlerSampleApplication;
+import com.icapps.sampleapplication.R;
+import com.icapps.sampleapplication.api.ExampleApi;
+import com.icapps.sampleapplication.api.Post;
 
 import java.util.List;
 
@@ -12,7 +17,7 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
-    private JsonPlaceholderApi mApi;
+    private ExampleApi mApi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
