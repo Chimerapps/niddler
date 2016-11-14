@@ -1,4 +1,4 @@
-package com.icapps.niddler;
+package com.icapps.niddler.core;
 
 import java.io.OutputStream;
 import java.util.List;

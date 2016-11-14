@@ -1,4 +1,4 @@
-package com.icapps.niddler;
+package com.icapps.niddler.core;
 
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
