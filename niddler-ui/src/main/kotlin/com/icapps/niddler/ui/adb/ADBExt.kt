@@ -9,7 +9,10 @@ import se.vidstige.jadb.JadbDevice
 class ADBExt(private val adbDevice: JadbDevice, private val adbBootstrap: ADBBootstrap) {
 
     fun fowardTCPPort(localPort: Int, remotePort: Int) {
-        adbBootstrap.executeADBCommand("-s", adbDevice.serial, "forward", "tcp:$localPort", "tcp:$remotePort")
+        if (adbDevice.serial != null)
+            adbBootstrap.executeADBCommand("-s", adbDevice.serial, "forward", "tcp:$localPort", "tcp:$remotePort")
+        else
+            adbBootstrap.executeADBCommand("forward", "tcp:$localPort", "tcp:$remotePort")
     }
 
 }
