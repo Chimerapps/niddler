@@ -1,13 +1,13 @@
 package com.icapps.niddler;
 
 
+import com.icapps.niddler.util.Base64;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.Iterator;
 import java.util.Map;
-
-import javax.xml.bind.DatatypeConverter;
 
 /**
  * @author Maarten Van Giel
@@ -23,7 +23,7 @@ public final class Niddler {
     public void logRequest(final NiddlerRequest request) {
         final ByteArrayOutputStream os = new ByteArrayOutputStream();
         request.writeBody(os);
-        String base64Body = DatatypeConverter.printBase64Binary(os.toByteArray());
+        String base64Body = Base64.encodeToString(os.toByteArray(), Base64.DEFAULT);
 
         final StringBuilder stringBuilder = new StringBuilder("{ requestId:\"");
         stringBuilder.append(request.getRequestId());
@@ -63,7 +63,7 @@ public final class Niddler {
     public void logResponse(final NiddlerResponse response) {
         final ByteArrayOutputStream os = new ByteArrayOutputStream();
         response.writeBody(os);
-        String base64Body = DatatypeConverter.printBase64Binary(os.toByteArray());
+        String base64Body = Base64.encodeToString(os.toByteArray(), Base64.DEFAULT);
 
         final StringBuilder stringBuilder = new StringBuilder("{ requestId:\"");
         stringBuilder.append(response.getRequestId());
