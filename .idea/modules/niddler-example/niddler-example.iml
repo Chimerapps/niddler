@@ -101,6 +101,7 @@
       <excludeFolder url="file://$MODULE_DIR$/../../../niddler-example/build/outputs" />
       <excludeFolder url="file://$MODULE_DIR$/../../../niddler-example/build/tmp" />
     </content>
+    <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="support-annotations-25.0.0" level="project" />
     <orderEntry type="library" exported="" name="support-v4-25.0.0" level="project" />

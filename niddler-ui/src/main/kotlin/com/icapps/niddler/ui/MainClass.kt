@@ -10,7 +10,7 @@ import java.net.URI
 fun main(args: Array<String>) {
     val adbBootstrap = ADBBootstrap()
     val adbConnection = adbBootstrap.bootStrap()
-    adbBootstrap.extend(adbConnection.anyDevice).fowardTCPPort(6555, 6555)
+    adbBootstrap.extend(adbConnection.devices.first()).fowardTCPPort(6555, 6555)
 
     print("Connecting to localhost:6555 ...")
     val client = NiddlerClient(URI.create("ws://127.0.0.1:6555"))
