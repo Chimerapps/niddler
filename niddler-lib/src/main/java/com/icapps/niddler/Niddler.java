@@ -10,6 +10,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import trikita.log.Log;
+
 /**
  * @author Maarten Van Giel
  */
@@ -24,9 +26,9 @@ public final class Niddler {
     public void logRequest(final NiddlerRequest request) {
         final ByteArrayOutputStream os = new ByteArrayOutputStream();
         request.writeBody(os);
-        String base64Body = Base64.encodeToString(os.toByteArray(), Base64.DEFAULT);
+        String base64Body = Base64.encodeToString(os.toByteArray(), Base64.NO_WRAP);
 
-        final StringBuilder stringBuilder = new StringBuilder("{ \"requestId\":\"");
+        final StringBuilder stringBuilder = new StringBuilder("{\"requestId\":\"");
         stringBuilder.append(request.getRequestId());
         stringBuilder.append("\", ");
         stringBuilder.append("\"url\":\"");
@@ -70,9 +72,9 @@ public final class Niddler {
     public void logResponse(final NiddlerResponse response) {
         final ByteArrayOutputStream os = new ByteArrayOutputStream();
         response.writeBody(os);
-        String base64Body = Base64.encodeToString(os.toByteArray(), Base64.DEFAULT);
+        String base64Body = Base64.encodeToString(os.toByteArray(), Base64.NO_WRAP);
 
-        final StringBuilder stringBuilder = new StringBuilder("{ \"requestId\":\"");
+        final StringBuilder stringBuilder = new StringBuilder("{\"requestId\":\"");
         stringBuilder.append(response.getRequestId());
         stringBuilder.append("\", ");
         stringBuilder.append("\"statusCode\":");
@@ -111,8 +113,8 @@ public final class Niddler {
     }
 
     public void start() {
-        System.out.println("Listening!" + mServer.getAddress());
         mServer.start();
+        Log.d("Started listening at address" + mServer.getAddress());
     }
 
     public void close() throws IOException, InterruptedException {

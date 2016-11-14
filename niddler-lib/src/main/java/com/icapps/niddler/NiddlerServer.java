@@ -7,14 +7,13 @@ import org.java_websocket.server.WebSocketServer;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Collection;
-import java.util.logging.Logger;
+
+import trikita.log.Log;
 
 /**
  * Created by maartenvangiel on 14/11/2016.
  */
 public class NiddlerServer extends WebSocketServer {
-
-    private static final Logger LOG = Logger.getLogger(NiddlerServer.class.getName());
 
     public NiddlerServer(InetSocketAddress address) {
         super(address);
@@ -26,17 +25,17 @@ public class NiddlerServer extends WebSocketServer {
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
-        System.out.println("Connection opened: " + handshake.getResourceDescriptor());
+        Log.d("Connection opened: " + handshake.getResourceDescriptor());
     }
 
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
-        System.out.println("Connection closed: " + conn);
+        Log.d("Connection closed: " + conn);
     }
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        System.out.println(conn + ": " + message);
+        Log.d(conn + ": " + message);
     }
 
     @Override
