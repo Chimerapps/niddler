@@ -2,10 +2,16 @@ package com.icapps.sampleapplication;
 
 import android.app.Application;
 
-import com.icapps.niddler.Niddler;
+import com.icapps.niddler.core.Niddler;
+import com.icapps.niddler.interceptor.NiddlerOkHttpInterceptor;
+import com.icapps.sampleapplication.api.ExampleApi;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
+
+import okhttp3.OkHttpClient;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Created by maartenvangiel on 10/11/2016.
@@ -13,6 +19,7 @@ import java.net.UnknownHostException;
 public class NiddlerSampleApplication extends Application {
 
     private Niddler mNiddler;
+    private ExampleApi mApi;
 
     @Override
     public void onCreate() {
@@ -24,6 +31,18 @@ public class NiddlerSampleApplication extends Application {
                     .build();
 
             mNiddler.start();
+
+            final OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                    .addInterceptor(new NiddlerOkHttpInterceptor(mNiddler))
+                    .build();
+
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl("https://jsonplaceholder.typicode.com")
+                    .client(okHttpClient)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+
+            mApi = retrofit.create(ExampleApi.class);
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
@@ -39,7 +58,7 @@ public class NiddlerSampleApplication extends Application {
         }
     }
 
-    public Niddler getNiddler() {
-        return mNiddler;
+    public ExampleApi getJsonPlaceholderApi() {
+        return mApi;
     }
 }

@@ -1,4 +1,4 @@
-package com.icapps.niddler;
+package com.icapps.niddler.core;
 
 
 import com.icapps.niddler.util.Base64;
@@ -49,15 +49,16 @@ public final class Niddler {
             final String headerName = headerIterator.next();
             final List<String> headers = headerMap.get(headerName);
 
+            stringBuilder.append("\"");
+            stringBuilder.append(headerName);
+            stringBuilder.append("\": \"");
+
             for (String header : headers) {
-                stringBuilder.append("\"");
-                stringBuilder.append(headerName);
-                stringBuilder.append("\": \"");
-                stringBuilder.append(header);
-                stringBuilder.append("\",");
+                stringBuilder.append(header.replace("\"", "\\\"")); // This seems fragile...
+                stringBuilder.append("\", ");
             }
             if (headers.size() > 0) {
-                stringBuilder.setLength(stringBuilder.length() - 1); // Remove trailing comma
+                stringBuilder.setLength(stringBuilder.length() - 2); // Remove trailing comma
             }
 
             if (headerIterator.hasNext()) {
@@ -92,15 +93,16 @@ public final class Niddler {
             final String headerName = headerIterator.next();
             final List<String> headers = headerMap.get(headerName);
 
+            stringBuilder.append("\"");
+            stringBuilder.append(headerName);
+            stringBuilder.append("\": \"");
+
             for (String header : headers) {
-                stringBuilder.append("\"");
-                stringBuilder.append(headerName);
-                stringBuilder.append("\": \"");
-                stringBuilder.append(header);
-                stringBuilder.append("\",");
+                stringBuilder.append(header.replace("\"", "\\\"")); // This seems fragile...
+                stringBuilder.append("\", ");
             }
             if (headers.size() > 0) {
-                stringBuilder.setLength(stringBuilder.length() - 1); // Remove trailing comma
+                stringBuilder.setLength(stringBuilder.length() - 2); // Remove trailing comma
             }
 
             if (headerIterator.hasNext()) {
