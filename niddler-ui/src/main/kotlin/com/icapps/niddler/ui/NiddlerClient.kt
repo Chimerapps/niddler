@@ -2,6 +2,7 @@ package com.icapps.niddler.ui
 
 import org.java_websocket.client.WebSocketClient
 import org.java_websocket.handshake.ServerHandshake
+import trikita.log.Log
 import java.net.URI
 
 /**
@@ -10,19 +11,19 @@ import java.net.URI
 class NiddlerClient(serverURI: URI?) : WebSocketClient(serverURI) {
 
     override fun onOpen(handshakedata: ServerHandshake?) {
-        print("Connection opened: " + handshakedata)
+        Log.d("Connection succeeded: " + connection.remoteSocketAddress)
     }
 
     override fun onClose(code: Int, reason: String?, remote: Boolean) {
-        print("Connection closed: " + reason)
+        Log.d("Connection closed: " + reason)
     }
 
     override fun onMessage(message: String?) {
-        print("Got message: " + message)
+        Log.d("Got message: " + message)
     }
 
     override fun onError(ex: Exception?) {
-        print(ex.toString())
+        Log.d(ex.toString())
     }
 
 }
