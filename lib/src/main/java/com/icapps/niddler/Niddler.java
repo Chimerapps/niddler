@@ -6,14 +6,33 @@ package com.icapps.niddler;
  */
 public final class Niddler {
 
-	private Niddler() {
-		//No direct instantiation
-	}
+    private final int mPort;
 
-	public void addRequest(final NiddlerRequest request) {
-	}
+    private Niddler(int port) {
+        mPort = port;
+    }
 
-	public void addResponse(final NiddlerResponse response) {
-	}
+    public void logRequest(final NiddlerRequest request) {
+
+    }
+
+    public void logResponse(final NiddlerResponse response) {
+
+    }
+
+    public static class Builder {
+
+        private int mPort = 6555;
+
+        public Builder setPort(final int port) {
+            mPort = port;
+            return this;
+        }
+
+        public Niddler build() {
+            return new Niddler(mPort);
+        }
+
+    }
 
 }

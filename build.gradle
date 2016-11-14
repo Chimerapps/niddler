@@ -1,3 +1,17 @@
 group 'com.icapps'
 version '1'
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.2.2'
+    }
+}
+
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+}

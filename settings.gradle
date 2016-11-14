@@ -1,4 +1,4 @@
+include ':sampleapplication'
 rootProject.name = 'niddler'
 include 'lib'
-findProject(':lib')?.name = 'niddler'
-
+findProject(':lib')?.name = 'niddler-lib'

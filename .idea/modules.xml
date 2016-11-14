@@ -2,13 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/niddler.iml" filepath="$PROJECT_DIR$/.idea/modules/niddler.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/lib/niddler-niddler.iml" filepath="$PROJECT_DIR$/.idea/modules/lib/niddler-niddler.iml" group="niddler" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/lib/niddler-niddler_main.iml" filepath="$PROJECT_DIR$/.idea/modules/lib/niddler-niddler_main.iml" group="niddler" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/lib/niddler-niddler_test.iml" filepath="$PROJECT_DIR$/.idea/modules/lib/niddler-niddler_test.iml" group="niddler" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/niddler-ui.iml" filepath="$PROJECT_DIR$/.idea/modules/niddler-ui.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/niddler-ui_main.iml" filepath="$PROJECT_DIR$/.idea/modules/niddler-ui_main.iml" group="niddler-ui" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/niddler-ui_test.iml" filepath="$PROJECT_DIR$/.idea/modules/niddler-ui_test.iml" group="niddler-ui" />
+      <module fileurl="file://$PROJECT_DIR$/niddler.iml" filepath="$PROJECT_DIR$/niddler.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lib/niddler-lib.iml" filepath="$PROJECT_DIR$/lib/niddler-lib.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sampleapplication/sampleapplication.iml" filepath="$PROJECT_DIR$/sampleapplication/sampleapplication.iml" />
     </modules>
   </component>
 </project>
