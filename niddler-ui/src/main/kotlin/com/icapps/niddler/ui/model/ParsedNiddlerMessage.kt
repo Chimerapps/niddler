@@ -6,6 +6,18 @@ package com.icapps.niddler.ui.model
  */
 class ParsedNiddlerMessage(val bodyFormat: BodyFormat, val bodyData: Any?, val message: NiddlerMessage) {
 
+    val subItems: List<ParsedNiddlerMessageSubItem>
+
+    init {
+        subItems = mutableListOf<ParsedNiddlerMessageSubItem>()
+        if(headers != null){
+            subItems.add(ParsedNiddlerMessageSubItem("headers", headers.toString()))
+        }
+        if(bodyData != null){
+            subItems.add(ParsedNiddlerMessageSubItem("body", bodyData.toString()))
+        }
+    }
+
     val requestId: String
         get() = message.requestId
 
