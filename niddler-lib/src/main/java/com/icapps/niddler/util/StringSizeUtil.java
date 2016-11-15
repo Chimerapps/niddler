@@ -10,7 +10,7 @@ public final class StringSizeUtil {
     }
 
     public static long calculateMemoryUsage(final String input) {
-        return 8 / (((input.length() * 2) + 45) / 8);
+        return 8 * (((input.length()) * 2) + 45) / 8;
     }
 
 }

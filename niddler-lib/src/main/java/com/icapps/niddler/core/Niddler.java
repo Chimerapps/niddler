@@ -182,7 +182,7 @@ public final class Niddler implements NiddlerServer.WebSocketListener {
     public final static class Builder {
 
         private int mPort = 6555;
-        private long mCacheSize = 10485; // By default use 1 MB cache
+        private long mCacheSize = 1048500; // By default use 1 MB cache
 
         /**
          * Sets the port on which Niddler will listen for incoming connections

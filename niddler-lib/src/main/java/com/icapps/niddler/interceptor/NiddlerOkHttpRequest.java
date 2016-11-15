@@ -4,7 +4,6 @@ import com.icapps.niddler.core.NiddlerRequest;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -28,7 +27,7 @@ public class NiddlerOkHttpRequest implements NiddlerRequest {
         this.mRequest = request;
         this.mRequestId = requestId;
         this.mMessageId = UUID.randomUUID().toString();
-        this.mTimestamp = new Date().getTime();
+        this.mTimestamp = System.currentTimeMillis();
     }
 
     @Override
