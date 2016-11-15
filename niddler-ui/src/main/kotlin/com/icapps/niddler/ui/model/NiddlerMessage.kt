@@ -26,6 +26,9 @@ class NiddlerMessage {
     val getBodyAsString: String?
         get() = if (body != null) String(Base64.decode(body), Charsets.UTF_8) else null
 
+    val getBodyAsBytes: ByteArray?
+        get() = if (body != null) Base64.decode(body) else null
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other?.javaClass != javaClass) return false
