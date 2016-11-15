@@ -15,6 +15,7 @@ public class MainWindow {
 	private JToolBar toolbar;
 	private JToggleButton buttonTimeline;
 	private JToggleButton buttonLinkedMode;
+	private JButton buttonClear;
 
 	public JPanel getRootPanel() {
 		return rootPanel;
@@ -30,6 +31,10 @@ public class MainWindow {
 
 	public JTextArea getDummyContentPanel() {
 		return dummyContentPanel;
+	}
+
+	public JButton getButtonClear() {
+		return buttonClear;
 	}
 
 	{
@@ -93,6 +98,14 @@ public class MainWindow {
 		buttonLinkedMode.setPreferredSize(new Dimension(32, 32));
 		buttonLinkedMode.setText("");
 		toolbar.add(buttonLinkedMode);
+		buttonClear = new JButton();
+		buttonClear.setIcon(new ImageIcon(getClass().getResource("/ic_delete.png")));
+		buttonClear.setLabel("");
+		buttonClear.setMaximumSize(new Dimension(32, 32));
+		buttonClear.setMinimumSize(new Dimension(32, 32));
+		buttonClear.setPreferredSize(new Dimension(32, 32));
+		buttonClear.setText("");
+		toolbar.add(buttonClear);
 		ButtonGroup buttonGroup;
 		buttonGroup = new ButtonGroup();
 		buttonGroup.add(buttonTimeline);

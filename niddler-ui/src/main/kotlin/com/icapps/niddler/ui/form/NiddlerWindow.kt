@@ -12,11 +12,9 @@ import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.net.URI
 import java.time.Clock
-import java.time.LocalDateTime
-import java.time.ZoneOffset
+import java.time.Instant
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.util.*
 import javax.swing.JFrame
 import javax.swing.SwingUtilities
 
@@ -42,6 +40,10 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
         }
         windowContents.adbTargetSelection.addActionListener {
             onDeviceSelectionChanged()
+        }
+        windowContents.buttonClear.addActionListener {
+            messages.clear()
+            windowContents.dummyContentPanel.text = ""
         }
 
         pack()
@@ -98,7 +100,7 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
 
     override fun onMessage(message: NiddlerMessage) {
         val formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
-        val timestamp = ZonedDateTime.of(LocalDateTime.ofInstant(Date(message.timestamp).toInstant(), ZoneOffset.UTC), Clock.systemDefaultZone().zone)
+        val timestamp = ZonedDateTime.ofInstant(Instant.ofEpochMilli(message.timestamp), Clock.systemDefaultZone().zone)
         SwingUtilities.invokeLater {
             if (message.isRequest) {
                 windowContents.dummyContentPanel.append("${timestamp.format(formatter)}: REQ  ${message.requestId} | ${message.method} ${message.url}")
