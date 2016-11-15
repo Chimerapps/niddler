@@ -10,7 +10,11 @@ import java.util.Map;
  */
 public interface NiddlerResponse {
 
+    String getMessageId();
+
     String getRequestId();
+
+    long getTimestamp();
 
     Map<String, List<String>> getHeaders();
 

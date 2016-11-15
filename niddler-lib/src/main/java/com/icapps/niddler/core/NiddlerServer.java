@@ -15,17 +15,23 @@ import trikita.log.Log;
  */
 public class NiddlerServer extends WebSocketServer {
 
-    public NiddlerServer(InetSocketAddress address) {
+    private final WebSocketListener mListener;
+
+    public NiddlerServer(InetSocketAddress address, WebSocketListener mListener) {
         super(address);
+        this.mListener = mListener;
     }
 
-    public NiddlerServer(final int port) throws UnknownHostException {
-        super(new InetSocketAddress(port));
+    public NiddlerServer(final int port, WebSocketListener mListener) throws UnknownHostException {
+        this(new InetSocketAddress(port), mListener);
     }
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
         Log.d("Connection opened: " + handshake.getResourceDescriptor());
+        if (mListener != null) {
+            mListener.onConnectionOpened(conn);
+        }
     }
 
     @Override
@@ -54,6 +60,10 @@ public class NiddlerServer extends WebSocketServer {
             socket.send(message);
 
         }
+    }
+
+    public interface WebSocketListener {
+        void onConnectionOpened(WebSocket conn);
     }
 
 }

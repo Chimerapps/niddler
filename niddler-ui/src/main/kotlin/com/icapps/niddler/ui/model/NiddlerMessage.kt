@@ -13,6 +13,7 @@ class NiddlerMessage {
 
     lateinit var requestId: String
     lateinit var messageId: String
+    var timestamp: Long = 0
     var url: String? = null
     var method: String? = null
     var body: String? = null
@@ -21,9 +22,6 @@ class NiddlerMessage {
 
     val isRequest: Boolean
         get() = statusCode == null
-
-    val isResponse: Boolean
-        get() = !isRequest
 
     val getBodyAsString: String
         get() = String(Base64.decode(body!!), Charset.forName("UTF-8"))

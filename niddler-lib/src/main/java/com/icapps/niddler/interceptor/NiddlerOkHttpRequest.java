@@ -4,8 +4,10 @@ import com.icapps.niddler.core.NiddlerRequest;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -19,15 +21,29 @@ public class NiddlerOkHttpRequest implements NiddlerRequest {
 
     private final Request mRequest;
     private final String mRequestId;
+    private final String mMessageId;
+    private final long mTimestamp;
 
     public NiddlerOkHttpRequest(Request request, String requestId) {
         this.mRequest = request;
         this.mRequestId = requestId;
+        this.mMessageId = UUID.randomUUID().toString();
+        this.mTimestamp = new Date().getTime();
+    }
+
+    @Override
+    public String getMessageId() {
+        return mMessageId;
     }
 
     @Override
     public String getRequestId() {
         return mRequestId;
+    }
+
+    @Override
+    public long getTimestamp() {
+        return mTimestamp;
     }
 
     @Override
