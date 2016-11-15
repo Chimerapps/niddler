@@ -11,12 +11,13 @@ import java.util.*
  */
 class NiddlerClient(serverURI: URI?) : WebSocketClient(serverURI) {
 
-    private val listeners: MutableSet<NiddlerClientListener> = HashSet()
+    private val clientListeners: MutableSet<NiddlerClientListener> = HashSet()
+    private val messageListeners: MutableSet<NiddlerClientMessageListener> = HashSet()
 
     override fun onOpen(handshakedata: ServerHandshake?) {
         Log.d("Connection succeeded: " + connection.remoteSocketAddress)
-        synchronized(listeners) {
-            listeners.forEach { it.onConnected() }
+        synchronized(clientListeners) {
+            clientListeners.forEach { it.onConnected() }
         }
     }
 
@@ -26,8 +27,8 @@ class NiddlerClient(serverURI: URI?) : WebSocketClient(serverURI) {
 
     override fun onMessage(message: String) {
         Log.d("Got message: " + message)
-        synchronized(listeners) {
-            listeners.forEach { it.onMessage(message) }
+        synchronized(clientListeners) {
+            messageListeners.forEach { it.onMessage(message) }
         }
     }
 
@@ -35,21 +36,35 @@ class NiddlerClient(serverURI: URI?) : WebSocketClient(serverURI) {
         Log.d(ex.toString())
     }
 
-    fun registerListener(listener: NiddlerClientListener) {
-        synchronized(listeners) {
-            listeners.add(listener)
+    fun registerClientListener(listener: NiddlerClientListener) {
+        synchronized(clientListeners) {
+            clientListeners.add(listener)
         }
     }
 
-    fun unregisterListener(listener: NiddlerClientListener) {
-        synchronized(listeners) {
-            listeners.remove(listener)
+    fun unregisterClientListener(listener: NiddlerClientListener) {
+        synchronized(clientListeners) {
+            clientListeners.remove(listener)
         }
     }
 
+    fun registerMessageListener(listener: NiddlerClientMessageListener) {
+        synchronized(messageListeners) {
+            messageListeners.add(listener)
+        }
+    }
+
+    fun unregisterMessageListener(listener: NiddlerClientMessageListener) {
+        synchronized(messageListeners) {
+            messageListeners.remove(listener)
+        }
+    }
 }
 
 interface NiddlerClientListener {
-    fun onMessage(msg: String)
     fun onConnected()
+}
+
+interface NiddlerClientMessageListener {
+    fun onMessage(msg: String)
 }

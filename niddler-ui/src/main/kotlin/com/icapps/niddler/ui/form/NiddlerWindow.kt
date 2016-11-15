@@ -1,14 +1,21 @@
 package com.icapps.niddler.ui.form
 
-import com.google.gson.Gson
 import com.icapps.niddler.ui.NiddlerClient
 import com.icapps.niddler.ui.NiddlerClientListener
 import com.icapps.niddler.ui.adb.ADBBootstrap
+import com.icapps.niddler.ui.model.MessageContainer
 import com.icapps.niddler.ui.model.NiddlerMessage
+import com.icapps.niddler.ui.model.NiddlerMessageListener
 import se.vidstige.jadb.JadbDevice
+import java.awt.event.WindowAdapter
+import java.awt.event.WindowEvent
 import java.net.URI
+import java.time.Clock
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.util.*
 import javax.swing.JFrame
 import javax.swing.SwingUtilities
 
@@ -16,13 +23,14 @@ import javax.swing.SwingUtilities
  * @author Nicola Verbeeck
  * @date 14/11/16.
  */
-class NiddlerWindow : JFrame(), NiddlerClientListener {
+class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
 
     private val windowContents = MainWindow()
     private val adbConnection = ADBBootstrap()
 
     private lateinit var devices: MutableList<JadbDevice>
     private var selectedSerial: String? = null
+    private val messages = MessageContainer()
 
     fun init() {
         add(windowContents.rootPanel)
@@ -36,8 +44,18 @@ class NiddlerWindow : JFrame(), NiddlerClientListener {
         }
 
         pack()
-        isVisible = true
+        addWindowListener(object : WindowAdapter() {
+            override fun windowClosing(e: WindowEvent?) {
+                super.windowClosing(e)
+                messages.unregisterListener(this@NiddlerWindow)
+            }
 
+            override fun windowOpened(e: WindowEvent?) {
+                super.windowOpened(e)
+                messages.registerListener(this@NiddlerWindow)
+            }
+        })
+        isVisible = true
         onDeviceSelectionChanged()
     }
 
@@ -53,7 +71,8 @@ class NiddlerWindow : JFrame(), NiddlerClientListener {
 
     private fun initNiddlerOnDevice() {
         niddlerClient?.close()
-        niddlerClient?.unregisterListener(this)
+        niddlerClient?.unregisterClientListener(this)
+        messages.clear()
         if (niddlerClient != null) {
             //TODO Remove previous port mapping
         }
@@ -61,7 +80,7 @@ class NiddlerWindow : JFrame(), NiddlerClientListener {
         val device = devices.find { it.serial == selectedSerial }
         adbConnection.extend(device)?.fowardTCPPort(6555, 6555)
         niddlerClient = NiddlerClient(URI.create("ws://127.0.0.1:6555"))
-        niddlerClient?.registerListener(this)
+        niddlerClient?.registerClientListener(this)
         niddlerClient?.connectBlocking()
     }
 
@@ -74,11 +93,9 @@ class NiddlerWindow : JFrame(), NiddlerClientListener {
         }
     }
 
-    override fun onMessage(msg: String) {
-        val timestamp = ZonedDateTime.now()
+    override fun onMessage(message: NiddlerMessage) {
         val formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
-        val message = Gson().fromJson(msg, NiddlerMessage::class.java)
-
+        val timestamp = ZonedDateTime.of(LocalDateTime.ofInstant(Date(message.timestamp).toInstant(), ZoneOffset.UTC), Clock.systemDefaultZone().zone)
         SwingUtilities.invokeLater {
             if (message.isRequest) {
                 windowContents.dummyContentPanel.append("${timestamp.format(formatter)}: REQ  ${message.requestId} | ${message.method} ${message.url}\n")
@@ -88,9 +105,7 @@ class NiddlerWindow : JFrame(), NiddlerClientListener {
                 } else {
                     windowContents.dummyContentPanel.append("${timestamp.format(formatter)}: RESP ${message.requestId} | ${message.statusCode} ${message.headers} - No body\n")
                 }
-
             }
-
             windowContents.dummyContentPanel.append("\n")
         }
     }

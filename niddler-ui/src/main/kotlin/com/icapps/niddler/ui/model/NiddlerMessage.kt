@@ -13,6 +13,7 @@ class NiddlerMessage {
     lateinit var requestId: String
     lateinit var messageId: String
     var timestamp: Long = 0
+
     var url: String? = null
     var method: String? = null
     var body: String? = null
