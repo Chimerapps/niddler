@@ -8,7 +8,7 @@ import org.java_websocket.util.Base64
  * @date 14/11/16.
  */
 
-class NiddlerMessage {
+open class NiddlerMessage {
 
     lateinit var requestId: String
     lateinit var messageId: String

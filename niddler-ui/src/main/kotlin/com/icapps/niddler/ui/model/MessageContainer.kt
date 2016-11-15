@@ -8,9 +8,9 @@ import java.util.*
  * @author Nicola Verbeeck
  * @date 15/11/16.
  */
-class MessageContainer : NiddlerClientMessageListener {
+class MessageContainer(private var bodyParser: NiddlerMessageBodyParser) : NiddlerClientMessageListener {
 
-    private val messages: MutableSet<NiddlerMessage> = hashSetOf()
+    private val messages: MutableSet<ParsedNiddlerMessage> = hashSetOf()
     private val gson = Gson()
     private val listeners: MutableSet<NiddlerMessageListener> = hashSetOf()
 
@@ -18,21 +18,21 @@ class MessageContainer : NiddlerClientMessageListener {
         messages.clear()
     }
 
-    fun addMessage(msg: NiddlerMessage) {
+    fun addMessage(msg: ParsedNiddlerMessage) {
         synchronized(messages) {
             messages.add(msg)
         }
     }
 
-    fun getMessagesChronological(): List<NiddlerMessage> {
+    fun getMessagesChronological(): List<ParsedNiddlerMessage> {
         val sortedMessages = synchronized(messages) { ArrayList(messages) }
         sortedMessages.sortBy { it.timestamp }
         return sortedMessages
     }
 
-    fun getMessagesLinked(): SortedMap<String, List<NiddlerMessage>> {
+    fun getMessagesLinked(): SortedMap<String, List<ParsedNiddlerMessage>> {
         val chronological = getMessagesChronological()
-        val map: MutableMap<String, MutableList<NiddlerMessage>> = LinkedHashMap()
+        val map: MutableMap<String, MutableList<ParsedNiddlerMessage>> = LinkedHashMap()
         chronological.forEach {
             var items = map[it.requestId]
             if (items == null) {
@@ -43,11 +43,11 @@ class MessageContainer : NiddlerClientMessageListener {
             }
         }
         @Suppress("UNCHECKED_CAST")
-        return map as SortedMap<String, List<NiddlerMessage>>
+        return map as SortedMap<String, List<ParsedNiddlerMessage>>
     }
 
     override fun onMessage(msg: String) {
-        val message = gson.fromJson(msg, NiddlerMessage::class.java)
+        val message = bodyParser.parseBody(gson.fromJson(msg, NiddlerMessage::class.java))
         addMessage(message)
 
         synchronized(listeners) {
@@ -71,6 +71,6 @@ class MessageContainer : NiddlerClientMessageListener {
 
 interface NiddlerMessageListener {
 
-    fun onMessage(message: NiddlerMessage)
+    fun onMessage(message: ParsedNiddlerMessage)
 
 }

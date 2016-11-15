@@ -4,8 +4,9 @@ import com.icapps.niddler.ui.NiddlerClient
 import com.icapps.niddler.ui.NiddlerClientListener
 import com.icapps.niddler.ui.adb.ADBBootstrap
 import com.icapps.niddler.ui.model.MessageContainer
-import com.icapps.niddler.ui.model.NiddlerMessage
+import com.icapps.niddler.ui.model.NiddlerMessageBodyParser
 import com.icapps.niddler.ui.model.NiddlerMessageListener
+import com.icapps.niddler.ui.model.ParsedNiddlerMessage
 import com.icapps.niddler.ui.util.getStatusCodeString
 import se.vidstige.jadb.JadbDevice
 import java.awt.event.WindowAdapter
@@ -29,7 +30,7 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
 
     private lateinit var devices: MutableList<JadbDevice>
     private var selectedSerial: String? = null
-    private val messages = MessageContainer()
+    private val messages = MessageContainer(NiddlerMessageBodyParser())
 
     fun init() {
         add(windowContents.rootPanel)
@@ -98,7 +99,7 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
         }
     }
 
-    override fun onMessage(message: NiddlerMessage) {
+    override fun onMessage(message: ParsedNiddlerMessage) {
         val formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
         val timestamp = ZonedDateTime.ofInstant(Instant.ofEpochMilli(message.timestamp), Clock.systemDefaultZone().zone)
         SwingUtilities.invokeLater {
@@ -106,7 +107,7 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
                 windowContents.dummyContentPanel.append("${timestamp.format(formatter)}: REQ  ${message.requestId} | ${message.method} ${message.url}")
             } else {
                 if (message.body != null) {
-                    windowContents.dummyContentPanel.append("${timestamp.format(formatter)}: RESP ${message.requestId} | ${message.statusCode} ${getStatusCodeString(message.statusCode!!)}\nHeaders: ${message.headers}\nBody:${message.getBodyAsString}")
+                    windowContents.dummyContentPanel.append("${timestamp.format(formatter)}: RESP ${message.requestId} | ${message.statusCode} ${getStatusCodeString(message.statusCode!!)}\nHeaders: ${message.headers}\nBody:${message.bodyFormat.type}; ${message.bodyData}")
                 } else {
                     windowContents.dummyContentPanel.append("${timestamp.format(formatter)}: RESP ${message.requestId} | ${message.statusCode} ${getStatusCodeString(message.statusCode!!)}\nHeaders: ${message.headers}\nBody: -NO BODY-")
                 }
