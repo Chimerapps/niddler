@@ -18,21 +18,65 @@
           </component>
         </children>
       </grid>
-      <scrollpane id="367af" binding="contentScroller">
+      <grid id="1ccb6" layout-manager="BorderLayout" hgap="0" vgap="0">
         <constraints border-constraint="Center"/>
-        <properties>
-          <minimumSize width="100" height="100"/>
-        </properties>
+        <properties/>
         <border type="none"/>
         <children>
-          <component id="14b9b" class="javax.swing.JTextArea" binding="dummyContentPanel">
-            <constraints/>
+          <scrollpane id="367af" binding="contentScroller">
+            <constraints border-constraint="Center"/>
             <properties>
-              <editable value="false"/>
+              <minimumSize width="100" height="100"/>
             </properties>
-          </component>
+            <border type="none"/>
+            <children>
+              <component id="14b9b" class="javax.swing.JTextArea" binding="dummyContentPanel">
+                <constraints/>
+                <properties>
+                  <editable value="false"/>
+                </properties>
+              </component>
+            </children>
+          </scrollpane>
         </children>
-      </scrollpane>
+      </grid>
+      <grid id="afc24" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints border-constraint="West"/>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <toolbar id="ae6a5" binding="toolbar">
+            <constraints border-constraint="North"/>
+            <properties>
+              <floatable value="false"/>
+              <orientation value="1"/>
+            </properties>
+            <border type="none"/>
+            <children>
+              <component id="c69af" class="javax.swing.JToggleButton" binding="buttonTimeline">
+                <constraints/>
+                <properties>
+                  <inheritsPopupMenu value="false"/>
+                  <maximumSize width="30" height="30"/>
+                  <minimumSize width="30" height="30"/>
+                  <preferredSize width="30" height="30"/>
+                  <selected value="true"/>
+                  <text value=""/>
+                </properties>
+              </component>
+              <component id="9278c" class="javax.swing.JToggleButton" binding="buttonLinkedMode">
+                <constraints/>
+                <properties>
+                  <maximumSize width="30" height="30"/>
+                  <minimumSize width="30" height="30"/>
+                  <preferredSize width="30" height="30"/>
+                  <text value=""/>
+                </properties>
+              </component>
+            </children>
+          </toolbar>
+        </children>
+      </grid>
     </children>
   </grid>
 </form>

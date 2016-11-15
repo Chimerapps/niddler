@@ -1,5 +1,8 @@
 package com.icapps.niddler.ui.form;
 
+import com.icapps.niddler.ui.icon.IcChronological;
+import com.icapps.niddler.ui.icon.IcLink;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -12,6 +15,9 @@ public class MainWindow {
 	private JComboBox adbTargetSelection;
 	private JScrollPane contentScroller;
 	private JTextArea dummyContentPanel;
+	private JToolBar toolbar;
+	private JToggleButton buttonTimeline;
+	private JToggleButton buttonLinkedMode;
 
 	public JPanel getRootPanel() {
 		return rootPanel;
@@ -27,6 +33,11 @@ public class MainWindow {
 
 	public JTextArea getDummyContentPanel() {
 		return dummyContentPanel;
+	}
+
+	public void initImages() {
+		buttonTimeline.setIcon(new IcChronological());
+		buttonLinkedMode.setIcon(new IcLink());
 	}
 
 	{
@@ -51,12 +62,36 @@ public class MainWindow {
 		rootPanel.add(panel1, BorderLayout.NORTH);
 		adbTargetSelection = new JComboBox();
 		panel1.add(adbTargetSelection);
+		final JPanel panel2 = new JPanel();
+		panel2.setLayout(new BorderLayout(0, 0));
+		rootPanel.add(panel2, BorderLayout.CENTER);
 		contentScroller = new JScrollPane();
 		contentScroller.setMinimumSize(new Dimension(100, 100));
-		rootPanel.add(contentScroller, BorderLayout.CENTER);
+		panel2.add(contentScroller, BorderLayout.CENTER);
 		dummyContentPanel = new JTextArea();
 		dummyContentPanel.setEditable(false);
 		contentScroller.setViewportView(dummyContentPanel);
+		final JPanel panel3 = new JPanel();
+		panel3.setLayout(new BorderLayout(0, 0));
+		rootPanel.add(panel3, BorderLayout.WEST);
+		toolbar = new JToolBar();
+		toolbar.setFloatable(false);
+		toolbar.setOrientation(1);
+		panel3.add(toolbar, BorderLayout.NORTH);
+		buttonTimeline = new JToggleButton();
+		buttonTimeline.setInheritsPopupMenu(false);
+		buttonTimeline.setMaximumSize(new Dimension(30, 30));
+		buttonTimeline.setMinimumSize(new Dimension(30, 30));
+		buttonTimeline.setPreferredSize(new Dimension(30, 30));
+		buttonTimeline.setSelected(true);
+		buttonTimeline.setText("");
+		toolbar.add(buttonTimeline);
+		buttonLinkedMode = new JToggleButton();
+		buttonLinkedMode.setMaximumSize(new Dimension(30, 30));
+		buttonLinkedMode.setMinimumSize(new Dimension(30, 30));
+		buttonLinkedMode.setPreferredSize(new Dimension(30, 30));
+		buttonLinkedMode.setText("");
+		toolbar.add(buttonLinkedMode);
 	}
 
 	/**

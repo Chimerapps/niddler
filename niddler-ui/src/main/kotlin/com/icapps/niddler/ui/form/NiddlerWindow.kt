@@ -25,6 +25,7 @@ class NiddlerWindow : JFrame(), NiddlerClientListener {
     private var selectedSerial: String? = null
 
     fun init() {
+        windowContents.initImages()
         add(windowContents.rootPanel)
         devices = adbConnection.bootStrap().devices
 
@@ -52,7 +53,7 @@ class NiddlerWindow : JFrame(), NiddlerClientListener {
         niddlerClient?.close()
         niddlerClient?.unregisterListener(this)
         if (niddlerClient != null) {
-            //TODO Remove previous mapping
+            //TODO Remove previous port mapping
         }
         windowContents.dummyContentPanel.text = ""
         val device = devices.find { it.serial == selectedSerial }
@@ -80,7 +81,6 @@ class NiddlerWindow : JFrame(), NiddlerClientListener {
             if (message.isRequest) {
                 windowContents.dummyContentPanel.append("${timestamp.format(formatter)}: REQ  ${message.requestId} | ${message.method} ${message.url}\n")
             } else {
-
                 if (message.body != null) {
                     windowContents.dummyContentPanel.append("${timestamp.format(formatter)}: RESP ${message.requestId} | ${message.statusCode} ${message.headers} ${message.getBodyAsString}\n")
                 } else {

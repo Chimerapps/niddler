@@ -8,7 +8,7 @@
       </configuration>
     </facet>
   </component>
-  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_7" inherit-compiler-output="false">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/../../../niddler-ui/build/classes/main" />
     <output-test url="file://$MODULE_DIR$/../../../niddler-ui/build/classes/test" />
     <exclude-output />
@@ -21,7 +21,7 @@
       <sourceFolder url="file://$MODULE_DIR$/../../../niddler-ui/src/test/resources" type="java-test-resource" />
       <excludeFolder url="file://$MODULE_DIR$/../../../niddler-ui/.gradle" />
     </content>
-    <orderEntry type="jdk" jdkName="1.7" jdkType="JavaSDK" />
+    <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="kotlin-stdlib-1.0.5" level="project" />
     <orderEntry type="library" exported="" name="jadb-v1.0.1" level="project" />
