@@ -72,6 +72,7 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
     private fun initNiddlerOnDevice() {
         niddlerClient?.close()
         niddlerClient?.unregisterClientListener(this)
+        niddlerClient?.unregisterMessageListener(messages)
         messages.clear()
         if (niddlerClient != null) {
             //TODO Remove previous port mapping
@@ -81,6 +82,7 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
         adbConnection.extend(device)?.fowardTCPPort(6555, 6555)
         niddlerClient = NiddlerClient(URI.create("ws://127.0.0.1:6555"))
         niddlerClient?.registerClientListener(this)
+        niddlerClient?.registerMessageListener(messages)
         niddlerClient?.connectBlocking()
     }
 
@@ -98,7 +100,7 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
         val timestamp = ZonedDateTime.of(LocalDateTime.ofInstant(Date(message.timestamp).toInstant(), ZoneOffset.UTC), Clock.systemDefaultZone().zone)
         SwingUtilities.invokeLater {
             if (message.isRequest) {
-                windowContents.dummyContentPanel.append("${timestamp.format(formatter)}: REQ  ${message.requestId} | ${message.method} ${message.url}\n")
+                windowContents.dummyContentPanel.append("${timestamp.format(formatter)}: REQ ${message.requestId} | ${message.method} ${message.url}\n")
             } else {
                 if (message.body != null) {
                     windowContents.dummyContentPanel.append("${timestamp.format(formatter)}: RESP ${message.requestId} | ${message.statusCode} ${message.headers} ${message.getBodyAsString}\n")
