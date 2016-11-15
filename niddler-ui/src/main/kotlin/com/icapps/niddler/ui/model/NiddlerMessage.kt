@@ -11,7 +11,8 @@ import java.nio.charset.Charset
 
 class NiddlerMessage {
 
-    var requestId: String? = null
+    lateinit var requestId: String
+    lateinit var messageId: String
     var url: String? = null
     var method: String? = null
     var body: String? = null
@@ -26,5 +27,21 @@ class NiddlerMessage {
 
     val getBodyAsString: String
         get() = String(Base64.decode(body!!), Charset.forName("UTF-8"))
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other?.javaClass != javaClass) return false
+
+        other as NiddlerMessage
+
+        if (messageId != other.messageId) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return messageId.hashCode()
+    }
+
 
 }
