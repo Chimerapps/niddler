@@ -15,7 +15,7 @@ class NiddlerMessage {
     var url: String? = null
     var method: String? = null
     var body: String? = null
-    var headers: Map<String, String>? = null
+    var headers: Map<String, List<String>>? = null
     var statusCode: Int? = null
 
     val isRequest: Boolean

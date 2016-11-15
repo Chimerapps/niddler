@@ -51,15 +51,18 @@ public final class Niddler {
 
             stringBuilder.append("\"");
             stringBuilder.append(headerName);
-            stringBuilder.append("\": \"");
+            stringBuilder.append("\": [");
 
             for (String header : headers) {
+                stringBuilder.append("\"");
                 stringBuilder.append(header.replace("\"", "\\\"")); // This seems fragile...
                 stringBuilder.append("\", ");
             }
             if (headers.size() > 0) {
                 stringBuilder.setLength(stringBuilder.length() - 2); // Remove trailing comma
             }
+
+            stringBuilder.append("]");
 
             if (headerIterator.hasNext()) {
                 stringBuilder.append(", ");
@@ -95,15 +98,18 @@ public final class Niddler {
 
             stringBuilder.append("\"");
             stringBuilder.append(headerName);
-            stringBuilder.append("\": \"");
+            stringBuilder.append("\": [");
 
             for (String header : headers) {
+                stringBuilder.append("\"");
                 stringBuilder.append(header.replace("\"", "\\\"")); // This seems fragile...
                 stringBuilder.append("\", ");
             }
             if (headers.size() > 0) {
                 stringBuilder.setLength(stringBuilder.length() - 2); // Remove trailing comma
             }
+
+            stringBuilder.append("]");
 
             if (headerIterator.hasNext()) {
                 stringBuilder.append(", ");
