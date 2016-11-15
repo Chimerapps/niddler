@@ -6,6 +6,7 @@ import com.icapps.niddler.ui.adb.ADBBootstrap
 import com.icapps.niddler.ui.model.MessageContainer
 import com.icapps.niddler.ui.model.NiddlerMessage
 import com.icapps.niddler.ui.model.NiddlerMessageListener
+import com.icapps.niddler.ui.util.getStatusCodeString
 import se.vidstige.jadb.JadbDevice
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
@@ -100,15 +101,15 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
         val timestamp = ZonedDateTime.of(LocalDateTime.ofInstant(Date(message.timestamp).toInstant(), ZoneOffset.UTC), Clock.systemDefaultZone().zone)
         SwingUtilities.invokeLater {
             if (message.isRequest) {
-                windowContents.dummyContentPanel.append("${timestamp.format(formatter)}: REQ ${message.requestId} | ${message.method} ${message.url}\n")
+                windowContents.dummyContentPanel.append("${timestamp.format(formatter)}: REQ  ${message.requestId} | ${message.method} ${message.url}")
             } else {
                 if (message.body != null) {
-                    windowContents.dummyContentPanel.append("${timestamp.format(formatter)}: RESP ${message.requestId} | ${message.statusCode} ${message.headers} ${message.getBodyAsString}\n")
+                    windowContents.dummyContentPanel.append("${timestamp.format(formatter)}: RESP ${message.requestId} | ${message.statusCode} ${getStatusCodeString(message.statusCode!!)}\nHeaders: ${message.headers}\nBody:${message.getBodyAsString}")
                 } else {
-                    windowContents.dummyContentPanel.append("${timestamp.format(formatter)}: RESP ${message.requestId} | ${message.statusCode} ${message.headers} - No body\n")
+                    windowContents.dummyContentPanel.append("${timestamp.format(formatter)}: RESP ${message.requestId} | ${message.statusCode} ${getStatusCodeString(message.statusCode!!)}\nHeaders: ${message.headers}\nBody: -NO BODY-")
                 }
             }
-            windowContents.dummyContentPanel.append("\n")
+            windowContents.dummyContentPanel.append("\n\n")
         }
     }
 
