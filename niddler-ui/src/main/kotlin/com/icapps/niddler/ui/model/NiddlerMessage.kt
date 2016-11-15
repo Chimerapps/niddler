@@ -1,7 +1,6 @@
 package com.icapps.niddler.ui.model
 
 import org.java_websocket.util.Base64
-import java.nio.charset.Charset
 
 
 /**
@@ -23,8 +22,8 @@ class NiddlerMessage {
     val isRequest: Boolean
         get() = statusCode == null
 
-    val getBodyAsString: String
-        get() = String(Base64.decode(body!!), Charset.forName("UTF-8"))
+    val getBodyAsString: String?
+        get() = if (body != null) String(Base64.decode(body), Charsets.UTF_8) else null
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
