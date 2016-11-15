@@ -42,6 +42,10 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
         windowContents.adbTargetSelection.addActionListener {
             onDeviceSelectionChanged()
         }
+        windowContents.buttonClear.addActionListener {
+            messages.clear()
+            windowContents.dummyContentPanel.text = ""
+        }
 
         pack()
         addWindowListener(object : WindowAdapter() {

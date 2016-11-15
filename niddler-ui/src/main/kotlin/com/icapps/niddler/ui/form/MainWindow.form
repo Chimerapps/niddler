@@ -83,6 +83,17 @@
                   <text value=""/>
                 </properties>
               </component>
+              <component id="14bee" class="javax.swing.JButton" binding="buttonClear">
+                <constraints/>
+                <properties>
+                  <icon value="ic_delete.png"/>
+                  <label value=""/>
+                  <maximumSize width="32" height="32"/>
+                  <minimumSize width="32" height="32"/>
+                  <preferredSize width="32" height="32"/>
+                  <text value=""/>
+                </properties>
+              </component>
             </children>
           </toolbar>
         </children>
