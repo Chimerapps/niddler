@@ -43,6 +43,9 @@ class NiddlerWindow : JFrame(), NiddlerClientListener {
     }
 
     private fun onDeviceSelectionChanged() {
+        if (windowContents.adbTargetSelection.selectedItem == null) {
+            return
+        }
         selectedSerial = windowContents.adbTargetSelection.selectedItem.toString()
         initNiddlerOnDevice()
     }
