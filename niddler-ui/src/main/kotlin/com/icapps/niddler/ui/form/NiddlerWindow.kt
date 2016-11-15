@@ -25,7 +25,6 @@ class NiddlerWindow : JFrame(), NiddlerClientListener {
     private var selectedSerial: String? = null
 
     fun init() {
-        windowContents.initImages()
         add(windowContents.rootPanel)
         devices = adbConnection.bootStrap().devices
 
