@@ -91,6 +91,14 @@ class JsonTreeNode(private val jsonElement: JsonElement, private val parent: Tre
         return type == Type.PRIMITIVE && (jsonElement.asJsonPrimitive.isString)
     }
 
+    fun isAnonymousObject() : Boolean {
+        return type == Type.OBJECT && name == null
+    }
+
+    fun isArray():Boolean{
+        return type == Type.ARRAY
+    }
+
     private enum class Type {
         ARRAY, OBJECT, PRIMITIVE
     }
