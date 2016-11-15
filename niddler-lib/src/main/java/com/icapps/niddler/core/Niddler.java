@@ -140,26 +140,26 @@ public final class Niddler implements NiddlerServer.WebSocketListener {
         mServer.stop();
     }
 
-    private void sendWithCache(final String message){
-        if(!mServer.connections().isEmpty()){
+    private void sendWithCache(final String message) {
+        if (!mServer.connections().isEmpty()) {
             mServer.sendToAll(message);
             return;
         }
 
-        if(mMaxCacheSize <= 0){
+        if (mMaxCacheSize <= 0) {
             return;
         }
 
         final long messageMemoryUsage = StringSizeUtil.calculateMemoryUsage(message);
-        if(mCacheSize + messageMemoryUsage < mMaxCacheSize){
+        if (mCacheSize + messageMemoryUsage < mMaxCacheSize) {
             mMessageCache.add(message);
             mCacheSize += messageMemoryUsage;
         } else {
-            if(messageMemoryUsage > mMaxCacheSize){
+            if (messageMemoryUsage > mMaxCacheSize) {
                 Log.d("Message too long for cache");
             } else {
                 Log.d("Cache is full, removing items until we have enough space");
-                while(mCacheSize + messageMemoryUsage >= mMaxCacheSize){
+                while (mCacheSize + messageMemoryUsage >= mMaxCacheSize) {
                     final String oldestMessage = mMessageCache.get(0);
                     mCacheSize -= StringSizeUtil.calculateMemoryUsage(oldestMessage);
                     mMessageCache.remove(oldestMessage);
@@ -172,10 +172,8 @@ public final class Niddler implements NiddlerServer.WebSocketListener {
 
     @Override
     public void onConnectionOpened(WebSocket conn) {
-        Iterator<String> messageIterator = mMessageCache.iterator();
-        while(messageIterator.hasNext()){
-            conn.send(messageIterator.next());
-            messageIterator.remove();
+        for (final String message : mMessageCache) {
+            conn.send(message);
         }
     }
 
@@ -186,6 +184,7 @@ public final class Niddler implements NiddlerServer.WebSocketListener {
 
         /**
          * Sets the port on which Niddler will listen for incoming connections
+         *
          * @param port The port to be used
          * @return Builder
          */
@@ -196,6 +195,7 @@ public final class Niddler implements NiddlerServer.WebSocketListener {
 
         /**
          * Sets the cache size to be used for caching requests and responses while there is no client connected
+         *
          * @param cacheSize The cache size to be used, in bytes
          * @return Builder
          */
@@ -206,6 +206,7 @@ public final class Niddler implements NiddlerServer.WebSocketListener {
 
         /**
          * Builds a Niddler instance with the configured parameters
+         *
          * @return a Niddler instance
          * @throws UnknownHostException
          */
