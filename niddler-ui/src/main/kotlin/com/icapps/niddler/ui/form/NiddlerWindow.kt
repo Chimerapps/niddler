@@ -3,12 +3,11 @@ package com.icapps.niddler.ui.form
 import com.icapps.niddler.ui.NiddlerClient
 import com.icapps.niddler.ui.NiddlerClientListener
 import com.icapps.niddler.ui.adb.ADBBootstrap
-import com.icapps.niddler.ui.model.MessageContainer
-import com.icapps.niddler.ui.model.NiddlerMessageBodyParser
-import com.icapps.niddler.ui.model.NiddlerMessageListener
-import com.icapps.niddler.ui.model.ParsedNiddlerMessage
+import com.icapps.niddler.ui.model.*
 import com.icapps.niddler.ui.util.getStatusCodeString
 import se.vidstige.jadb.JadbDevice
+import java.awt.BorderLayout
+import java.awt.Dimension
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.net.URI
@@ -92,6 +91,12 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
 
     private fun showMessageDetails(message: ParsedNiddlerMessage) {
         windowContents.detailPanel.removeAll()
+        if (message.bodyFormat.type == BodyFormatType.FORMAT_JSON) {
+            windowContents.detailPanel.minimumSize = Dimension(100, 0)
+            windowContents.detailPanel.add(NiddlerJsonPanel(message), BorderLayout.CENTER)
+        }
+        windowContents.detailPanel.revalidate()
+        windowContents.detailPanel.repaint()
     }
 
     override fun onConnected() {
@@ -111,7 +116,8 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
                 windowContents.dummyContentPanel.append("${timestamp.format(formatter)}: REQ  ${message.requestId} | ${message.method} ${message.url}")
             } else {
                 if (message.body != null) {
-                    windowContents.dummyContentPanel.append("${timestamp.format(formatter)}: RESP ${message.requestId} | ${message.statusCode} ${getStatusCodeString(message.statusCode!!)}\nHeaders: ${message.headers}\nBody:${message.bodyFormat.type}; ${message.bodyData}")
+                    windowContents.dummyContentPanel.append("${timestamp.format(formatter)}: RESP ${message.requestId} | ${message.statusCode} ${getStatusCodeString(message.statusCode!!)}\nHeaders: ${message.headers}\nBody:${message.bodyFormat.type};")
+                    showMessageDetails(message)
                 } else {
                     windowContents.dummyContentPanel.append("${timestamp.format(formatter)}: RESP ${message.requestId} | ${message.statusCode} ${getStatusCodeString(message.statusCode!!)}\nHeaders: ${message.headers}\nBody: -NO BODY-")
                 }
