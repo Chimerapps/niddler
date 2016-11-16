@@ -11,7 +11,7 @@ public class MainWindow {
 	private JPanel rootPanel;
 	private JComboBox adbTargetSelection;
 	private JScrollPane contentScroller;
-	private JTextArea dummyContentPanel;
+	private JTree messagesTree;
 	private JToolBar toolbar;
 	private JToggleButton buttonTimeline;
 	private JToggleButton buttonLinkedMode;
@@ -30,8 +30,8 @@ public class MainWindow {
 		return contentScroller;
 	}
 
-	public JTextArea getDummyContentPanel() {
-		return dummyContentPanel;
+	public JTree getMessagesTree() {
+		return messagesTree;
 	}
 
 	public JButton getButtonClear() {
@@ -107,8 +107,8 @@ public class MainWindow {
 		rootPanel.add(splitPane1, BorderLayout.CENTER);
 		final JScrollPane scrollPane1 = new JScrollPane();
 		splitPane1.setLeftComponent(scrollPane1);
-		dummyContentPanel = new JTextArea();
-		scrollPane1.setViewportView(dummyContentPanel);
+		messagesTree = new JTree();
+		scrollPane1.setViewportView(messagesTree);
 		detailPanel = new JPanel();
 		detailPanel.setLayout(new BorderLayout(0, 0));
 		splitPane1.setRightComponent(detailPanel);

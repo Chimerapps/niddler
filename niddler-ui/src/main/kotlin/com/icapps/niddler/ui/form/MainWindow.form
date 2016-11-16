@@ -90,9 +90,12 @@
             <properties/>
             <border type="none"/>
             <children>
-              <component id="898f2" class="javax.swing.JTextArea" binding="dummyContentPanel">
+              <component id="beb97" class="javax.swing.JTree" binding="messagesTree">
                 <constraints/>
-                <properties/>
+                <properties>
+                  <rootVisible value="false"/>
+                  <showsRootHandles value="false"/>
+                </properties>
               </component>
             </children>
           </scrollpane>

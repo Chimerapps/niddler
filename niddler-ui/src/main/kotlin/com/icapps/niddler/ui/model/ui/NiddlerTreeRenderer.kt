@@ -35,28 +35,23 @@ class NiddlerTreeRenderer : DefaultTreeCellRenderer() {
 
     init {
         timestampLabel.border = EmptyBorder(0, 0, 0, 15)
-        timestampLabel.border = BorderFactory.createLineBorder(Color.BLUE)
         timestampLabel.font = Font("SansSerif", Font.PLAIN, 11)
         timestampLabel.background = Color.RED
         rootPanel.add(timestampLabel)
 
         requestIdLabel.border = EmptyBorder(0, 0, 0, 15)
-        requestIdLabel.border = BorderFactory.createLineBorder(Color.GREEN)
         requestIdLabel.font = Font("SansSerif", Font.PLAIN, 11)
         rootPanel.add(requestIdLabel)
 
         methodLabel.border = EmptyBorder(0, 0, 0, 5)
-        methodLabel.border = BorderFactory.createLineBorder(Color.YELLOW)
         methodLabel.font = Font("Monospaced", Font.PLAIN, 11)
         rootPanel.add(methodLabel)
 
         urlLabel.border = EmptyBorder(0, 0, 0, 10)
-        urlLabel.border = BorderFactory.createLineBorder(Color.GRAY)
         urlLabel.font = Font("Monospaced", Font.PLAIN, 11)
         rootPanel.add(urlLabel)
 
         statusCodeLabel.border = EmptyBorder(0, 0, 0, 10)
-        statusCodeLabel.border = BorderFactory.createLineBorder(Color.ORANGE)
         statusCodeLabel.font = Font("Monospaced", Font.PLAIN, 11)
         rootPanel.add(statusCodeLabel)
 
@@ -65,11 +60,8 @@ class NiddlerTreeRenderer : DefaultTreeCellRenderer() {
         rootPanel.add(nameLabel)
 
         valueLabel.border = EmptyBorder(0, 0, 0, 10)
-        valueLabel.border = BorderFactory.createLineBorder(Color.CYAN)
         valueLabel.font = Font("Monospaced", Font.PLAIN, 11)
         rootPanel.add(valueLabel)
-
-        rootPanel.border = BorderFactory.createLineBorder(Color.RED)
     }
 
     override fun getTreeCellRendererComponent(tree: JTree, value: Any?, sel: Boolean, expanded: Boolean, leaf: Boolean, row: Int, hasFocus: Boolean): Component {

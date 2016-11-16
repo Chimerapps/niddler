@@ -4,7 +4,8 @@ import com.icapps.niddler.ui.NiddlerClient
 import com.icapps.niddler.ui.NiddlerClientListener
 import com.icapps.niddler.ui.adb.ADBBootstrap
 import com.icapps.niddler.ui.model.*
-import com.icapps.niddler.ui.util.getStatusCodeString
+import com.icapps.niddler.ui.model.ui.NiddlerMessageTreeNode
+import com.icapps.niddler.ui.model.ui.NiddlerTreeRenderer
 import se.vidstige.jadb.JadbDevice
 import java.awt.BorderLayout
 import java.awt.Dimension
@@ -17,6 +18,8 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import javax.swing.JFrame
 import javax.swing.SwingUtilities
+import javax.swing.tree.DefaultMutableTreeNode
+import javax.swing.tree.DefaultTreeModel
 
 /**
  * @author Nicola Verbeeck
@@ -41,10 +44,13 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
         windowContents.adbTargetSelection.addActionListener {
             onDeviceSelectionChanged()
         }
+        windowContents.messagesTree.model = DefaultTreeModel(DefaultMutableTreeNode("messages"))
+        windowContents.messagesTree.cellRenderer = NiddlerTreeRenderer()
         windowContents.buttonClear.addActionListener {
             messages.clear()
-            windowContents.dummyContentPanel.text = ""
-            // TODO uncomment windowContents.dummyContentPanel.removeAll()
+            val model = windowContents.messagesTree.model as DefaultTreeModel
+            (model.root as DefaultMutableTreeNode).removeAllChildren()
+            model.reload()
         }
 
         pack()
@@ -81,7 +87,6 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
         if (niddlerClient != null) {
             //TODO Remove previous port mapping
         }
-        windowContents.dummyContentPanel.text = ""
         val device = devices.find { it.serial == selectedSerial }
         adbConnection.extend(device)?.fowardTCPPort(6555, 6555)
         niddlerClient = NiddlerClient(URI.create("ws://127.0.0.1:6555"))
@@ -107,9 +112,9 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
         val timestamp = ZonedDateTime.now()
         val formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
 
-        SwingUtilities.invokeLater {
-            windowContents.dummyContentPanel.append("${timestamp.format(formatter)}: Connected to ${niddlerClient?.connection?.remoteSocketAddress}\n\n")
-        }
+//        SwingUtilities.invokeLater {
+//            windowContents.messagesTree.append("${timestamp.format(formatter)}: Connected to ${niddlerClient?.connection?.remoteSocketAddress}\n\n")
+//        }
     }
 
     override fun onMessage(message: ParsedNiddlerMessage) {
@@ -117,26 +122,25 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
         val timestamp = ZonedDateTime.ofInstant(Instant.ofEpochMilli(message.timestamp), Clock.systemDefaultZone().zone)
 
         SwingUtilities.invokeLater {
-            if (message.isRequest) {
-                windowContents.dummyContentPanel.append("${timestamp.format(formatter)}: REQ  ${message.requestId} | ${message.method} ${message.url}")
-            } else {
-                if (message.body != null) {
-                    windowContents.dummyContentPanel.append("${timestamp.format(formatter)}: RESP ${message.requestId} | ${message.statusCode} ${getStatusCodeString(message.statusCode!!)}\nHeaders: ${message.headers}\nBody:${message.bodyFormat.type};")
-                    showMessageDetails(message)
-                } else {
-                    windowContents.dummyContentPanel.append("${timestamp.format(formatter)}: RESP ${message.requestId} | ${message.statusCode} ${getStatusCodeString(message.statusCode!!)}\nHeaders: ${message.headers}\nBody: -NO BODY-")
-                }
-            }
-            windowContents.dummyContentPanel.append("\n\n")
+            //            if (message.isRequest) {
+//                windowContents.messagesTree.append("${timestamp.format(formatter)}: REQ  ${message.requestId} | ${message.method} ${message.url}")
+//            } else {
+//                if (message.body != null) {
+//                    windowContents.messagesTree.append("${timestamp.format(formatter)}: RESP ${message.requestId} | ${message.statusCode} ${getStatusCodeString(message.statusCode!!)}\nHeaders: ${message.headers}\nBody:${message.bodyFormat.type};")
+//                    showMessageDetails(message)
+//                } else {
+//                    windowContents.messagesTree.append("${timestamp.format(formatter)}: RESP ${message.requestId} | ${message.statusCode} ${getStatusCodeString(message.statusCode!!)}\nHeaders: ${message.headers}\nBody: -NO BODY-")
+//                }
+//            }
+//            windowContents.messagesTree.append("\n\n")
 
 // TODO UNCOMMENT VOOR JTREE
-//            val model = windowContents.dummyContentPanel.model as DefaultTreeModel
-//            val rootNode = (model.root as DefaultMutableTreeNode)
-//
-//            val node = NiddlerMessageTreeNode(message)
-//            rootNode.add(node)
-//            model.reload()
+            val model = windowContents.messagesTree.model as DefaultTreeModel
+            val rootNode = (model.root as DefaultMutableTreeNode)
 
+            val node = NiddlerMessageTreeNode(message)
+            rootNode.add(node)
+            model.reload()
         }
     }
 
