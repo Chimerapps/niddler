@@ -76,7 +76,7 @@
           </toolbar>
         </children>
       </grid>
-      <splitpane id="486c5">
+      <splitpane id="486c5" binding="splitPane">
         <constraints border-constraint="Center"/>
         <properties>
           <resizeWeight value="1.0"/>

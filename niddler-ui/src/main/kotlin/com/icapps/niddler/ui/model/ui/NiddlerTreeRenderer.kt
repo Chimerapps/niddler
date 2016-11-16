@@ -7,10 +7,7 @@ import java.awt.Dimension
 import java.awt.Font
 import java.text.SimpleDateFormat
 import java.util.*
-import javax.swing.BorderFactory
-import javax.swing.JLabel
-import javax.swing.JPanel
-import javax.swing.JTree
+import javax.swing.*
 import javax.swing.border.EmptyBorder
 import javax.swing.tree.DefaultTreeCellRenderer
 
@@ -29,6 +26,9 @@ class NiddlerTreeRenderer : DefaultTreeCellRenderer() {
     private val statusCodeLabel = JLabel("")
     private val nameLabel = JLabel("")
     private val valueLabel = JLabel("")
+    private val directionIconLabel = JLabel()
+    private val upIcon:Icon
+    private val downIcon:Icon
 
     private val rootPanel = JPanel()
     private val defaultRenderer = DefaultTreeCellRenderer()
@@ -42,6 +42,9 @@ class NiddlerTreeRenderer : DefaultTreeCellRenderer() {
         requestIdLabel.border = EmptyBorder(0, 0, 0, 15)
         requestIdLabel.font = Font("SansSerif", Font.PLAIN, 11)
         rootPanel.add(requestIdLabel)
+
+        directionIconLabel.border = EmptyBorder(0, 0, 0, 5)
+        rootPanel.add(directionIconLabel)
 
         methodLabel.border = EmptyBorder(0, 0, 0, 5)
         methodLabel.font = Font("Monospaced", Font.PLAIN, 11)
@@ -61,6 +64,10 @@ class NiddlerTreeRenderer : DefaultTreeCellRenderer() {
 
         valueLabel.border = EmptyBorder(0, 0, 0, 10)
         valueLabel.font = Font("Monospaced", Font.PLAIN, 11)
+
+        upIcon = ImageIcon(javaClass.getResource("/ic_up.png"))
+        downIcon = ImageIcon(javaClass.getResource("/ic_down.png"))
+
         rootPanel.add(valueLabel)
     }
 
@@ -70,6 +77,7 @@ class NiddlerTreeRenderer : DefaultTreeCellRenderer() {
             valueLabel.isVisible = false
             timestampLabel.isVisible = true
             requestIdLabel.isVisible = true
+            directionIconLabel.isVisible = true
             urlLabel.isVisible = value.item.isRequest
             methodLabel.isVisible = value.item.isRequest
             statusCodeLabel.isVisible = !value.item.isRequest
@@ -77,6 +85,7 @@ class NiddlerTreeRenderer : DefaultTreeCellRenderer() {
             timestampLabel.text = formatter.format(Date(value.item.timestamp))
             urlLabel.text = value.item.url
             methodLabel.text = value.item.method
+            directionIconLabel.icon = if (value.item.isRequest) upIcon else downIcon
             requestIdLabel.text = value.item.requestId
             statusCodeLabel.text = "${value.item.statusCode} ${getStatusCodeString(value.item.statusCode)}"
 
@@ -88,6 +97,7 @@ class NiddlerTreeRenderer : DefaultTreeCellRenderer() {
             statusCodeLabel.isVisible = false
             timestampLabel.isVisible = false
             requestIdLabel.isVisible = false
+            directionIconLabel.isVisible = false
 
             nameLabel.text = value.item.name + ":"
             valueLabel.text = value.item.value

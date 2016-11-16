@@ -100,6 +100,7 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
             windowContents.detailPanel.minimumSize = Dimension(100, 0)
             windowContents.detailPanel.add(NiddlerXMLDataPanel(message), BorderLayout.CENTER)
         }
+        windowContents.splitPane.revalidate()
         windowContents.detailPanel.revalidate()
         windowContents.detailPanel.repaint()
     }

@@ -17,6 +17,7 @@ public class MainWindow {
 	private JToggleButton buttonLinkedMode;
 	private JButton buttonClear;
 	private JPanel detailPanel;
+	private JSplitPane splitPane;
 
 	public JPanel getRootPanel() {
 		return rootPanel;
@@ -40,6 +41,10 @@ public class MainWindow {
 
 	public JPanel getDetailPanel() {
 		return detailPanel;
+	}
+
+	public JSplitPane getSplitPane() {
+		return splitPane;
 	}
 
 	{
@@ -102,18 +107,18 @@ public class MainWindow {
 		buttonClear.setPreferredSize(new Dimension(32, 32));
 		buttonClear.setText("");
 		toolbar.add(buttonClear);
-		final JSplitPane splitPane1 = new JSplitPane();
-		splitPane1.setResizeWeight(1.0);
-		rootPanel.add(splitPane1, BorderLayout.CENTER);
+		splitPane = new JSplitPane();
+		splitPane.setResizeWeight(1.0);
+		rootPanel.add(splitPane, BorderLayout.CENTER);
 		final JScrollPane scrollPane1 = new JScrollPane();
-		splitPane1.setLeftComponent(scrollPane1);
+		splitPane.setLeftComponent(scrollPane1);
 		messagesTree = new JTree();
 		messagesTree.setRootVisible(false);
 		messagesTree.setShowsRootHandles(true);
 		scrollPane1.setViewportView(messagesTree);
 		detailPanel = new JPanel();
 		detailPanel.setLayout(new BorderLayout(0, 0));
-		splitPane1.setRightComponent(detailPanel);
+		splitPane.setRightComponent(detailPanel);
 		ButtonGroup buttonGroup;
 		buttonGroup = new ButtonGroup();
 		buttonGroup.add(buttonTimeline);
