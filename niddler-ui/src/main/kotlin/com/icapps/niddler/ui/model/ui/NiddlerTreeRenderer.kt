@@ -20,7 +20,6 @@ class NiddlerTreeRenderer : DefaultTreeCellRenderer() {
     private val formatter = SimpleDateFormat("HH:mm:ss.SSS", Locale.US)
 
     private val timestampLabel = JLabel("")
-    private val requestIdLabel = JLabel("")
     private val urlLabel = JLabel("")
     private val methodLabel = JLabel("")
     private val statusCodeLabel = JLabel("")
@@ -38,10 +37,6 @@ class NiddlerTreeRenderer : DefaultTreeCellRenderer() {
         timestampLabel.font = Font("SansSerif", Font.PLAIN, 11)
         timestampLabel.background = Color.RED
         rootPanel.add(timestampLabel)
-
-        requestIdLabel.border = EmptyBorder(0, 0, 0, 15)
-        requestIdLabel.font = Font("SansSerif", Font.PLAIN, 11)
-        rootPanel.add(requestIdLabel)
 
         directionIconLabel.border = EmptyBorder(0, 0, 0, 5)
         rootPanel.add(directionIconLabel)
@@ -68,6 +63,7 @@ class NiddlerTreeRenderer : DefaultTreeCellRenderer() {
         upIcon = ImageIcon(javaClass.getResource("/ic_up.png"))
         downIcon = ImageIcon(javaClass.getResource("/ic_down.png"))
 
+        rootPanel.isOpaque = false
         rootPanel.add(valueLabel)
     }
 
@@ -78,7 +74,6 @@ class NiddlerTreeRenderer : DefaultTreeCellRenderer() {
             nameLabel.isVisible = false
             valueLabel.isVisible = false
             timestampLabel.isVisible = true
-            requestIdLabel.isVisible = true
             directionIconLabel.isVisible = true
             urlLabel.isVisible = value.item.isRequest
             methodLabel.isVisible = value.item.isRequest
@@ -88,7 +83,6 @@ class NiddlerTreeRenderer : DefaultTreeCellRenderer() {
             urlLabel.text = value.item.url
             methodLabel.text = value.item.method
             directionIconLabel.icon = if (value.item.isRequest) upIcon else downIcon
-            requestIdLabel.text = value.item.requestId
             statusCodeLabel.text = "${value.item.statusCode} ${getStatusCodeString(value.item.statusCode)}"
 
             return rootPanel
@@ -98,7 +92,6 @@ class NiddlerTreeRenderer : DefaultTreeCellRenderer() {
             urlLabel.isVisible = false
             statusCodeLabel.isVisible = false
             timestampLabel.isVisible = false
-            requestIdLabel.isVisible = false
             directionIconLabel.isVisible = false
 
             nameLabel.text = value.item.name + ":"
