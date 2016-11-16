@@ -18,6 +18,8 @@ class NiddlerJsonPanel(val message: ParsedNiddlerMessage) : JPanel() {
 
     private var currentContentPanel: JComponent? = null
 
+    private lateinit var treeView: JTree
+
     private val treeButton: JToggleButton
     private val prettyButton: JToggleButton
     private val rawButton: JToggleButton
@@ -44,6 +46,7 @@ class NiddlerJsonPanel(val message: ParsedNiddlerMessage) : JPanel() {
         add(toolbar, BorderLayout.NORTH)
 
         treeButton.isSelected = true
+        preInitTree()
         initAsTree()
 
         treeButton.addItemListener { if (treeButton.isSelected) initAsTree() }
@@ -51,8 +54,9 @@ class NiddlerJsonPanel(val message: ParsedNiddlerMessage) : JPanel() {
         rawButton.addItemListener { if (rawButton.isSelected) initAsRaw() }
     }
 
-    private fun initAsTree() {
-        val treeView = JTree()
+
+    private fun preInitTree() {
+        treeView = JTree()
         treeView.isEditable = false
         treeView.showsRootHandles = true
         treeView.isRootVisible = true
@@ -60,6 +64,9 @@ class NiddlerJsonPanel(val message: ParsedNiddlerMessage) : JPanel() {
 
         treeView.cellRenderer = JsonTreeRenderer()
         treeView.selectionModel.selectionMode = TreeSelectionModel.SINGLE_TREE_SELECTION
+    }
+
+    private fun initAsTree(){
         replacePanel(JScrollPane(treeView))
     }
 

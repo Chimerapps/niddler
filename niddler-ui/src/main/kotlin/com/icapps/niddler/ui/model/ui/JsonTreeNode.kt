@@ -4,6 +4,7 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
+import java.math.BigInteger
 import java.util.*
 import javax.swing.tree.TreeNode
 
@@ -80,27 +81,46 @@ class JsonTreeNode(private val jsonElement: JsonElement, private val parent: Tre
 
     override fun toString(): String {
         return when (type) {
-            JsonTreeNode.Type.ARRAY -> "array[$childCount]"
+            JsonTreeNode.Type.ARRAY -> if (name != null) "$name[$childCount]" else "array[$childCount]"
             JsonTreeNode.Type.OBJECT -> name ?: "object"
             JsonTreeNode.Type.PRIMITIVE -> if (name != null) "$name : $value" else "$value"
             else -> ""
         }
     }
 
-    fun isString(): Boolean {
-        return type == Type.PRIMITIVE && (jsonElement.asJsonPrimitive.isString)
+    fun actualType(): JsonDataType {
+        return when (type) {
+            JsonTreeNode.Type.ARRAY -> JsonDataType.ARRAY
+            JsonTreeNode.Type.OBJECT -> JsonDataType.OBJECT
+            JsonTreeNode.Type.PRIMITIVE -> {
+                if (jsonElement.isJsonNull)
+                    return JsonDataType.NULL
+
+                val primitive = jsonElement.asJsonPrimitive
+                if (primitive.isBoolean)
+                    return JsonDataType.BOOLEAN
+                else if (primitive.isString)
+                    return JsonDataType.STRING
+
+                val number = primitive.asNumber
+                if (number is BigInteger || number is Long || number is Int
+                        || number is Short || number is Byte)
+                    return JsonDataType.INT
+                return JsonDataType.DOUBLE
+            }
+        }
     }
 
-    fun isAnonymousObject() : Boolean {
-        return type == Type.OBJECT && name == null
-    }
-
-    fun isArray():Boolean{
-        return type == Type.ARRAY
+    fun isAnonymous(): Boolean {
+        return name == null
     }
 
     private enum class Type {
         ARRAY, OBJECT, PRIMITIVE
+    }
+
+    enum class JsonDataType {
+        ARRAY, OBJECT, BOOLEAN, INT, STRING, DOUBLE, NULL
     }
 
 }
