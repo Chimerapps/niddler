@@ -27,8 +27,8 @@ class NiddlerTreeRenderer : DefaultTreeCellRenderer() {
     private val nameLabel = JLabel("")
     private val valueLabel = JLabel("")
     private val directionIconLabel = JLabel()
-    private val upIcon:Icon
-    private val downIcon:Icon
+    private val upIcon: Icon
+    private val downIcon: Icon
 
     private val rootPanel = JPanel()
     private val defaultRenderer = DefaultTreeCellRenderer()
@@ -72,6 +72,8 @@ class NiddlerTreeRenderer : DefaultTreeCellRenderer() {
     }
 
     override fun getTreeCellRendererComponent(tree: JTree, value: Any?, sel: Boolean, expanded: Boolean, leaf: Boolean, row: Int, hasFocus: Boolean): Component {
+        rootPanel.background = if (sel) backgroundSelectionColor else backgroundNonSelectionColor
+
         if (value is NiddlerMessageTreeNode) {
             nameLabel.isVisible = false
             valueLabel.isVisible = false
@@ -105,7 +107,7 @@ class NiddlerTreeRenderer : DefaultTreeCellRenderer() {
             return rootPanel
         }
 
-        return defaultRenderer.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus)
+        return defaultRenderer.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus)
     }
 
 }

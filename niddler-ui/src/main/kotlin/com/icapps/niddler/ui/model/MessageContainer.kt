@@ -67,6 +67,12 @@ class MessageContainer(private var bodyParser: NiddlerMessageBodyParser) : Niddl
         }
     }
 
+    fun getMessageWithId(messageId: String): ParsedNiddlerMessage? {
+        return synchronized(messages) {
+            messages.find { it.messageId == messageId }
+        }
+    }
+
 }
 
 interface NiddlerMessageListener {

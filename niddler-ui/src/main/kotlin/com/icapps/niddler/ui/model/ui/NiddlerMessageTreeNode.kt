@@ -19,4 +19,8 @@ class NiddlerMessageTreeNode(val item: ParsedNiddlerMessage) : DefaultMutableTre
         }
     }
 
+    override fun toString(): String {
+        return item.messageId
+    }
+
 }

@@ -8,11 +8,12 @@ import com.icapps.niddler.ui.model.ui.NiddlerMessageTreeNode
 import com.icapps.niddler.ui.model.ui.NiddlerTreeRenderer
 import se.vidstige.jadb.JadbDevice
 import java.awt.BorderLayout
-import java.awt.Dimension
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.net.URI
 import javax.swing.JFrame
+import javax.swing.JLabel
+import javax.swing.SwingConstants
 import javax.swing.SwingUtilities
 import javax.swing.tree.DefaultMutableTreeNode
 import javax.swing.tree.DefaultTreeModel
@@ -42,9 +43,22 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
         }
         windowContents.messagesTree.model = DefaultTreeModel(DefaultMutableTreeNode("messages"))
         windowContents.messagesTree.cellRenderer = NiddlerTreeRenderer()
+        windowContents.messagesTree.addTreeSelectionListener {
+            if (windowContents.messagesTree.isSelectionEmpty) {
+                clearDetailPanel()
+            } else {
+                val selectedItem = windowContents.messagesTree.selectionPath
+                if (selectedItem.path.size > 1) {
+                    val messageId = selectedItem.path[1].toString()
+                    showDetailsOfMessageWithId(messageId)
+                }
+            }
+        }
+        clearDetailPanel()
         windowContents.buttonClear.addActionListener {
             messages.clear()
             val model = windowContents.messagesTree.model as DefaultTreeModel
+            windowContents.messagesTree.clearSelection()
             (model.root as DefaultMutableTreeNode).removeAllChildren()
             model.reload()
         }
@@ -91,14 +105,37 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
         niddlerClient?.connectBlocking()
     }
 
+    private fun clearDetailPanel() {
+        windowContents.detailPanel.removeAll()
+        windowContents.detailPanel.add(JLabel("Select a request/response to the body", SwingConstants.CENTER), BorderLayout.CENTER)
+        windowContents.detailPanel.revalidate()
+        windowContents.splitPane.revalidate()
+        windowContents.detailPanel.repaint()
+    }
+
+    private fun showEmptyMessageDetails() {
+        windowContents.detailPanel.removeAll()
+        windowContents.detailPanel.add(JLabel("This request/response has no body", SwingConstants.CENTER), BorderLayout.CENTER)
+        windowContents.detailPanel.revalidate()
+        windowContents.splitPane.revalidate()
+        windowContents.detailPanel.repaint()
+    }
+
+    private fun showDetailsOfMessageWithId(messageId: String) {
+        val message = messages.getMessageWithId(messageId)
+        if (message != null)
+            showMessageDetails(message)
+    }
+
     private fun showMessageDetails(message: ParsedNiddlerMessage) {
         windowContents.detailPanel.removeAll()
         if (message.bodyFormat.type == BodyFormatType.FORMAT_JSON) {
-            windowContents.detailPanel.minimumSize = Dimension(100, 0)
             windowContents.detailPanel.add(NiddlerJsonDataPanel(message), BorderLayout.CENTER)
         } else if (message.bodyFormat.type == BodyFormatType.FORMAT_XML) {
-            windowContents.detailPanel.minimumSize = Dimension(100, 0)
             windowContents.detailPanel.add(NiddlerXMLDataPanel(message), BorderLayout.CENTER)
+        } else if (message.body.isNullOrBlank()) {
+            showEmptyMessageDetails()
+            return
         }
         windowContents.splitPane.revalidate()
         windowContents.detailPanel.revalidate()
@@ -111,18 +148,15 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
 
     override fun onMessage(message: ParsedNiddlerMessage) {
         SwingUtilities.invokeLater {
-            if (!message.isRequest) {
-                if (message.body != null) {
-                    showMessageDetails(message)
-                }
-            }
-
             val model = windowContents.messagesTree.model as DefaultTreeModel
             val rootNode = (model.root as DefaultMutableTreeNode)
 
+            val selectedPath = windowContents.messagesTree.selectionPath
+
             val node = NiddlerMessageTreeNode(message)
-            rootNode.add(node)
-            model.reload()
+            model.insertNodeInto(node, rootNode, rootNode.childCount)
+            model.reload(rootNode)
+            windowContents.messagesTree.selectionPath = selectedPath
         }
     }
 

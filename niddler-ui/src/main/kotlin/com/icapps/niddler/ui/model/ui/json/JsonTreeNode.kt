@@ -18,6 +18,7 @@ class JsonTreeNode(private val jsonElement: JsonElement, private val parent: Tre
     private val children: MutableList<JsonTreeNode> = arrayListOf()
     private var value: String? = null
     private var type: Type = Type.PRIMITIVE
+    private lateinit var primitiveNumber : Number
 
     init {
         if (jsonElement.isJsonArray)
@@ -50,6 +51,14 @@ class JsonTreeNode(private val jsonElement: JsonElement, private val parent: Tre
 
     private fun initLeafPrimitive(jsonPrimitive: JsonPrimitive) {
         value = jsonPrimitive.toString()
+
+        if (jsonPrimitive.isNumber) {
+            try{
+                primitiveNumber = jsonPrimitive.asLong
+            }catch(e:NumberFormatException){
+                primitiveNumber = jsonPrimitive.asDouble
+            }
+        }
     }
 
     override fun children(): Enumeration<*> {
@@ -103,7 +112,7 @@ class JsonTreeNode(private val jsonElement: JsonElement, private val parent: Tre
                 else if (primitive.isString)
                     return JsonDataType.STRING
 
-                val number = primitive.asNumber
+                val number = primitiveNumber
                 if (number is BigInteger || number is Long || number is Int
                         || number is Short || number is Byte)
                     return JsonDataType.INT

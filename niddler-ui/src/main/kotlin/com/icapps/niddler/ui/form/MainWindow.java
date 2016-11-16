@@ -64,7 +64,8 @@ public class MainWindow {
 	private void $$$setupUI$$$() {
 		rootPanel = new JPanel();
 		rootPanel.setLayout(new BorderLayout(0, 0));
-		rootPanel.setPreferredSize(new Dimension(200, 200));
+		rootPanel.setMinimumSize(new Dimension(300, 300));
+		rootPanel.setPreferredSize(new Dimension(300, 300));
 		final JPanel panel1 = new JPanel();
 		panel1.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 		rootPanel.add(panel1, BorderLayout.NORTH);
@@ -118,6 +119,7 @@ public class MainWindow {
 		scrollPane1.setViewportView(messagesTree);
 		detailPanel = new JPanel();
 		detailPanel.setLayout(new BorderLayout(0, 0));
+		detailPanel.setMinimumSize(new Dimension(100, 100));
 		splitPane.setRightComponent(detailPanel);
 		ButtonGroup buttonGroup;
 		buttonGroup = new ButtonGroup();
