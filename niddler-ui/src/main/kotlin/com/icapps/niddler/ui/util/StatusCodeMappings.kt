@@ -3,7 +3,7 @@ package com.icapps.niddler.ui.util
 /**
  * Created by maartenvangiel on 15/11/2016.
  */
-fun getStatusCodeString(code: Int): String = when (code) {
+fun getStatusCodeString(code: Int?): String = when (code) {
     100 -> "Continue"
     101 -> "Switching Protocols"
     102 -> "Processing (WebDAV)"
@@ -69,5 +69,5 @@ fun getStatusCodeString(code: Int): String = when (code) {
     510 -> "Not Extended"
     511 -> "Network Authentication Required"
 
-    else -> throw IllegalArgumentException("Not a valid status code")
+    else -> "Unknown"
 }

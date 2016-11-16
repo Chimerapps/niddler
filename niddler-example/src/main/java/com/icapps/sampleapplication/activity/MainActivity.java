@@ -20,49 +20,49 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
-	private ExampleJsonApi mJsonApi;
-	private ExampleXMLApi mXMLApi;
+    private ExampleJsonApi mJsonApi;
+    private ExampleXMLApi mXMLApi;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
-		mJsonApi = ((NiddlerSampleApplication) getApplication()).getJsonPlaceholderApi();
-		mXMLApi = ((NiddlerSampleApplication) getApplication()).getXmlPlaceholderApi();
+        mJsonApi = ((NiddlerSampleApplication) getApplication()).getJsonPlaceholderApi();
+        mXMLApi = ((NiddlerSampleApplication) getApplication()).getXmlPlaceholderApi();
 
-		findViewById(R.id.buttonJson).setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				mJsonApi.getPosts().enqueue(new Callback<List<Post>>() {
-					@Override
-					public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
-						System.out.println(response.body().size());
-					}
+        findViewById(R.id.buttonJson).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mJsonApi.getPosts().enqueue(new Callback<List<Post>>() {
+                    @Override
+                    public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
+                        Log.w("Response", "Got JSON response");
+                    }
 
-					@Override
-					public void onFailure(Call<List<Post>> call, Throwable t) {
-						System.out.println(t);
-					}
-				});
-			}
-		});
+                    @Override
+                    public void onFailure(Call<List<Post>> call, Throwable t) {
+                        Log.e("Response", "Got JSON response failure!", t);
+                    }
+                });
+            }
+        });
 
-		findViewById(R.id.buttonXML).setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				mXMLApi.getMenu().enqueue(new Callback<ResponseBody>() {
-					@Override
-					public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-						Log.w("Response","Got xml response");
-					}
+        findViewById(R.id.buttonXML).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mXMLApi.getMenu().enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        Log.w("Response", "Got xml response");
+                    }
 
-					@Override
-					public void onFailure(Call<ResponseBody> call, Throwable t) {
-						Log.e("Response","Got xml response failure!",t);
-					}
-				});
-			}
-		});
-	}
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Log.e("Response", "Got xml response failure!", t);
+                    }
+                });
+            }
+        });
+    }
 }
