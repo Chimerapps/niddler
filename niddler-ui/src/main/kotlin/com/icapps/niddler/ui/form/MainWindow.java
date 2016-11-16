@@ -16,6 +16,7 @@ public class MainWindow {
 	private JToggleButton buttonTimeline;
 	private JToggleButton buttonLinkedMode;
 	private JButton buttonClear;
+	private JPanel detailPanel;
 
 	public JPanel getRootPanel() {
 		return rootPanel;
@@ -35,6 +36,10 @@ public class MainWindow {
 
 	public JButton getButtonClear() {
 		return buttonClear;
+	}
+
+	public JPanel getDetailPanel() {
+		return detailPanel;
 	}
 
 	{
@@ -62,21 +67,12 @@ public class MainWindow {
 		panel1.add(adbTargetSelection);
 		final JPanel panel2 = new JPanel();
 		panel2.setLayout(new BorderLayout(0, 0));
-		rootPanel.add(panel2, BorderLayout.CENTER);
-		contentScroller = new JScrollPane();
-		contentScroller.setMinimumSize(new Dimension(100, 100));
-		panel2.add(contentScroller, BorderLayout.CENTER);
-		dummyContentPanel = new JTextArea();
-		dummyContentPanel.setEditable(false);
-		contentScroller.setViewportView(dummyContentPanel);
-		final JPanel panel3 = new JPanel();
-		panel3.setLayout(new BorderLayout(0, 0));
-		rootPanel.add(panel3, BorderLayout.WEST);
+		rootPanel.add(panel2, BorderLayout.WEST);
 		toolbar = new JToolBar();
 		toolbar.setFloatable(false);
 		toolbar.setMargin(new Insets(0, 4, 0, 4));
 		toolbar.setOrientation(1);
-		panel3.add(toolbar, BorderLayout.NORTH);
+		panel2.add(toolbar, BorderLayout.NORTH);
 		buttonTimeline = new JToggleButton();
 		buttonTimeline.setFocusPainted(true);
 		buttonTimeline.setHideActionText(false);
@@ -106,6 +102,16 @@ public class MainWindow {
 		buttonClear.setPreferredSize(new Dimension(32, 32));
 		buttonClear.setText("");
 		toolbar.add(buttonClear);
+		final JSplitPane splitPane1 = new JSplitPane();
+		splitPane1.setResizeWeight(1.0);
+		rootPanel.add(splitPane1, BorderLayout.CENTER);
+		final JScrollPane scrollPane1 = new JScrollPane();
+		splitPane1.setLeftComponent(scrollPane1);
+		dummyContentPanel = new JTextArea();
+		scrollPane1.setViewportView(dummyContentPanel);
+		detailPanel = new JPanel();
+		detailPanel.setLayout(new BorderLayout(0, 0));
+		splitPane1.setRightComponent(detailPanel);
 		ButtonGroup buttonGroup;
 		buttonGroup = new ButtonGroup();
 		buttonGroup.add(buttonTimeline);

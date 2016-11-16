@@ -54,7 +54,6 @@ class NiddlerJsonPanel(val message: ParsedNiddlerMessage) : JPanel() {
         rawButton.addItemListener { if (rawButton.isSelected) initAsRaw() }
     }
 
-
     private fun preInitTree() {
         treeView = JTree()
         treeView.isEditable = false
@@ -66,7 +65,7 @@ class NiddlerJsonPanel(val message: ParsedNiddlerMessage) : JPanel() {
         treeView.selectionModel.selectionMode = TreeSelectionModel.SINGLE_TREE_SELECTION
     }
 
-    private fun initAsTree(){
+    private fun initAsTree() {
         replacePanel(JScrollPane(treeView))
     }
 

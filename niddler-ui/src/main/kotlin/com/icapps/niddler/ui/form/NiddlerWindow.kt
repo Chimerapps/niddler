@@ -90,6 +90,10 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
         niddlerClient?.connectBlocking()
     }
 
+    private fun showMessageDetails(message: ParsedNiddlerMessage) {
+        windowContents.detailPanel.removeAll()
+    }
+
     override fun onConnected() {
         val timestamp = ZonedDateTime.now()
         val formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
