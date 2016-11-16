@@ -35,7 +35,12 @@ class XMLTreeNode(private val xmlElement: Node, private val parent: TreeNode?) :
     private fun populateChildren() {
         val nodeList = xmlElement.childNodes
         val numItems = nodeList.length
-        (0..numItems - 1).mapTo(children) { XMLTreeNode(nodeList.item(it), this) }
+        for (i in 0..numItems - 1) {
+            val item = nodeList.item(i)
+            if (item is Text && item.nodeValue.isBlank())
+                continue
+            children.add(XMLTreeNode(nodeList.item(i), this))
+        }
     }
 
     override fun children(): Enumeration<*> {

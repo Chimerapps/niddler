@@ -44,7 +44,7 @@ public class NiddlerSampleApplication extends Application {
 			mJsonApi = jsonRetrofit.create(ExampleJsonApi.class);
 
 			Retrofit xmlRetrofit = new Retrofit.Builder()
-					.baseUrl("https://raw.githubusercontent.com/bcantoni/yql/master/")
+					.baseUrl("https://raw.githubusercontent.com/")
 					.client(okHttpClient)
 					.build();
 			mXMLApi = xmlRetrofit.create(ExampleXMLApi.class);

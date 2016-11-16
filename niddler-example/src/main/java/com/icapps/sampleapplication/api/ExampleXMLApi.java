@@ -9,7 +9,7 @@ import retrofit2.http.GET;
  */
 public interface ExampleXMLApi {
 
-	@GET("/lorem.ipsum.xml")
+	@GET("/bcantoni/yql/master/lorem.ipsum.xml")
 	Call<ResponseBody> getMenu();
 
 }

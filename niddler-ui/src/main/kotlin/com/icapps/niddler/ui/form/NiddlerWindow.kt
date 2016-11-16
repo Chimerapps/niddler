@@ -12,10 +12,6 @@ import java.awt.Dimension
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.net.URI
-import java.time.Clock
-import java.time.Instant
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
 import javax.swing.JFrame
 import javax.swing.SwingUtilities
 import javax.swing.tree.DefaultMutableTreeNode
@@ -109,32 +105,17 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
     }
 
     override fun onConnected() {
-        val timestamp = ZonedDateTime.now()
-        val formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
-
-//        SwingUtilities.invokeLater {
-//            windowContents.messagesTree.append("${timestamp.format(formatter)}: Connected to ${niddlerClient?.connection?.remoteSocketAddress}\n\n")
-//        }
+        //TODO ?
     }
 
     override fun onMessage(message: ParsedNiddlerMessage) {
-        val formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
-        val timestamp = ZonedDateTime.ofInstant(Instant.ofEpochMilli(message.timestamp), Clock.systemDefaultZone().zone)
-
         SwingUtilities.invokeLater {
-            //            if (message.isRequest) {
-//                windowContents.messagesTree.append("${timestamp.format(formatter)}: REQ  ${message.requestId} | ${message.method} ${message.url}")
-//            } else {
-//                if (message.body != null) {
-//                    windowContents.messagesTree.append("${timestamp.format(formatter)}: RESP ${message.requestId} | ${message.statusCode} ${getStatusCodeString(message.statusCode!!)}\nHeaders: ${message.headers}\nBody:${message.bodyFormat.type};")
-//                    showMessageDetails(message)
-//                } else {
-//                    windowContents.messagesTree.append("${timestamp.format(formatter)}: RESP ${message.requestId} | ${message.statusCode} ${getStatusCodeString(message.statusCode!!)}\nHeaders: ${message.headers}\nBody: -NO BODY-")
-//                }
-//            }
-//            windowContents.messagesTree.append("\n\n")
+            if (!message.isRequest) {
+                if (message.body != null) {
+                    showMessageDetails(message)
+                }
+            }
 
-// TODO UNCOMMENT VOOR JTREE
             val model = windowContents.messagesTree.model as DefaultTreeModel
             val rootNode = (model.root as DefaultMutableTreeNode)
 
