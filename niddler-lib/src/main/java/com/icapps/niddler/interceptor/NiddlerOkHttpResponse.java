@@ -10,6 +10,8 @@ import java.util.UUID;
 
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import okio.Buffer;
+import okio.BufferedSource;
 
 /**
  * Created by maartenvangiel on 14/11/2016.
@@ -55,10 +57,14 @@ public class NiddlerOkHttpResponse implements NiddlerResponse {
 
     @Override
     public void writeBody(OutputStream stream) {
+        final ResponseBody body = mResponse.body();
         try {
-            final ResponseBody body = mResponse.body();
             if (body != null) {
-                stream.write(body.bytes());
+                final BufferedSource source = body.source();
+                source.request(Long.MAX_VALUE); // Buffer entire body
+
+                final Buffer buffer = source.buffer();
+                stream.write(buffer.clone().readByteArray());
                 stream.flush();
             }
         } catch (IOException e) {
