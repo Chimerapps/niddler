@@ -54,6 +54,7 @@ class NiddlerTreeRenderer : DefaultTreeCellRenderer() {
         rootPanel.add(statusCodeLabel)
 
         nameLabel.preferredSize = Dimension(63, 15)
+        nameLabel.border = EmptyBorder(0, 0, 0, 10)
         nameLabel.font = Font("SansSerif", Font.BOLD, 11)
         rootPanel.add(nameLabel)
 
@@ -68,8 +69,6 @@ class NiddlerTreeRenderer : DefaultTreeCellRenderer() {
     }
 
     override fun getTreeCellRendererComponent(tree: JTree, value: Any?, sel: Boolean, expanded: Boolean, leaf: Boolean, row: Int, hasFocus: Boolean): Component {
-        rootPanel.background = if (sel) backgroundSelectionColor else backgroundNonSelectionColor
-
         if (value is NiddlerMessageTreeNode) {
             nameLabel.isVisible = false
             valueLabel.isVisible = false
@@ -82,7 +81,7 @@ class NiddlerTreeRenderer : DefaultTreeCellRenderer() {
             timestampLabel.text = formatter.format(Date(value.item.timestamp))
             urlLabel.text = value.item.url
             methodLabel.text = value.item.method
-            directionIconLabel.icon = if (value.item.isRequest) upIcon else downIcon
+            //  directionIconLabel.icon = if (value.item.isRequest) upIcon else downIcon
             statusCodeLabel.text = "${value.item.statusCode} ${getStatusCodeString(value.item.statusCode)}"
 
             return rootPanel
