@@ -1,9 +1,10 @@
-package com.icapps.niddler.ui.model.ui
+package com.icapps.niddler.ui.model.ui.json
 
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
+import com.icapps.niddler.ui.asEnumeration
 import java.math.BigInteger
 import java.util.*
 import javax.swing.tree.TreeNode
@@ -52,7 +53,7 @@ class JsonTreeNode(private val jsonElement: JsonElement, private val parent: Tre
     }
 
     override fun children(): Enumeration<*> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return children.iterator().asEnumeration()
     }
 
     override fun isLeaf(): Boolean {
@@ -81,18 +82,18 @@ class JsonTreeNode(private val jsonElement: JsonElement, private val parent: Tre
 
     override fun toString(): String {
         return when (type) {
-            JsonTreeNode.Type.ARRAY -> if (name != null) "$name[$childCount]" else "array[$childCount]"
-            JsonTreeNode.Type.OBJECT -> name ?: "object"
-            JsonTreeNode.Type.PRIMITIVE -> if (name != null) "$name : $value" else "$value"
+            Type.ARRAY -> if (name != null) "$name[$childCount]" else "array[$childCount]"
+            Type.OBJECT -> name ?: "object"
+            Type.PRIMITIVE -> if (name != null) "$name : $value" else "$value"
             else -> ""
         }
     }
 
     fun actualType(): JsonDataType {
         return when (type) {
-            JsonTreeNode.Type.ARRAY -> JsonDataType.ARRAY
-            JsonTreeNode.Type.OBJECT -> JsonDataType.OBJECT
-            JsonTreeNode.Type.PRIMITIVE -> {
+            Type.ARRAY -> JsonDataType.ARRAY
+            Type.OBJECT -> JsonDataType.OBJECT
+            Type.PRIMITIVE -> {
                 if (jsonElement.isJsonNull)
                     return JsonDataType.NULL
 

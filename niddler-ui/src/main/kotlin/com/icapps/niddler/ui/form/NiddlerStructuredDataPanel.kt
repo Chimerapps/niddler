@@ -1,28 +1,24 @@
 package com.icapps.niddler.ui.form
 
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonElement
 import com.icapps.niddler.ui.model.ParsedNiddlerMessage
-import com.icapps.niddler.ui.model.ui.JsonTreeNode
-import com.icapps.niddler.ui.model.ui.JsonTreeRenderer
 import java.awt.BorderLayout
 import javax.swing.*
-import javax.swing.tree.DefaultTreeModel
-import javax.swing.tree.TreeSelectionModel
+import javax.swing.text.Document
 
 /**
  * @author Nicola Verbeeck
  * @date 15/11/16.
  */
-class NiddlerJsonPanel(val message: ParsedNiddlerMessage) : JPanel() {
+abstract class NiddlerStructuredDataPanel(protected val message: ParsedNiddlerMessage) : JPanel() {
 
     private var currentContentPanel: JComponent? = null
 
-    private lateinit var treeView: JTree
+    protected lateinit var treeView: JTree
 
     private val treeButton: JToggleButton
     private val prettyButton: JToggleButton
     private val rawButton: JToggleButton
+    private var toolbar: JToolBar
 
     init {
         layout = BorderLayout()
@@ -36,34 +32,28 @@ class NiddlerJsonPanel(val message: ParsedNiddlerMessage) : JPanel() {
         buttonGroup.add(prettyButton)
         buttonGroup.add(rawButton)
 
-        val toolbar = JToolBar()
+        toolbar = JToolBar()
         toolbar.isFloatable = false
         toolbar.add(Box.createGlue())
         toolbar.add(treeButton)
         toolbar.add(prettyButton)
         toolbar.add(rawButton)
 
-        add(toolbar, BorderLayout.NORTH)
-
         treeButton.isSelected = true
-        preInitTree()
-        initAsTree()
-
         treeButton.addItemListener { if (treeButton.isSelected) initAsTree() }
         prettyButton.addItemListener { if (prettyButton.isSelected) initAsPretty() }
         rawButton.addItemListener { if (rawButton.isSelected) initAsRaw() }
     }
 
-    private fun preInitTree() {
-        treeView = JTree()
-        treeView.isEditable = false
-        treeView.showsRootHandles = true
-        treeView.isRootVisible = true
-        treeView.model = DefaultTreeModel(JsonTreeNode(message.bodyData as JsonElement, null, null), false)
+    protected fun initUI() {
+        add(toolbar, BorderLayout.NORTH)
 
-        treeView.cellRenderer = JsonTreeRenderer()
-        treeView.selectionModel.selectionMode = TreeSelectionModel.SINGLE_TREE_SELECTION
+        createTreeView()
+        initAsTree()
     }
+
+    protected abstract fun createTreeView()
+    protected abstract fun createPrettyPrintedView(doc: Document)
 
     private fun initAsTree() {
         replacePanel(JScrollPane(treeView))
@@ -71,8 +61,8 @@ class NiddlerJsonPanel(val message: ParsedNiddlerMessage) : JPanel() {
 
     private fun initAsPretty() {
         val textArea = JTextArea()
-        textArea.text = GsonBuilder().setPrettyPrinting().create().toJson(message.bodyData)
         textArea.isEditable = false
+        createPrettyPrintedView(textArea.document)
         replacePanel(JScrollPane(textArea))
     }
 

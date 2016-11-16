@@ -9,7 +9,7 @@ import retrofit2.http.Path;
 /**
  * Created by maartenvangiel on 14/11/2016.
  */
-public interface ExampleApi {
+public interface ExampleJsonApi {
 
     @GET("/posts")
     Call<List<Post>> getPosts();

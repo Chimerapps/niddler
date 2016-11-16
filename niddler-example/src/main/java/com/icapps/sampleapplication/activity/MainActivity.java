@@ -2,45 +2,65 @@ package com.icapps.sampleapplication.activity;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
-
 import com.icapps.sampleapplication.NiddlerSampleApplication;
 import com.icapps.sampleapplication.R;
-import com.icapps.sampleapplication.api.ExampleApi;
+import com.icapps.sampleapplication.api.ExampleJsonApi;
+import com.icapps.sampleapplication.api.ExampleXMLApi;
 import com.icapps.sampleapplication.api.Post;
-
-import java.util.List;
-
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
 
-    private ExampleApi mApi;
+	private ExampleJsonApi mJsonApi;
+	private ExampleXMLApi mXMLApi;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
 
-        mApi = ((NiddlerSampleApplication) getApplication()).getJsonPlaceholderApi();
+		mJsonApi = ((NiddlerSampleApplication) getApplication()).getJsonPlaceholderApi();
+		mXMLApi = ((NiddlerSampleApplication) getApplication()).getXmlPlaceholderApi();
 
-        findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mApi.getPosts().enqueue(new Callback<List<Post>>() {
-                    @Override
-                    public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
+		findViewById(R.id.buttonJson).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				mJsonApi.getPosts().enqueue(new Callback<List<Post>>() {
+					@Override
+					public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
 
-                    }
+					}
 
-                    @Override
-                    public void onFailure(Call<List<Post>> call, Throwable t) {
+					@Override
+					public void onFailure(Call<List<Post>> call, Throwable t) {
 
-                    }
-                });
-            }
-        });
-    }
+					}
+				});
+			}
+		});
+
+		findViewById(R.id.buttonXML).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				mXMLApi.getMenu().enqueue(new Callback<ResponseBody>() {
+					@Override
+					public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+						Log.w("Response","Got xml response");
+					}
+
+					@Override
+					public void onFailure(Call<ResponseBody> call, Throwable t) {
+						Log.e("Response","Got xml response failure!",t);
+					}
+				});
+			}
+		});
+	}
 }

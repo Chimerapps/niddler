@@ -15,3 +15,16 @@ fun String.prefixList(elements: Array<out String>): List<String> {
 
 fun nop() {
 }
+
+fun <T> Iterator<T>.asEnumeration(): Enumeration<T> {
+    return object : Enumeration<T> {
+        override fun hasMoreElements(): Boolean {
+            return hasNext()
+        }
+
+        override fun nextElement(): T {
+            return next()
+        }
+
+    }
+}

@@ -1,4 +1,4 @@
-package com.icapps.niddler.ui.model.ui
+package com.icapps.niddler.ui.model.ui.json
 
 import java.awt.Component
 import java.awt.Font

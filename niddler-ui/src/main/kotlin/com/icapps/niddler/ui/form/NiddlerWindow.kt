@@ -93,7 +93,10 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
         windowContents.detailPanel.removeAll()
         if (message.bodyFormat.type == BodyFormatType.FORMAT_JSON) {
             windowContents.detailPanel.minimumSize = Dimension(100, 0)
-            windowContents.detailPanel.add(NiddlerJsonPanel(message), BorderLayout.CENTER)
+            windowContents.detailPanel.add(NiddlerJsonDataPanel(message), BorderLayout.CENTER)
+        } else if (message.bodyFormat.type == BodyFormatType.FORMAT_XML) {
+            windowContents.detailPanel.minimumSize = Dimension(100, 0)
+            windowContents.detailPanel.add(NiddlerXMLDataPanel(message), BorderLayout.CENTER)
         }
         windowContents.detailPanel.revalidate()
         windowContents.detailPanel.repaint()
