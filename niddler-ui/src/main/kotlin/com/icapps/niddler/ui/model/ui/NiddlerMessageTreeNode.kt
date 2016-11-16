@@ -13,12 +13,10 @@ class NiddlerMessageTreeNode(val item: ParsedNiddlerMessage) : DefaultMutableTre
     private val children: MutableList<TreeNode> = arrayListOf()
 
     init {
-        if (!item.isRequest) {
-            initResponseSubitems(item)
-        }
+        initResponseSubItems(item)
     }
 
-    private fun initResponseSubitems(item: ParsedNiddlerMessage) {
+    private fun initResponseSubItems(item: ParsedNiddlerMessage) {
         item.subItems.forEach {
             add(NiddlerMessageSubItemTreeNode(it))
         }

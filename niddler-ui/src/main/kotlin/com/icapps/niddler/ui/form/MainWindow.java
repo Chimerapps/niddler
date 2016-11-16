@@ -108,6 +108,8 @@ public class MainWindow {
 		final JScrollPane scrollPane1 = new JScrollPane();
 		splitPane1.setLeftComponent(scrollPane1);
 		messagesTree = new JTree();
+		messagesTree.setRootVisible(false);
+		messagesTree.setShowsRootHandles(true);
 		scrollPane1.setViewportView(messagesTree);
 		detailPanel = new JPanel();
 		detailPanel.setLayout(new BorderLayout(0, 0));
