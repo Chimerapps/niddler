@@ -2,6 +2,7 @@ package com.icapps.niddler.ui.model.ui
 
 import com.icapps.niddler.ui.model.MessageContainer
 import com.icapps.niddler.ui.model.ParsedNiddlerMessage
+import com.icapps.niddler.ui.util.getStatusCodeString
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.swing.Icon
@@ -94,10 +95,13 @@ class TimelineMessagesTableModel : TableModel {
             INDEX_DIRECTION -> if (message.isRequest) upIcon else downIcon
             INDEX_METHOD -> message.method ?: other?.method
             INDEX_URL -> message.url ?: other?.url
-            INDEX_STATUS_CODE -> message.statusCode ?: other?.statusCode
+            INDEX_STATUS_CODE -> if (message.statusCode != null) formatStatusCode(message.statusCode) else formatStatusCode(other?.statusCode)
             else -> "<NO COLUMN DEF>"
         }
     }
+
+    private fun formatStatusCode(statusCode: Int?)
+            = String.format("%d %s", statusCode, getStatusCodeString(statusCode))
 
     override fun removeTableModelListener(l: TableModelListener) {
         listeners.remove(l)

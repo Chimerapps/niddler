@@ -69,5 +69,5 @@ fun getStatusCodeString(code: Int?): String = when (code) {
     510 -> "Not Extended"
     511 -> "Network Authentication Required"
 
-    else -> "Unknown"
+    else -> ""
 }
