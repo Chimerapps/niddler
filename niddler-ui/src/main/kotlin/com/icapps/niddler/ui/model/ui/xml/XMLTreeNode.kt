@@ -1,6 +1,7 @@
 package com.icapps.niddler.ui.model.ui.xml
 
 import com.icapps.niddler.ui.asEnumeration
+import org.w3c.dom.Attr
 import org.w3c.dom.Node
 import org.w3c.dom.Text
 import java.util.*
@@ -16,10 +17,10 @@ class XMLTreeNode(private val xmlElement: Node, private val parent: TreeNode?) :
 
     private lateinit var value: String
     private var name: String
-    private lateinit var type: Type
+    var type: Type
 
     init {
-        name = xmlElement.nodeName
+        name = xmlElement.asString()
 
         if (xmlElement.hasChildNodes()) {
             populateChildren()
@@ -79,7 +80,29 @@ class XMLTreeNode(private val xmlElement: Node, private val parent: TreeNode?) :
         }
     }
 
-    private enum class Type {
+    enum class Type {
         NODE, TEXT
+    }
+
+    fun Node.asString(): String {
+        val stringBuilder = StringBuilder("");
+        stringBuilder.append(nodeName)
+
+        if (attributes != null && attributes.length > 0) {
+            stringBuilder.append(" [")
+            for (i: Int in 0..(attributes.length - 1)) {
+                val node: Attr = attributes.item(i) as Attr
+                if (i > 0) {
+                    stringBuilder.append(", ")
+                }
+                stringBuilder.append(node.nodeName)
+                stringBuilder.append("=\"")
+                stringBuilder.append(node.nodeValue)
+                stringBuilder.append("\"")
+            }
+            stringBuilder.append("]")
+        }
+
+        return stringBuilder.toString()
     }
 }
