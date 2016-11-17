@@ -91,7 +91,7 @@
             <properties/>
             <border type="none"/>
             <children>
-              <component id="beb97" class="javax.swing.JTree" binding="messagesTree">
+              <component id="68f63" class="com.icapps.niddler.ui.model.ui.ColorizedJTree" binding="messagesTree">
                 <constraints/>
                 <properties>
                   <rootVisible value="false"/>

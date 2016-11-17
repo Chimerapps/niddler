@@ -27,7 +27,7 @@ public class MainWindow {
     private JPanel rootPanel;
     private JComboBox adbTargetSelection;
     private JScrollPane contentScroller;
-    private JTree messagesTree;
+    private ColorizedJTree messagesTree;
     private JToolBar toolbar;
     private JToggleButton buttonTimeline;
     private JToggleButton buttonLinkedMode;
@@ -130,8 +130,6 @@ public class MainWindow {
         final JScrollPane scrollPane1 = new JScrollPane();
         splitPane.setLeftComponent(scrollPane1);
         messagesTree = new ColorizedJTree();
-        messagesTree.setRootVisible(false);
-        messagesTree.setShowsRootHandles(true);
         scrollPane1.setViewportView(messagesTree);
         detailPanel = new JPanel();
         detailPanel.setLayout(new BorderLayout(0, 0));
