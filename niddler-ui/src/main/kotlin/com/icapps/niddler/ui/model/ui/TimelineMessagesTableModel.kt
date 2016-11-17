@@ -37,7 +37,6 @@ class TimelineMessagesTableModel : TableModel {
         downIcon = ImageIcon(javaClass.getResource("/ic_down.png"))
     }
 
-
     fun updateMessages(msgs: MessageContainer) {
         messages = msgs.getMessagesChronological()
         container = msgs
@@ -109,13 +108,13 @@ class TimelineMessagesTableModel : TableModel {
     }
 
     private fun findResponse(message: ParsedNiddlerMessage): ParsedNiddlerMessage? {
-        return container.getMessagesWithRequestId(message.requestId)?.find {
+        return container.getMessagesWithRequestId(message.requestId!!)?.find {
             !it.isRequest
         }
     }
 
     private fun findRequest(message: ParsedNiddlerMessage): ParsedNiddlerMessage? {
-        return container.getMessagesWithRequestId(message.requestId)?.find(ParsedNiddlerMessage::isRequest)
+        return container.getMessagesWithRequestId(message.requestId!!)?.find(ParsedNiddlerMessage::isRequest)
     }
 
 }

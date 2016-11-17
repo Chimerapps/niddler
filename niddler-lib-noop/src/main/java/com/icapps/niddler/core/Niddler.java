@@ -34,7 +34,18 @@ public final class Niddler {
 		return false;
 	}
 
-	public final static class Builder {
+    public final static class NiddlerServerInfo {
+
+        public NiddlerServerInfo(String mServerName, String mDescription) {
+            // Dummy implementation
+        }
+
+        public String toJsonString() {
+            return null;
+        }
+    }
+
+    public final static class Builder {
 
 		public Builder setPort(final int port) {
 			return this;
@@ -43,6 +54,10 @@ public final class Niddler {
 		public Builder setCacheSize(final long cacheSize) {
 			return this;
 		}
+
+        public Builder setNiddlerInformation(final NiddlerServerInfo niddlerServerInfo) {
+            return this;
+        }
 
 		public Niddler build() {
 			return new Niddler(0, 0);
