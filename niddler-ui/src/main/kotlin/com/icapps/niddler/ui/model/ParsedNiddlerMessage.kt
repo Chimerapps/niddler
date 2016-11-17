@@ -1,5 +1,7 @@
 package com.icapps.niddler.ui.model
 
+import com.google.gson.JsonObject
+
 /**
  * @author Nicola Verbeeck
  * @date 15/11/16.
@@ -10,7 +12,7 @@ class ParsedNiddlerMessage(val bodyFormat: BodyFormat, val bodyData: Any?, val m
 
     init {
         subItems = mutableListOf<ParsedNiddlerMessageSubItem>()
-        if(headers != null){
+        if (headers != null) {
             subItems.add(ParsedNiddlerMessageSubItem("headers", headers.toString()))
         }
     }
@@ -20,6 +22,12 @@ class ParsedNiddlerMessage(val bodyFormat: BodyFormat, val bodyData: Any?, val m
 
     val messageId: String
         get() = message.messageId
+
+    val controlCode: Int?
+        get() = message.controlCode
+
+    val controlData: JsonObject?
+        get() = message.controlData
 
     val timestamp: Long
         get() = message.timestamp
@@ -41,4 +49,7 @@ class ParsedNiddlerMessage(val bodyFormat: BodyFormat, val bodyData: Any?, val m
 
     val isRequest: Boolean
         get() = message.isRequest
+
+    val isControlMessage: Boolean
+        get() = message.isControlMessage
 }

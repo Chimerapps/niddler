@@ -1,10 +1,15 @@
 package com.icapps.sampleapplication;
 
 import android.app.Application;
+
 import com.icapps.niddler.core.Niddler;
 import com.icapps.niddler.interceptor.NiddlerOkHttpInterceptor;
 import com.icapps.sampleapplication.api.ExampleJsonApi;
 import com.icapps.sampleapplication.api.ExampleXMLApi;
+
+import java.io.IOException;
+import java.net.UnknownHostException;
+
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -24,9 +29,10 @@ public class NiddlerSampleApplication extends Application {
 	public void onCreate() {
 		super.onCreate();
 
-		mNiddler = new Niddler.Builder()
-				.setPort(6555)
-				.build();
+            mNiddler = new Niddler.Builder()
+                    .setPort(6555)
+                    .setNiddlerInformation(new Niddler.NiddlerServerInfo(getPackageName(), android.os.Build.MANUFACTURER + " " + android.os.Build.PRODUCT))
+                    .build();
 
 		mNiddler.start();
 
@@ -59,11 +65,11 @@ public class NiddlerSampleApplication extends Application {
 		}
 	}
 
-	public ExampleJsonApi getJsonPlaceholderApi() {
-		return mJsonApi;
-	}
+    public ExampleJsonApi getJsonPlaceholderApi() {
+        return mJsonApi;
+    }
 
-	public ExampleXMLApi getXmlPlaceholderApi() {
-		return mXMLApi;
-	}
+    public ExampleXMLApi getXmlPlaceholderApi() {
+        return mXMLApi;
+    }
 }

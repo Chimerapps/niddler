@@ -65,7 +65,9 @@ class MessageContainer(private var bodyParser: NiddlerMessageBodyParser) : Niddl
 
     override fun onMessage(msg: String) {
         val message = bodyParser.parseBody(gson.fromJson(msg, NiddlerMessage::class.java))
-        addMessage(message)
+        if (!message.isControlMessage) {
+            addMessage(message)
+        }
 
         synchronized(listeners) {
             listeners.forEach { it.onMessage(message) }

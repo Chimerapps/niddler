@@ -151,12 +151,29 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
     }
 
     override fun onMessage(message: ParsedNiddlerMessage) {
+        if (message.isControlMessage) {
+            handleControlMessage(message)
+            return
+        }
+
         SwingUtilities.invokeLater {
             val previousSelection = windowContents.messages.selectedRow
             (windowContents.messages.model as TimelineMessagesTableModel).updateMessages(messages)
             if (previousSelection != -1)
                 windowContents.messages.addRowSelectionInterval(previousSelection, previousSelection)
         }
+    }
+
+    private fun handleControlMessage(message: ParsedNiddlerMessage) {
+        when (message.controlCode) {
+            1 -> SwingUtilities.invokeLater {
+                windowContents.statusText.text = "Connected to ${message.controlData?.get("serverName")?.asString} (${message.controlData?.get("serverDescription")?.asString})"
+                windowContents.statusText.icon = ImageIcon(NiddlerWindow::class.java.getResource("/ic_connected.png"))
+            }
+
+            else -> JOptionPane.showMessageDialog(this, "Received unknown control message")
+        }
+
     }
 
 }
