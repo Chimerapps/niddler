@@ -21,49 +21,49 @@ import java.io.IOException;
  */
 public class NiddlerSampleApplication extends Application {
 
-	private Niddler mNiddler;
-	private ExampleJsonApi mJsonApi;
-	private ExampleXMLApi mXMLApi;
+    private Niddler mNiddler;
+    private ExampleJsonApi mJsonApi;
+    private ExampleXMLApi mXMLApi;
 
-	@Override
-	public void onCreate() {
-		super.onCreate();
+    @Override
+    public void onCreate() {
+        super.onCreate();
 
-            mNiddler = new Niddler.Builder()
-                    .setPort(6555)
-                    .setNiddlerInformation(new Niddler.NiddlerServerInfo(getPackageName(), android.os.Build.MANUFACTURER + " " + android.os.Build.PRODUCT))
-                    .build();
+        mNiddler = new Niddler.Builder()
+                .setPort(6555)
+                .setNiddlerInformation(new Niddler.NiddlerServerInfo(getPackageName(), android.os.Build.MANUFACTURER + " " + android.os.Build.PRODUCT))
+                .build();
 
-		mNiddler.start();
+        mNiddler.start();
 
-		final OkHttpClient okHttpClient = new OkHttpClient.Builder()
-				.addInterceptor(new NiddlerOkHttpInterceptor(mNiddler))
-				.build();
+        final OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .addInterceptor(new NiddlerOkHttpInterceptor(mNiddler))
+                .build();
 
-		Retrofit jsonRetrofit = new Retrofit.Builder()
-				.baseUrl("https://jsonplaceholder.typicode.com")
-				.client(okHttpClient)
-				.addConverterFactory(GsonConverterFactory.create())
-				.build();
-		mJsonApi = jsonRetrofit.create(ExampleJsonApi.class);
+        Retrofit jsonRetrofit = new Retrofit.Builder()
+                .baseUrl("https://jsonplaceholder.typicode.com")
+                .client(okHttpClient)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        mJsonApi = jsonRetrofit.create(ExampleJsonApi.class);
 
-		Retrofit xmlRetrofit = new Retrofit.Builder()
-				.baseUrl("https://raw.githubusercontent.com/")
-				.client(okHttpClient)
-				.build();
-		mXMLApi = xmlRetrofit.create(ExampleXMLApi.class);
+        Retrofit xmlRetrofit = new Retrofit.Builder()
+                .baseUrl("https://raw.githubusercontent.com/")
+                .client(okHttpClient)
+                .build();
+        mXMLApi = xmlRetrofit.create(ExampleXMLApi.class);
 
-	}
+    }
 
-	@Override
-	public void onTerminate() {
-		super.onTerminate();
-		try {
-			mNiddler.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    @Override
+    public void onTerminate() {
+        super.onTerminate();
+        try {
+            mNiddler.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public ExampleJsonApi getJsonPlaceholderApi() {
         return mJsonApi;

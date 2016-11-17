@@ -30,7 +30,7 @@ public final class Niddler implements NiddlerServer.WebSocketListener, Closeable
 
     private long mCacheSize = 0;
 
-    private Niddler(final int port, final long cacheSize, final NiddlerServerInfo niddlerServerInfo) throws UnknownHostException {
+    private Niddler(final int port, final long cacheSize, final NiddlerServerInfo niddlerServerInfo) {
         try {
             mServer = new NiddlerServer(port, this);
         } catch (final UnknownHostException ex) {
@@ -248,7 +248,7 @@ public final class Niddler implements NiddlerServer.WebSocketListener, Closeable
          * @return a Niddler instance
          * @throws UnknownHostException
          */
-        public Niddler build() throws UnknownHostException {
+        public Niddler build() {
             return new Niddler(mPort, mCacheSize, mNiddlerServerInfo);
         }
 
