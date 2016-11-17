@@ -1,6 +1,7 @@
 package com.icapps.niddler.ui.form
 
 import com.icapps.niddler.ui.model.ParsedNiddlerMessage
+import com.icapps.niddler.ui.model.ui.json.XMLTreeRenderer
 import com.icapps.niddler.ui.model.ui.xml.XMLTreeNode
 import java.io.StringWriter
 import javax.swing.JTree
@@ -29,7 +30,7 @@ class NiddlerXMLDataPanel(message: ParsedNiddlerMessage) : NiddlerStructuredData
         treeView.isRootVisible = true
         treeView.model = DefaultTreeModel(XMLTreeNode((message.bodyData as org.w3c.dom.Document).documentElement, null), false)
 
-//        treeView.cellRenderer = JsonTreeRenderer()
+        treeView.cellRenderer = XMLTreeRenderer()
         treeView.selectionModel.selectionMode = TreeSelectionModel.SINGLE_TREE_SELECTION
     }
 
