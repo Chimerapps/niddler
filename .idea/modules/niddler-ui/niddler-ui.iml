@@ -30,5 +30,6 @@
     <orderEntry type="library" exported="" name="gson-2.8.0" level="project" />
     <orderEntry type="library" exported="" name="httpcore-4.4.5" level="project" />
     <orderEntry type="library" exported="" name="kotlin-runtime-1.0.5" level="project" />
+    <orderEntry type="library" exported="" name="niddler-ui.niddler-ui-0.0.1" level="project" />
   </component>
 </module>

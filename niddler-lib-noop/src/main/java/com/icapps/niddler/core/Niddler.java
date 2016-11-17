@@ -11,40 +11,44 @@ import java.net.UnknownHostException;
 @SuppressWarnings({"UnusedParameters", "unused"})
 public final class Niddler {
 
-    private Niddler(final int port, final long cacheSize) throws UnknownHostException {
-        // Dummy implementation
-    }
+	private Niddler(final int port, final long cacheSize) throws UnknownHostException {
+		// Dummy implementation
+	}
 
-    public void logRequest(final NiddlerRequest request) {
-        // Do nothing
-    }
+	public void logRequest(final NiddlerRequest request) {
+		// Do nothing
+	}
 
-    public void logResponse(final NiddlerResponse response) {
-        // Do nothing
-    }
+	public void logResponse(final NiddlerResponse response) {
+		// Do nothing
+	}
 
-    public void start() {
-        // Do nothing
-    }
+	public void start() {
+		// Do nothing
+	}
 
-    public void close() throws IOException, InterruptedException {
-        // Do nothing
-    }
+	public void close() throws IOException, InterruptedException {
+		// Do nothing
+	}
 
-    public final static class Builder {
+	public boolean enabled() {
+		return false;
+	}
 
-        public Builder setPort(final int port) {
-            return this;
-        }
+	public final static class Builder {
 
-        public Builder setCacheSize(final long cacheSize) {
-            return this;
-        }
+		public Builder setPort(final int port) {
+			return this;
+		}
 
-        public Niddler build() throws UnknownHostException {
-            return new Niddler(0, 0);
-        }
+		public Builder setCacheSize(final long cacheSize) {
+			return this;
+		}
 
-    }
+		public Niddler build() throws UnknownHostException {
+			return new Niddler(0, 0);
+		}
+
+	}
 
 }

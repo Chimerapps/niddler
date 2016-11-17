@@ -3,8 +3,8 @@ package com.icapps.niddler.core;
 
 import com.icapps.niddler.util.Base64;
 import com.icapps.niddler.util.StringSizeUtil;
-
 import org.java_websocket.WebSocket;
+import trikita.log.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -14,206 +14,196 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import trikita.log.Log;
-
 /**
  * @author Maarten Van Giel
  */
 public final class Niddler implements NiddlerServer.WebSocketListener {
 
-    private final long mMaxCacheSize;
-    private final List<String> mMessageCache;
-    private final NiddlerServer mServer;
+	private final long mMaxCacheSize;
+	private final List<String> mMessageCache;
+	private final NiddlerServer mServer;
 
-    private long mCacheSize = 0;
+	private long mCacheSize = 0;
+	private boolean mEnabled;
 
-    private Niddler(final int port, final long cacheSize) throws UnknownHostException {
-        mServer = new NiddlerServer(port, this);
-        mMessageCache = new LinkedList<>();
-        mMaxCacheSize = cacheSize;
-    }
+	private Niddler(final int port, final long cacheSize) throws UnknownHostException {
+		mServer = new NiddlerServer(port, this);
+		mMessageCache = new LinkedList<>();
+		mMaxCacheSize = cacheSize;
+	}
 
-    public void logRequest(final NiddlerRequest request) {
-        final ByteArrayOutputStream os = new ByteArrayOutputStream();
-        request.writeBody(os);
-        String base64Body = Base64.encodeToString(os.toByteArray(), Base64.NO_WRAP);
+	public void logRequest(final NiddlerRequest request) {
+		final String base64Body = transformBody(request);
 
-        final StringBuilder stringBuilder = new StringBuilder("{\"requestId\":\"");
-        stringBuilder.append(request.getRequestId());
-        stringBuilder.append("\", \"messageId\":\"");
-        stringBuilder.append(request.getMessageId());
-        stringBuilder.append("\", \"url\":\"");
-        stringBuilder.append(request.getUrl());
-        stringBuilder.append("\", \"timestamp\":");
-        stringBuilder.append(request.getTimestamp());
-        stringBuilder.append(", \"method\":\"");
-        stringBuilder.append(request.getMethod());
-        stringBuilder.append("\", \"body\":\"");
-        stringBuilder.append(base64Body);
-        stringBuilder.append("\", \"headers\": {");
+		final StringBuilder stringBuilder = new StringBuilder("{\"requestId\":\"");
+		stringBuilder.append(request.getRequestId());
+		stringBuilder.append("\", \"messageId\":\"");
+		stringBuilder.append(request.getMessageId());
+		stringBuilder.append("\", \"url\":\"");
+		stringBuilder.append(request.getUrl());
+		stringBuilder.append("\", \"timestamp\":");
+		stringBuilder.append(request.getTimestamp());
+		stringBuilder.append(", \"method\":\"");
+		stringBuilder.append(request.getMethod());
+		stringBuilder.append("\", \"body\":\"");
+		stringBuilder.append(base64Body);
+		stringBuilder.append("\", \"headers\": {");
 
-        final Map<String, List<String>> headerMap = request.getHeaders();
-        final Iterator<String> headerIterator = headerMap.keySet().iterator();
+		transformHeaders(stringBuilder, request);
 
-        while (headerIterator.hasNext()) {
-            final String headerName = headerIterator.next();
-            final List<String> headers = headerMap.get(headerName);
+		stringBuilder.append("}}");
+		sendWithCache(stringBuilder.toString());
+	}
 
-            stringBuilder.append("\"");
-            stringBuilder.append(headerName);
-            stringBuilder.append("\": [");
+	public void logResponse(final NiddlerResponse response) {
+		final String base64Body = transformBody(response);
 
-            for (String header : headers) {
-                stringBuilder.append("\"");
-                stringBuilder.append(header.replace("\"", "\\\"")); // This seems fragile...
-                stringBuilder.append("\", ");
-            }
-            if (headers.size() > 0) {
-                stringBuilder.setLength(stringBuilder.length() - 2); // Remove trailing comma
-            }
+		final StringBuilder stringBuilder = new StringBuilder("{\"requestId\":\"");
+		stringBuilder.append(response.getRequestId());
+		stringBuilder.append("\", \"messageId\":\"");
+		stringBuilder.append(response.getMessageId());
+		stringBuilder.append("\", \"timestamp\":");
+		stringBuilder.append(response.getTimestamp());
+		stringBuilder.append(", \"statusCode\":");
+		stringBuilder.append(response.getStatusCode());
+		stringBuilder.append(", \"body\":\"");
+		stringBuilder.append(base64Body);
+		stringBuilder.append("\", \"headers\": {");
 
-            stringBuilder.append("]");
+		transformHeaders(stringBuilder, response);
 
-            if (headerIterator.hasNext()) {
-                stringBuilder.append(", ");
-            }
-        }
+		stringBuilder.append("}}");
+		sendWithCache(stringBuilder.toString());
+	}
 
-        stringBuilder.append("}}");
-        sendWithCache(stringBuilder.toString());
-    }
+	public void start() {
+		mServer.start();
+		Log.d("Started listening at address" + mServer.getAddress());
+	}
 
-    public void logResponse(final NiddlerResponse response) {
-        final ByteArrayOutputStream os = new ByteArrayOutputStream();
-        response.writeBody(os);
-        String base64Body = Base64.encodeToString(os.toByteArray(), Base64.NO_WRAP);
+	public void close() throws IOException, InterruptedException {
+		mServer.stop();
+	}
 
-        final StringBuilder stringBuilder = new StringBuilder("{\"requestId\":\"");
-        stringBuilder.append(response.getRequestId());
-        stringBuilder.append("\", \"messageId\":\"");
-        stringBuilder.append(response.getMessageId());
-        stringBuilder.append("\", \"timestamp\":");
-        stringBuilder.append(response.getTimestamp());
-        stringBuilder.append(", \"statusCode\":");
-        stringBuilder.append(response.getStatusCode());
-        stringBuilder.append(", \"body\":\"");
-        stringBuilder.append(base64Body);
-        stringBuilder.append("\", \"headers\": {");
+	public boolean enabled() {
+		return true;
+	}
 
-        final Map<String, List<String>> headerMap = response.getHeaders();
-        final Iterator<String> headerIterator = headerMap.keySet().iterator();
+	private void sendWithCache(final String message) {
+		if (!mServer.connections().isEmpty()) {
+			mServer.sendToAll(message);
+			return;
+		}
 
-        while (headerIterator.hasNext()) {
-            final String headerName = headerIterator.next();
-            final List<String> headers = headerMap.get(headerName);
+		if (mMaxCacheSize <= 0) {
+			return;
+		}
 
-            stringBuilder.append("\"");
-            stringBuilder.append(headerName);
-            stringBuilder.append("\": [");
+		final long messageMemoryUsage = StringSizeUtil.calculateMemoryUsage(message);
+		if (mCacheSize + messageMemoryUsage < mMaxCacheSize) {
+			mMessageCache.add(message);
+			mCacheSize += messageMemoryUsage;
+		} else {
+			if (messageMemoryUsage > mMaxCacheSize) {
+				Log.d("Message too long for cache");
+			} else {
+				Log.d("Cache is full, removing items until we have enough space");
+				while (mCacheSize + messageMemoryUsage >= mMaxCacheSize) {
+					final String oldestMessage = mMessageCache.get(0);
+					mCacheSize -= StringSizeUtil.calculateMemoryUsage(oldestMessage);
+					mMessageCache.remove(oldestMessage);
+				}
+				mMessageCache.add(message);
+				mCacheSize += messageMemoryUsage;
+			}
+		}
+	}
 
-            for (String header : headers) {
-                stringBuilder.append("\"");
-                stringBuilder.append(header.replace("\"", "\\\"")); // This seems fragile...
-                stringBuilder.append("\", ");
-            }
-            if (headers.size() > 0) {
-                stringBuilder.setLength(stringBuilder.length() - 2); // Remove trailing comma
-            }
+	private String transformBody(final NiddlerMessageBase base) {
+		try {
+			final ByteArrayOutputStream os = new ByteArrayOutputStream();
+			base.writeBody(os);
+			return Base64.encodeToString(os.toByteArray(), Base64.NO_WRAP);
+		} catch (final IOException e) {
+			Log.w("Failed to serialize! " + e.getLocalizedMessage());
+			return "";
+		}
+	}
 
-            stringBuilder.append("]");
+	private StringBuilder transformHeaders(final StringBuilder builder, final NiddlerMessageBase base) {
+		final Map<String, List<String>> headerMap = base.getHeaders();
+		final Iterator<String> headerIterator = headerMap.keySet().iterator();
 
-            if (headerIterator.hasNext()) {
-                stringBuilder.append(", ");
-            }
-        }
+		while (headerIterator.hasNext()) {
+			final String headerName = headerIterator.next();
+			final List<String> headers = headerMap.get(headerName);
 
-        stringBuilder.append("}}");
-        sendWithCache(stringBuilder.toString());
-    }
+			builder.append("\"");
+			builder.append(headerName);
+			builder.append("\": [");
 
-    public void start() {
-        mServer.start();
-        Log.d("Started listening at address" + mServer.getAddress());
-    }
+			for (String header : headers) {
+				builder.append("\"");
+				builder.append(header.replace("\"", "\\\"")); // This seems fragile...
+				builder.append("\", ");
+			}
+			if (headers.size() > 0) {
+				builder.setLength(builder.length() - 2); // Remove trailing comma
+			}
 
-    public void close() throws IOException, InterruptedException {
-        mServer.stop();
-    }
+			builder.append("]");
 
-    private void sendWithCache(final String message) {
-        if (!mServer.connections().isEmpty()) {
-            mServer.sendToAll(message);
-            return;
-        }
+			if (headerIterator.hasNext()) {
+				builder.append(", ");
+			}
+		}
+		return builder;
+	}
 
-        if (mMaxCacheSize <= 0) {
-            return;
-        }
+	@Override
+	public void onConnectionOpened(WebSocket conn) {
+		for (final String message : mMessageCache) {
+			conn.send(message);
+		}
+	}
 
-        final long messageMemoryUsage = StringSizeUtil.calculateMemoryUsage(message);
-        if (mCacheSize + messageMemoryUsage < mMaxCacheSize) {
-            mMessageCache.add(message);
-            mCacheSize += messageMemoryUsage;
-        } else {
-            if (messageMemoryUsage > mMaxCacheSize) {
-                Log.d("Message too long for cache");
-            } else {
-                Log.d("Cache is full, removing items until we have enough space");
-                while (mCacheSize + messageMemoryUsage >= mMaxCacheSize) {
-                    final String oldestMessage = mMessageCache.get(0);
-                    mCacheSize -= StringSizeUtil.calculateMemoryUsage(oldestMessage);
-                    mMessageCache.remove(oldestMessage);
-                }
-                mMessageCache.add(message);
-                mCacheSize += messageMemoryUsage;
-            }
-        }
-    }
+	public final static class Builder {
 
-    @Override
-    public void onConnectionOpened(WebSocket conn) {
-        for (final String message : mMessageCache) {
-            conn.send(message);
-        }
-    }
+		private int mPort = 6555;
+		private long mCacheSize = 1048500; // By default use 1 MB cache
 
-    public final static class Builder {
+		/**
+		 * Sets the port on which Niddler will listen for incoming connections
+		 *
+		 * @param port The port to be used
+		 * @return Builder
+		 */
+		public Builder setPort(final int port) {
+			mPort = port;
+			return this;
+		}
 
-        private int mPort = 6555;
-        private long mCacheSize = 1048500; // By default use 1 MB cache
+		/**
+		 * Sets the cache size to be used for caching requests and responses while there is no client connected
+		 *
+		 * @param cacheSize The cache size to be used, in bytes
+		 * @return Builder
+		 */
+		public Builder setCacheSize(final long cacheSize) {
+			mCacheSize = cacheSize;
+			return this;
+		}
 
-        /**
-         * Sets the port on which Niddler will listen for incoming connections
-         *
-         * @param port The port to be used
-         * @return Builder
-         */
-        public Builder setPort(final int port) {
-            mPort = port;
-            return this;
-        }
+		/**
+		 * Builds a Niddler instance with the configured parameters
+		 *
+		 * @return a Niddler instance
+		 * @throws UnknownHostException
+		 */
+		public Niddler build() throws UnknownHostException {
+			return new Niddler(mPort, mCacheSize);
+		}
 
-        /**
-         * Sets the cache size to be used for caching requests and responses while there is no client connected
-         *
-         * @param cacheSize The cache size to be used, in bytes
-         * @return Builder
-         */
-        public Builder setCacheSize(final long cacheSize) {
-            mCacheSize = cacheSize;
-            return this;
-        }
-
-        /**
-         * Builds a Niddler instance with the configured parameters
-         *
-         * @return a Niddler instance
-         * @throws UnknownHostException
-         */
-        public Niddler build() throws UnknownHostException {
-            return new Niddler(mPort, mCacheSize);
-        }
-
-    }
+	}
 
 }

@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/niddler.iml" filepath="$PROJECT_DIR$/.idea/modules/niddler.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/niddler-example/niddler-example.iml" filepath="$PROJECT_DIR$/.idea/modules/niddler-example/niddler-example.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/niddler-lib/niddler-lib.iml" filepath="$PROJECT_DIR$/.idea/modules/niddler-lib/niddler-lib.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/niddler-lib-noop/niddler-lib-noop.iml" filepath="$PROJECT_DIR$/.idea/modules/niddler-lib-noop/niddler-lib-noop.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/niddler-ui/niddler-ui.iml" filepath="$PROJECT_DIR$/.idea/modules/niddler-ui/niddler-ui.iml" />
     </modules>
   </component>

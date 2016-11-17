@@ -1,9 +1,43 @@
 apply plugin: 'java'
+apply plugin: 'maven-publish'
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compileOnly 'com.squareup.okhttp3:okhttp:3.4.2'
 }
 
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
+
+publishing {
+    repositories {
+        maven {
+            url "s3://icappsmaven/release"
+            credentials(AwsCredentials) {
+                accessKey rootProject.ext.awsKey
+                secretKey rootProject.ext.awsSecretKey
+            }
+        }
+    }
+
+    publications {
+        maven(MavenPublication) {
+            groupId "$ARTIFACT_PACKAGE"
+            version "$ARTIFACT_VERSION"
+            artifactId "$ARTIFACT_NAME"
+            artifact("$buildDir/libs/niddler-lib-noop.jar")
+
+            pom.withXml {
+                def dependenciesNode = asNode().appendNode('dependencies')
+
+                //Iterate over the compile dependencies (we don't want the test ones), adding a <dependency> node for each
+                configurations.compile.allDependencies.each {
+                    if (it instanceof ExternalModuleDependency) {
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', it.group)
+                        dependencyNode.appendNode('artifactId', it.name)
+                        dependencyNode.appendNode('version', it.version)
+                    }
+                }
+            }
+        }
+    }
+}
