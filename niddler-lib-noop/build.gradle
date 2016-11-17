@@ -1,0 +1,9 @@
+apply plugin: 'java'
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compileOnly 'com.squareup.okhttp3:okhttp:3.4.2'
+}
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"

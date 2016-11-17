@@ -1,4 +1,4 @@
-include ':niddler-lib'
+include ':niddler-lib', ':niddler-lib-noop'
 include ':niddler-ui'
 include ':niddler-example'
 
