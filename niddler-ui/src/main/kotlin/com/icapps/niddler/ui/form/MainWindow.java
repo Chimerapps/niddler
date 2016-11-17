@@ -75,7 +75,7 @@ public class MainWindow {
 		rootPanel = new JPanel();
 		rootPanel.setLayout(new BorderLayout(0, 0));
 		rootPanel.setMinimumSize(new Dimension(300, 300));
-		rootPanel.setPreferredSize(new Dimension(300, 300));
+		rootPanel.setPreferredSize(new Dimension(1000, 600));
 		final JPanel panel1 = new JPanel();
 		panel1.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 		rootPanel.add(panel1, BorderLayout.NORTH);
@@ -136,7 +136,7 @@ public class MainWindow {
 		statusBar = new JPanel();
 		statusBar.setLayout(new BorderLayout(0, 0));
 		rootPanel.add(statusBar, BorderLayout.SOUTH);
-		statusBar.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLoweredBevelBorder(), null));
+		statusBar.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(4, 42, 4, 10), null));
 		statusText = new JLabel();
 		statusText.setFocusable(false);
 		statusText.setText("");

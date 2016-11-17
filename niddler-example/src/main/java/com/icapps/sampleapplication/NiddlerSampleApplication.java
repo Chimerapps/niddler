@@ -1,15 +1,10 @@
 package com.icapps.sampleapplication;
 
 import android.app.Application;
-
 import com.icapps.niddler.core.Niddler;
 import com.icapps.niddler.interceptor.NiddlerOkHttpInterceptor;
 import com.icapps.sampleapplication.api.ExampleJsonApi;
 import com.icapps.sampleapplication.api.ExampleXMLApi;
-
-import java.io.IOException;
-import java.net.UnknownHostException;
-
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;

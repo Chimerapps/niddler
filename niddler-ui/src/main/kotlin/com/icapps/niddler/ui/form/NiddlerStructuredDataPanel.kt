@@ -24,8 +24,8 @@ abstract class NiddlerStructuredDataPanel(protected val message: ParsedNiddlerMe
         layout = BorderLayout()
 
         treeButton = JToggleButton("Structure", ImageIcon(javaClass.getResource("/ic_as_tree.png")))
-        prettyButton = JToggleButton("Pretty", ImageIcon(javaClass.getResource("/ic_as_tree.png")))
-        rawButton = JToggleButton("Raw", ImageIcon(javaClass.getResource("/ic_as_tree.png")))
+        prettyButton = JToggleButton("Pretty", ImageIcon(javaClass.getResource("/ic_pretty.png")))
+        rawButton = JToggleButton("Raw", ImageIcon(javaClass.getResource("/ic_raw.png")))
 
         val buttonGroup = ButtonGroup()
         buttonGroup.add(treeButton)
