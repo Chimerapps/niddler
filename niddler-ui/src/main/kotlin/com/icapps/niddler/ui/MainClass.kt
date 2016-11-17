@@ -11,6 +11,6 @@ import javax.swing.WindowConstants
 fun main(args: Array<String>) {
     val window = NiddlerWindow()
     window.defaultCloseOperation = WindowConstants.EXIT_ON_CLOSE
-    window.setSize(1000, 600)
+    window.setSize(1300, 600)
     window.init()
 }

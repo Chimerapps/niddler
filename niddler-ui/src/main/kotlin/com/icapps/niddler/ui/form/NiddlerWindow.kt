@@ -41,7 +41,8 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
         windowContents.messages.model = TimelineMessagesTableModel()
         windowContents.messages.setColumnFixedWidth(0, 90)
         windowContents.messages.setColumnFixedWidth(1, 36)
-        windowContents.messages.setColumnFixedWidth(2, 50)
+        windowContents.messages.setColumnFixedWidth(2, 40)
+        windowContents.messages.setColumnFixedWidth(3, 400)
         windowContents.messages.tableHeader = null
         windowContents.statusText.text = "<>"
         windowContents.statusBar.border = BorderFactory.createCompoundBorder(windowContents.statusBar.border, EmptyBorder(1, 6, 1, 6))

@@ -34,6 +34,7 @@ class NiddlerMessageBodyParser {
             }
             BodyFormatType.FORMAT_IMAGE -> TODO("Images not yet supported, sorry!")
             BodyFormatType.FORMAT_BINARY -> return ParsedNiddlerMessage(contentType, message.getBodyAsBytes, message)
+            BodyFormatType.FORMAT_EMPTY -> return ParsedNiddlerMessage(contentType, null, message)
         }
     }
 
@@ -128,15 +129,20 @@ class NiddlerMessageBodyParser {
 
 data class BodyFormat(val type: BodyFormatType, val subtype: String?, val encoding: String?) {
     companion object {
-        val NONE = BodyFormat(BodyFormatType.FORMAT_BINARY, null, null)
+        val NONE = BodyFormat(BodyFormatType.FORMAT_EMPTY, null, null)
         val UNKNOWN = BodyFormat(BodyFormatType.FORMAT_BINARY, null, null)
+    }
+
+    override fun toString(): String {
+        return type.verbose
     }
 }
 
-enum class BodyFormatType {
-    FORMAT_JSON,
-    FORMAT_XML,
-    FORMAT_PLAIN,
-    FORMAT_IMAGE,
-    FORMAT_BINARY
+enum class BodyFormatType(val verbose: String) {
+    FORMAT_JSON("application/json"),
+    FORMAT_XML("application/xml"),
+    FORMAT_PLAIN("text/plain"),
+    FORMAT_IMAGE("image"),
+    FORMAT_BINARY("binary"),
+    FORMAT_EMPTY("")
 }

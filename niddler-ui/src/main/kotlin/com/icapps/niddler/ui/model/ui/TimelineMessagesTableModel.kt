@@ -23,6 +23,7 @@ class TimelineMessagesTableModel : TableModel {
         @JvmStatic private val INDEX_METHOD = 2
         @JvmStatic private val INDEX_URL = 3
         @JvmStatic private val INDEX_STATUS_CODE = 4
+        @JvmStatic private val INDEX_FORMAT = 5
     }
 
     private val listeners: MutableSet<TableModelListener> = hashSetOf()
@@ -61,6 +62,7 @@ class TimelineMessagesTableModel : TableModel {
             INDEX_METHOD -> "Method"
             INDEX_URL -> "Url"
             INDEX_STATUS_CODE -> "Status"
+            INDEX_FORMAT -> "Format"
             else -> "<NO COLUMN NAME>"
         }
     }
@@ -73,7 +75,8 @@ class TimelineMessagesTableModel : TableModel {
         return when (columnIndex) {
             INDEX_TIMESTAMP, INDEX_URL, INDEX_METHOD -> String::class.java
             INDEX_DIRECTION -> Icon::class.java
-            INDEX_STATUS_CODE -> Int::class.java
+            INDEX_STATUS_CODE -> String::class.java
+            INDEX_FORMAT -> String::class.java
             else -> String::class.java
         }
     }
@@ -83,7 +86,7 @@ class TimelineMessagesTableModel : TableModel {
     }
 
     override fun getColumnCount(): Int {
-        return 5
+        return 6
     }
 
     override fun getValueAt(rowIndex: Int, columnIndex: Int): Any? {
@@ -96,12 +99,18 @@ class TimelineMessagesTableModel : TableModel {
             INDEX_METHOD -> message.method ?: other?.method
             INDEX_URL -> message.url ?: other?.url
             INDEX_STATUS_CODE -> if (message.statusCode != null) formatStatusCode(message.statusCode) else formatStatusCode(other?.statusCode)
+            INDEX_FORMAT -> message.bodyFormat
             else -> "<NO COLUMN DEF>"
         }
     }
 
-    private fun formatStatusCode(statusCode: Int?)
-            = String.format("%d %s", statusCode, getStatusCodeString(statusCode))
+    private fun formatStatusCode(statusCode: Int?): String {
+        return if (statusCode == null) {
+            ""
+        } else {
+            String.format("%d %s", statusCode, getStatusCodeString(statusCode))
+        }
+    }
 
     override fun removeTableModelListener(l: TableModelListener) {
         listeners.remove(l)
@@ -112,13 +121,13 @@ class TimelineMessagesTableModel : TableModel {
     }
 
     private fun findResponse(message: ParsedNiddlerMessage): ParsedNiddlerMessage? {
-        return container.getMessagesWithRequestId(message.requestId!!)?.find {
+        return container.getMessagesWithRequestId(message.requestId)?.find {
             !it.isRequest
         }
     }
 
     private fun findRequest(message: ParsedNiddlerMessage): ParsedNiddlerMessage? {
-        return container.getMessagesWithRequestId(message.requestId!!)?.find(ParsedNiddlerMessage::isRequest)
+        return container.getMessagesWithRequestId(message.requestId)?.find(ParsedNiddlerMessage::isRequest)
     }
 
 }
