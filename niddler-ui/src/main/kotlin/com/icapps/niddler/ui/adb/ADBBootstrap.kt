@@ -46,7 +46,11 @@ class ADBBootstrap {
 
     fun extend(device: JadbDevice?): ADBExt? {
         if (device == null) return null
-        return ADBExt(device, this)
+        return extend(device.serial)
+    }
+
+    fun extend(serial: String?): ADBExt? {
+        return ADBExt(serial, this)
     }
 
     internal fun executeADBCommand(vararg commands: String) {

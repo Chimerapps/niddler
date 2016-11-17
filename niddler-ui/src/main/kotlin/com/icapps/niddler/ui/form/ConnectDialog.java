@@ -15,7 +15,7 @@ public abstract class ConnectDialog extends JDialog {
 	protected JFormattedTextField port;
 
 	public ConnectDialog(final JFrame owner) {
-		super(owner,"Select a device to connect to",true);
+		super(owner, "Select a device to connect to", true);
 		setContentPane(contentPane);
 		getRootPane().setDefaultButton(buttonOK);
 

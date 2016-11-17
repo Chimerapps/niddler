@@ -8,17 +8,13 @@
       <minimumSize width="300" height="300"/>
       <preferredSize width="1000" height="600"/>
     </properties>
-    <border mJsonType="none"/>
+    <border type="none"/>
     <children>
       <grid id="1a46d" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="0">
         <constraints border-constraint="North"/>
         <properties/>
-        <border mJsonType="none"/>
+        <border type="none"/>
         <children>
-          <component id="e6569" class="javax.swing.JComboBox" binding="adbTargetSelection">
-            <constraints/>
-            <properties/>
-          </component>
           <component id="518c3" class="javax.swing.JButton" binding="connectButton">
             <constraints/>
             <properties>
@@ -30,7 +26,7 @@
       <grid id="afc24" layout-manager="BorderLayout" hgap="0" vgap="0">
         <constraints border-constraint="West"/>
         <properties/>
-        <border mJsonType="none"/>
+        <border type="none"/>
         <children>
           <toolbar id="ae6a5" binding="toolbar">
             <constraints border-constraint="North"/>
@@ -39,7 +35,7 @@
               <margin top="0" left="4" bottom="0" right="4"/>
               <orientation value="1"/>
             </properties>
-            <border mJsonType="none"/>
+            <border type="none"/>
             <children>
               <component id="c69af" class="javax.swing.JToggleButton" binding="buttonTimeline">
                 <constraints/>
@@ -88,14 +84,14 @@
         <properties>
           <resizeWeight value="1.0"/>
         </properties>
-        <border mJsonType="none"/>
+        <border type="none"/>
         <children>
           <scrollpane id="e101e">
             <constraints>
               <splitpane position="left"/>
             </constraints>
             <properties/>
-            <border mJsonType="none"/>
+            <border type="none"/>
             <children>
               <component id="638a8" class="javax.swing.JTable" binding="messages">
                 <constraints/>
@@ -115,7 +111,7 @@
             <properties>
               <minimumSize width="100" height="100"/>
             </properties>
-            <border mJsonType="none"/>
+            <border type="none"/>
             <children/>
           </grid>
         </children>
@@ -123,7 +119,7 @@
       <grid id="799c7" binding="statusBar" layout-manager="BorderLayout" hgap="0" vgap="0">
         <constraints border-constraint="South"/>
         <properties/>
-        <border mJsonType="bevel-lowered"/>
+        <border type="bevel-lowered"/>
         <children>
           <component id="dd4e8" class="javax.swing.JLabel" binding="statusText">
             <constraints border-constraint="Center"/>

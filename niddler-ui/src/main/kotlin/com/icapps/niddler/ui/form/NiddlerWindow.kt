@@ -6,7 +6,6 @@ import com.icapps.niddler.ui.adb.ADBBootstrap
 import com.icapps.niddler.ui.model.*
 import com.icapps.niddler.ui.model.ui.TimelineMessagesTableModel
 import com.icapps.niddler.ui.setColumnFixedWidth
-import se.vidstige.jadb.JadbDevice
 import java.awt.BorderLayout
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
@@ -23,21 +22,12 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
     private val windowContents = MainWindow()
     private val adbConnection = ADBBootstrap()
 
-    private lateinit var devices: MutableList<JadbDevice>
-    private var selectedSerial: String? = null
     private val messages = MessageContainer(NiddlerMessageBodyParser())
     private var currentDetailMessage: ParsedNiddlerMessage? = null
 
     fun init() {
         add(windowContents.rootPanel)
-        devices = adbConnection.bootStrap().devices
 
-        devices.forEach {
-            windowContents.adbTargetSelection.addItem(it.serial)
-        }
-        windowContents.adbTargetSelection.addActionListener {
-            onDeviceSelectionChanged()
-        }
         windowContents.messages.model = TimelineMessagesTableModel()
         windowContents.messages.setColumnFixedWidth(0, 90)
         windowContents.messages.setColumnFixedWidth(1, 36)
@@ -65,7 +55,9 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
         }
 
         windowContents.connectButton.addActionListener {
-            NiddlerConnectDialog.showDialog(this, adbConnection.bootStrap(), null, null)
+            val selection = NiddlerConnectDialog.showDialog(this, adbConnection.bootStrap(), null, null)
+            if (selection != null)
+                onDeviceSelectionChanged(selection)
         }
 
         pack()
@@ -81,30 +73,29 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
             }
         })
         isVisible = true
-        onDeviceSelectionChanged()
     }
 
-    private fun onDeviceSelectionChanged() {
-        if (windowContents.adbTargetSelection.selectedItem == null) {
-            return
-        }
-        selectedSerial = windowContents.adbTargetSelection.selectedItem.toString()
-        initNiddlerOnDevice()
+    private fun onDeviceSelectionChanged(params: NiddlerConnectDialog.ConnectSelection) {
+        val ip = if (params.serial != null) {
+            adbConnection.extend(params.serial)?.forwardTCPPort(6555, params.port)
+            "127.0.0.1"
+        } else
+            params.ip!!
+
+        initNiddlerOnDevice(ip)
     }
 
     private var niddlerClient: NiddlerClient? = null
 
-    private fun initNiddlerOnDevice() {
+    private fun initNiddlerOnDevice(ip: String) {
         niddlerClient?.close()
         niddlerClient?.unregisterClientListener(this)
         niddlerClient?.unregisterMessageListener(messages)
         messages.clear()
         if (niddlerClient != null) {
-            //TODO Remove previous port mapping
+            //TODO Remove previous port mapping, this could cause conflicts, to check
         }
-        val device = devices.find { it.serial == selectedSerial }
-        adbConnection.extend(device)?.fowardTCPPort(6555, 6555)
-        niddlerClient = NiddlerClient(URI.create("ws://127.0.0.1:6555"))
+        niddlerClient = NiddlerClient(URI.create("ws://$ip:6555"))
         niddlerClient?.registerClientListener(this)
         niddlerClient?.registerMessageListener(messages)
         niddlerClient?.connectBlocking()
