@@ -34,16 +34,19 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
         windowContents.messages.setColumnFixedWidth(2, 40)
         windowContents.messages.setColumnFixedWidth(3, 400)
         windowContents.messages.tableHeader = null
+        windowContents.messages.setSelectionMode(ListSelectionModel.SINGLE_SELECTION)
         windowContents.statusText.text = "<>"
         windowContents.statusBar.border = BorderFactory.createCompoundBorder(windowContents.statusBar.border, EmptyBorder(1, 6, 1, 6))
 
         windowContents.messages.selectionModel.addListSelectionListener {
-            if (windowContents.messages.selectedRowCount == 0) {
-                clearDetailPanel()
-            } else {
-                val selectedRow = windowContents.messages.selectedRow
-                val row = (windowContents.messages.model as TimelineMessagesTableModel).getRow(selectedRow)
-                showMessageDetails(row)
+            SwingUtilities.invokeLater {
+                if (windowContents.messages.selectedRowCount == 0) {
+                    clearDetailPanel()
+                } else {
+                    val selectedRow = windowContents.messages.selectedRow
+                    val row = (windowContents.messages.model as TimelineMessagesTableModel).getRow(selectedRow)
+                    showMessageDetails(row)
+                }
             }
         }
 
