@@ -43,6 +43,7 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
         windowContents.messages.setColumnFixedWidth(0, 90)
         windowContents.messages.setColumnFixedWidth(1, 36)
         windowContents.messages.setColumnFixedWidth(2, 50)
+        windowContents.messages.tableHeader = null
 
         windowContents.messages.selectionModel.addListSelectionListener {
             if (windowContents.messages.selectedRowCount == 0) {
@@ -144,7 +145,7 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
             val previousSelection = windowContents.messages.selectedRow
             (windowContents.messages.model as TimelineMessagesTableModel).updateMessages(messages)
             if (previousSelection != -1)
-                windowContents.messages.addRowSelectionInterval(previousSelection,previousSelection)
+                windowContents.messages.addRowSelectionInterval(previousSelection, previousSelection)
         }
     }
 
