@@ -26,6 +26,7 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
     private lateinit var devices: MutableList<JadbDevice>
     private var selectedSerial: String? = null
     private val messages = MessageContainer(NiddlerMessageBodyParser())
+    private var currentDetailMessage: ParsedNiddlerMessage? = null
 
     fun init() {
         add(windowContents.rootPanel)
@@ -106,6 +107,7 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
     }
 
     private fun clearDetailPanel() {
+        currentDetailMessage = null
         windowContents.detailPanel.removeAll()
         windowContents.detailPanel.add(JLabel("Select a request/response to the body", SwingConstants.CENTER), BorderLayout.CENTER)
         windowContents.detailPanel.revalidate()
@@ -122,6 +124,10 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
     }
 
     private fun showMessageDetails(message: ParsedNiddlerMessage) {
+        if (currentDetailMessage?.messageId == message.messageId)
+            return
+        currentDetailMessage = message
+
         windowContents.detailPanel.removeAll()
         if (message.bodyFormat.type == BodyFormatType.FORMAT_JSON) {
             windowContents.detailPanel.add(NiddlerJsonDataPanel(message), BorderLayout.CENTER)
