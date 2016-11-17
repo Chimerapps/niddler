@@ -19,6 +19,11 @@ public class MainWindow {
 	private JPanel detailPanel;
 	private JSplitPane splitPane;
 	private JLabel statusText;
+	private JPanel statusBar;
+
+	public JPanel getStatusBar() {
+		return statusBar;
+	}
 
 	public JLabel getStatusText() {
 		return statusText;
@@ -128,13 +133,16 @@ public class MainWindow {
 		detailPanel.setLayout(new BorderLayout(0, 0));
 		detailPanel.setMinimumSize(new Dimension(100, 100));
 		splitPane.setRightComponent(detailPanel);
-		final JPanel panel3 = new JPanel();
-		panel3.setLayout(new BorderLayout(0, 0));
-		rootPanel.add(panel3, BorderLayout.SOUTH);
-		panel3.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLoweredBevelBorder(), null));
+		statusBar = new JPanel();
+		statusBar.setLayout(new BorderLayout(0, 0));
+		rootPanel.add(statusBar, BorderLayout.SOUTH);
+		statusBar.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLoweredBevelBorder(), null));
 		statusText = new JLabel();
+		statusText.setFocusable(false);
 		statusText.setText("");
-		panel3.add(statusText, BorderLayout.WEST);
+		statusText.setVerifyInputWhenFocusTarget(false);
+		statusText.putClientProperty("html.disable", Boolean.FALSE);
+		statusBar.add(statusText, BorderLayout.CENTER);
 		ButtonGroup buttonGroup;
 		buttonGroup = new ButtonGroup();
 		buttonGroup.add(buttonTimeline);

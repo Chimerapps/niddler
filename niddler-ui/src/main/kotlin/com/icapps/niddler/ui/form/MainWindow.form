@@ -114,16 +114,21 @@
           </grid>
         </children>
       </splitpane>
-      <grid id="799c7" layout-manager="BorderLayout" hgap="0" vgap="0">
+      <grid id="799c7" binding="statusBar" layout-manager="BorderLayout" hgap="0" vgap="0">
         <constraints border-constraint="South"/>
         <properties/>
         <border type="bevel-lowered"/>
         <children>
           <component id="dd4e8" class="javax.swing.JLabel" binding="statusText">
-            <constraints border-constraint="West"/>
+            <constraints border-constraint="Center"/>
             <properties>
+              <focusable value="false"/>
               <text value=""/>
+              <verifyInputWhenFocusTarget value="false"/>
             </properties>
+            <clientProperties>
+              <html.disable class="java.lang.Boolean" value="false"/>
+            </clientProperties>
           </component>
         </children>
       </grid>

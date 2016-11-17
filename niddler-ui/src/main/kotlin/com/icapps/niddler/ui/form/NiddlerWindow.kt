@@ -11,10 +11,8 @@ import java.awt.BorderLayout
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.net.URI
-import javax.swing.JFrame
-import javax.swing.JLabel
-import javax.swing.SwingConstants
-import javax.swing.SwingUtilities
+import javax.swing.*
+import javax.swing.border.EmptyBorder
 
 /**
  * @author Nicola Verbeeck
@@ -45,6 +43,7 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
         windowContents.messages.setColumnFixedWidth(2, 50)
         windowContents.messages.tableHeader = null
         windowContents.statusText.text = "<>"
+        windowContents.statusBar.border = BorderFactory.createCompoundBorder(windowContents.statusBar.border, EmptyBorder(1, 6, 1, 6))
 
         windowContents.messages.selectionModel.addListSelectionListener {
             if (windowContents.messages.selectedRowCount == 0) {
@@ -140,12 +139,14 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
     override fun onConnected() {
         SwingUtilities.invokeLater {
             windowContents.statusText.text = "Connected"
+            windowContents.statusText.icon = ImageIcon(NiddlerWindow::class.java.getResource("/ic_connected.png"))
         }
     }
 
     override fun onDisconnected() {
         SwingUtilities.invokeLater {
             windowContents.statusText.text = "Disconnected"
+            windowContents.statusText.icon = ImageIcon(NiddlerWindow::class.java.getResource("/ic_disconnected.png"))
         }
     }
 
