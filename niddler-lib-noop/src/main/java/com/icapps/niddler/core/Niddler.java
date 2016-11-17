@@ -2,7 +2,6 @@ package com.icapps.niddler.core;
 
 
 import java.io.IOException;
-import java.net.UnknownHostException;
 
 /**
  * @author Maarten Van Giel
@@ -11,7 +10,7 @@ import java.net.UnknownHostException;
 @SuppressWarnings({"UnusedParameters", "unused"})
 public final class Niddler {
 
-	private Niddler(final int port, final long cacheSize) throws UnknownHostException {
+	private Niddler(final int port, final long cacheSize) {
 		// Dummy implementation
 	}
 
@@ -45,7 +44,7 @@ public final class Niddler {
 			return this;
 		}
 
-		public Niddler build() throws UnknownHostException {
+		public Niddler build() {
 			return new Niddler(0, 0);
 		}
 

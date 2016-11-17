@@ -7,6 +7,7 @@ import org.java_websocket.WebSocket;
 import trikita.log.Log;
 
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.Iterator;
@@ -17,17 +18,20 @@ import java.util.Map;
 /**
  * @author Maarten Van Giel
  */
-public final class Niddler implements NiddlerServer.WebSocketListener {
+public final class Niddler implements NiddlerServer.WebSocketListener, Closeable {
 
 	private final long mMaxCacheSize;
 	private final List<String> mMessageCache;
-	private final NiddlerServer mServer;
+	private NiddlerServer mServer;
 
 	private long mCacheSize = 0;
-	private boolean mEnabled;
 
-	private Niddler(final int port, final long cacheSize) throws UnknownHostException {
-		mServer = new NiddlerServer(port, this);
+	private Niddler(final int port, final long cacheSize) {
+		try {
+			mServer = new NiddlerServer(port, this);
+		} catch (final UnknownHostException e) {
+			Log.e("Failed to start server: " + e.getLocalizedMessage());
+		}
 		mMessageCache = new LinkedList<>();
 		mMaxCacheSize = cacheSize;
 	}
@@ -77,12 +81,21 @@ public final class Niddler implements NiddlerServer.WebSocketListener {
 	}
 
 	public void start() {
-		mServer.start();
-		Log.d("Started listening at address" + mServer.getAddress());
+		if (mServer != null) {
+			mServer.start();
+			Log.d("Started listening at address" + mServer.getAddress());
+		}
 	}
 
-	public void close() throws IOException, InterruptedException {
-		mServer.stop();
+	@Override
+	public void close() throws IOException {
+		if (mServer != null) {
+			try {
+				mServer.stop();
+			} catch (InterruptedException e) {
+				throw new IOException(e);
+			}
+		}
 	}
 
 	public boolean enabled() {
@@ -90,31 +103,33 @@ public final class Niddler implements NiddlerServer.WebSocketListener {
 	}
 
 	private void sendWithCache(final String message) {
-		if (!mServer.connections().isEmpty()) {
-			mServer.sendToAll(message);
-			return;
-		}
+		if (mServer != null) {
+			if (!mServer.connections().isEmpty()) {
+				mServer.sendToAll(message);
+				return;
+			}
 
-		if (mMaxCacheSize <= 0) {
-			return;
-		}
+			if (mMaxCacheSize <= 0) {
+				return;
+			}
 
-		final long messageMemoryUsage = StringSizeUtil.calculateMemoryUsage(message);
-		if (mCacheSize + messageMemoryUsage < mMaxCacheSize) {
-			mMessageCache.add(message);
-			mCacheSize += messageMemoryUsage;
-		} else {
-			if (messageMemoryUsage > mMaxCacheSize) {
-				Log.d("Message too long for cache");
-			} else {
-				Log.d("Cache is full, removing items until we have enough space");
-				while (mCacheSize + messageMemoryUsage >= mMaxCacheSize) {
-					final String oldestMessage = mMessageCache.get(0);
-					mCacheSize -= StringSizeUtil.calculateMemoryUsage(oldestMessage);
-					mMessageCache.remove(oldestMessage);
-				}
+			final long messageMemoryUsage = StringSizeUtil.calculateMemoryUsage(message);
+			if (mCacheSize + messageMemoryUsage < mMaxCacheSize) {
 				mMessageCache.add(message);
 				mCacheSize += messageMemoryUsage;
+			} else {
+				if (messageMemoryUsage > mMaxCacheSize) {
+					Log.d("Message too long for cache");
+				} else {
+					Log.d("Cache is full, removing items until we have enough space");
+					while (mCacheSize + messageMemoryUsage >= mMaxCacheSize) {
+						final String oldestMessage = mMessageCache.get(0);
+						mCacheSize -= StringSizeUtil.calculateMemoryUsage(oldestMessage);
+						mMessageCache.remove(oldestMessage);
+					}
+					mMessageCache.add(message);
+					mCacheSize += messageMemoryUsage;
+				}
 			}
 		}
 	}
@@ -200,7 +215,7 @@ public final class Niddler implements NiddlerServer.WebSocketListener {
 		 * @return a Niddler instance
 		 * @throws UnknownHostException
 		 */
-		public Niddler build() throws UnknownHostException {
+		public Niddler build() {
 			return new Niddler(mPort, mCacheSize);
 		}
 
