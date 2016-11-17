@@ -15,15 +15,18 @@ class NiddlerConnectDialog(parent: JFrame?, val adbConnection: JadbConnection, v
 
     companion object {
         @JvmStatic
-        fun showDialog(parent: JFrame?, adbConnection: JadbConnection, previousIp: String?, previousPort: Int?) {
+        fun showDialog(parent: JFrame?, adbConnection: JadbConnection, previousIp: String?, previousPort: Int?): ConnectSelection? {
             val dialog = NiddlerConnectDialog(parent, adbConnection, previousIp, previousPort)
             dialog.initUI()
             dialog.pack()
             if (parent != null)
                 dialog.setLocationRelativeTo(parent)
             dialog.isVisible = true
+            return dialog.selection
         }
     }
+
+    private var selection: ConnectSelection? = null
 
     private fun initUI() {
         val model = DefaultListModel<String>()
@@ -53,6 +56,9 @@ class NiddlerConnectDialog(parent: JFrame?, val adbConnection: JadbConnection, v
     override fun onOK() {
         if (!validateContents())
             return
+
+        selection = ConnectSelection(if (adbList.isSelectionEmpty) null else adbList.selectedValue as String, directIP.text, port.text.toInt())
+
         dispose()
     }
 
@@ -81,5 +87,7 @@ class NiddlerConnectDialog(parent: JFrame?, val adbConnection: JadbConnection, v
         JOptionPane.showMessageDialog(this, error, "Could not connect", JOptionPane.ERROR_MESSAGE)
         return false
     }
+
+    data class ConnectSelection(val serial: String?, val ip: String?, val port: Int)
 
 }

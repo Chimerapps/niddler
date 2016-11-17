@@ -9,8 +9,6 @@ import java.awt.*;
  */
 public class MainWindow {
 	private JPanel rootPanel;
-	private JComboBox adbTargetSelection;
-	private JScrollPane contentScroller;
 	private JTable messages;
 	private JToolBar toolbar;
 	private JToggleButton buttonTimeline;
@@ -36,10 +34,6 @@ public class MainWindow {
 
 	public JPanel getRootPanel() {
 		return rootPanel;
-	}
-
-	public JComboBox getAdbTargetSelection() {
-		return adbTargetSelection;
 	}
 
 	public JTable getMessages() {
@@ -84,8 +78,6 @@ public class MainWindow {
 		final JPanel panel1 = new JPanel();
 		panel1.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 		rootPanel.add(panel1, BorderLayout.NORTH);
-		adbTargetSelection = new JComboBox();
-		panel1.add(adbTargetSelection);
 		connectButton = new JButton();
 		connectButton.setText("Connect");
 		panel1.add(connectButton);
