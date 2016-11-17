@@ -19,6 +19,12 @@
             <constraints/>
             <properties/>
           </component>
+          <component id="518c3" class="javax.swing.JButton" binding="connectButton">
+            <constraints/>
+            <properties>
+              <text value="Connect"/>
+            </properties>
+          </component>
         </children>
       </grid>
       <grid id="afc24" layout-manager="BorderLayout" hgap="0" vgap="0">

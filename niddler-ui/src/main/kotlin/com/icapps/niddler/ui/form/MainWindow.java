@@ -20,6 +20,11 @@ public class MainWindow {
 	private JSplitPane splitPane;
 	private JLabel statusText;
 	private JPanel statusBar;
+	private JButton connectButton;
+
+	public JButton getConnectButton() {
+		return connectButton;
+	}
 
 	public JPanel getStatusBar() {
 		return statusBar;
@@ -81,6 +86,9 @@ public class MainWindow {
 		rootPanel.add(panel1, BorderLayout.NORTH);
 		adbTargetSelection = new JComboBox();
 		panel1.add(adbTargetSelection);
+		connectButton = new JButton();
+		connectButton.setText("Connect");
+		panel1.add(connectButton);
 		final JPanel panel2 = new JPanel();
 		panel2.setLayout(new BorderLayout(0, 0));
 		rootPanel.add(panel2, BorderLayout.WEST);
@@ -136,7 +144,7 @@ public class MainWindow {
 		statusBar = new JPanel();
 		statusBar.setLayout(new BorderLayout(0, 0));
 		rootPanel.add(statusBar, BorderLayout.SOUTH);
-		statusBar.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(4, 42, 4, 10), null));
+		statusBar.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLoweredBevelBorder(), null));
 		statusText = new JLabel();
 		statusText.setFocusable(false);
 		statusText.setText("");

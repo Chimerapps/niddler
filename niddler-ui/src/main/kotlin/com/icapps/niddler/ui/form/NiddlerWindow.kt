@@ -64,6 +64,10 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
             model.updateMessages(messages)
         }
 
+        windowContents.connectButton.addActionListener {
+            NiddlerConnectDialog.showDialog(this, adbConnection.bootStrap(), null, null)
+        }
+
         pack()
         addWindowListener(object : WindowAdapter() {
             override fun windowClosing(e: WindowEvent?) {

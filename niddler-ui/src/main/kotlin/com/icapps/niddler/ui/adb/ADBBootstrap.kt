@@ -34,9 +34,13 @@ class ADBBootstrap {
     }
 
     private var pathToAdb: String = findADB()
+    private var hasBootStrap = false
 
     fun bootStrap(): JadbConnection {
-        executeADBCommand("start-server")
+        if (!hasBootStrap) {
+            hasBootStrap = true
+            executeADBCommand("start-server")
+        }
         return JadbConnection()
     }
 
