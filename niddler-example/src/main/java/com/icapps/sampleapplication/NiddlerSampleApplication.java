@@ -10,7 +10,6 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.IOException;
-import java.net.UnknownHostException;
 
 /**
  * Created by maartenvangiel on 10/11/2016.
@@ -25,32 +24,29 @@ public class NiddlerSampleApplication extends Application {
 	public void onCreate() {
 		super.onCreate();
 
-		try {
-			mNiddler = new Niddler.Builder()
-					.setPort(6555)
-					.build();
+		mNiddler = new Niddler.Builder()
+				.setPort(6555)
+				.build();
 
-			mNiddler.start();
+		mNiddler.start();
 
-			final OkHttpClient okHttpClient = new OkHttpClient.Builder()
-					.addInterceptor(new NiddlerOkHttpInterceptor(mNiddler))
-					.build();
+		final OkHttpClient okHttpClient = new OkHttpClient.Builder()
+				.addInterceptor(new NiddlerOkHttpInterceptor(mNiddler))
+				.build();
 
-			Retrofit jsonRetrofit = new Retrofit.Builder()
-					.baseUrl("https://jsonplaceholder.typicode.com")
-					.client(okHttpClient)
-					.addConverterFactory(GsonConverterFactory.create())
-					.build();
-			mJsonApi = jsonRetrofit.create(ExampleJsonApi.class);
+		Retrofit jsonRetrofit = new Retrofit.Builder()
+				.baseUrl("https://jsonplaceholder.typicode.com")
+				.client(okHttpClient)
+				.addConverterFactory(GsonConverterFactory.create())
+				.build();
+		mJsonApi = jsonRetrofit.create(ExampleJsonApi.class);
 
-			Retrofit xmlRetrofit = new Retrofit.Builder()
-					.baseUrl("https://raw.githubusercontent.com/")
-					.client(okHttpClient)
-					.build();
-			mXMLApi = xmlRetrofit.create(ExampleXMLApi.class);
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		}
+		Retrofit xmlRetrofit = new Retrofit.Builder()
+				.baseUrl("https://raw.githubusercontent.com/")
+				.client(okHttpClient)
+				.build();
+		mXMLApi = xmlRetrofit.create(ExampleXMLApi.class);
+
 	}
 
 	@Override
@@ -58,7 +54,7 @@ public class NiddlerSampleApplication extends Application {
 		super.onTerminate();
 		try {
 			mNiddler.close();
-		} catch (IOException | InterruptedException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}

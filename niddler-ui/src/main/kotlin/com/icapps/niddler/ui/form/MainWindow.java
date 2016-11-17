@@ -18,6 +18,11 @@ public class MainWindow {
 	private JButton buttonClear;
 	private JPanel detailPanel;
 	private JSplitPane splitPane;
+	private JLabel statusText;
+
+	public JLabel getStatusText() {
+		return statusText;
+	}
 
 	public JPanel getRootPanel() {
 		return rootPanel;
@@ -123,6 +128,13 @@ public class MainWindow {
 		detailPanel.setLayout(new BorderLayout(0, 0));
 		detailPanel.setMinimumSize(new Dimension(100, 100));
 		splitPane.setRightComponent(detailPanel);
+		final JPanel panel3 = new JPanel();
+		panel3.setLayout(new BorderLayout(0, 0));
+		rootPanel.add(panel3, BorderLayout.SOUTH);
+		panel3.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLoweredBevelBorder(), null));
+		statusText = new JLabel();
+		statusText.setText("");
+		panel3.add(statusText, BorderLayout.WEST);
 		ButtonGroup buttonGroup;
 		buttonGroup = new ButtonGroup();
 		buttonGroup.add(buttonTimeline);

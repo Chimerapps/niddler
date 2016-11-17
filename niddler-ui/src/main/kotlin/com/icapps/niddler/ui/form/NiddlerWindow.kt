@@ -44,6 +44,7 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
         windowContents.messages.setColumnFixedWidth(1, 36)
         windowContents.messages.setColumnFixedWidth(2, 50)
         windowContents.messages.tableHeader = null
+        windowContents.statusText.text = "<>"
 
         windowContents.messages.selectionModel.addListSelectionListener {
             if (windowContents.messages.selectedRowCount == 0) {
@@ -137,7 +138,15 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
     }
 
     override fun onConnected() {
-        //TODO ?
+        SwingUtilities.invokeLater {
+            windowContents.statusText.text = "Connected"
+        }
+    }
+
+    override fun onDisconnected() {
+        SwingUtilities.invokeLater {
+            windowContents.statusText.text = "Disconnected"
+        }
     }
 
     override fun onMessage(message: ParsedNiddlerMessage) {

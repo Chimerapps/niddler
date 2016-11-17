@@ -23,6 +23,9 @@ class NiddlerClient(serverURI: URI?) : WebSocketClient(serverURI) {
 
     override fun onClose(code: Int, reason: String?, remote: Boolean) {
         Log.d("Connection closed: " + reason)
+        synchronized(clientListeners){
+            clientListeners.forEach { it.onDisconnected() }
+        }
     }
 
     override fun onMessage(message: String) {
@@ -63,6 +66,8 @@ class NiddlerClient(serverURI: URI?) : WebSocketClient(serverURI) {
 
 interface NiddlerClientListener {
     fun onConnected()
+
+    fun onDisconnected()
 }
 
 interface NiddlerClientMessageListener {
