@@ -1,6 +1,7 @@
 package com.icapps.niddler.ui
 
 import java.util.*
+import javax.swing.JTable
 
 /**
  * @author Nicola Verbeeck
@@ -27,4 +28,11 @@ fun <T> Iterator<T>.asEnumeration(): Enumeration<T> {
         }
 
     }
+}
+
+fun JTable.setColumnFixedWidth(columnIndex: Int, width: Int) {
+    val column = columnModel.getColumn(columnIndex)
+    column?.minWidth = width
+    column?.maxWidth = width
+    column?.preferredWidth = width
 }

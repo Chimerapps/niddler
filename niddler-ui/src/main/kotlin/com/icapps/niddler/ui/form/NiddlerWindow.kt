@@ -4,8 +4,8 @@ import com.icapps.niddler.ui.NiddlerClient
 import com.icapps.niddler.ui.NiddlerClientListener
 import com.icapps.niddler.ui.adb.ADBBootstrap
 import com.icapps.niddler.ui.model.*
-import com.icapps.niddler.ui.model.ui.NiddlerMessageTreeNode
-import com.icapps.niddler.ui.model.ui.NiddlerTreeRenderer
+import com.icapps.niddler.ui.model.ui.TimelineMessagesTableModel
+import com.icapps.niddler.ui.setColumnFixedWidth
 import se.vidstige.jadb.JadbDevice
 import java.awt.BorderLayout
 import java.awt.event.WindowAdapter
@@ -15,8 +15,6 @@ import javax.swing.JFrame
 import javax.swing.JLabel
 import javax.swing.SwingConstants
 import javax.swing.SwingUtilities
-import javax.swing.tree.DefaultMutableTreeNode
-import javax.swing.tree.DefaultTreeModel
 
 /**
  * @author Nicola Verbeeck
@@ -41,26 +39,27 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
         windowContents.adbTargetSelection.addActionListener {
             onDeviceSelectionChanged()
         }
-        windowContents.messagesTree.model = DefaultTreeModel(DefaultMutableTreeNode("messages"))
-        windowContents.messagesTree.cellRenderer = NiddlerTreeRenderer()
-        windowContents.messagesTree.addTreeSelectionListener {
-            if (windowContents.messagesTree.isSelectionEmpty) {
+        windowContents.messages.model = TimelineMessagesTableModel()
+        windowContents.messages.setColumnFixedWidth(0, 90)
+        windowContents.messages.setColumnFixedWidth(1, 36)
+        windowContents.messages.setColumnFixedWidth(2, 50)
+
+        windowContents.messages.selectionModel.addListSelectionListener {
+            if (windowContents.messages.selectedRowCount == 0) {
                 clearDetailPanel()
             } else {
-                val selectedItem = windowContents.messagesTree.selectionPath
-                if (selectedItem.path.size > 1) {
-                    val messageId = selectedItem.path[1].toString()
-                    showDetailsOfMessageWithId(messageId)
-                }
+                val selectedRow = windowContents.messages.selectedRow
+                val row = (windowContents.messages.model as TimelineMessagesTableModel).getRow(selectedRow)
+                showMessageDetails(row)
             }
         }
+
         clearDetailPanel()
         windowContents.buttonClear.addActionListener {
             messages.clear()
-            val model = windowContents.messagesTree.model as DefaultTreeModel
-            windowContents.messagesTree.clearSelection()
-            (model.root as DefaultMutableTreeNode).removeAllChildren()
-            model.reload()
+            val model = windowContents.messages.model as TimelineMessagesTableModel
+            windowContents.messages.clearSelection()
+            model.updateMessages(messages)
         }
 
         pack()
@@ -121,12 +120,6 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
         windowContents.detailPanel.repaint()
     }
 
-    private fun showDetailsOfMessageWithId(messageId: String) {
-        val message = messages.getMessageWithId(messageId)
-        if (message != null)
-            showMessageDetails(message)
-    }
-
     private fun showMessageDetails(message: ParsedNiddlerMessage) {
         windowContents.detailPanel.removeAll()
         if (message.bodyFormat.type == BodyFormatType.FORMAT_JSON) {
@@ -148,15 +141,10 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
 
     override fun onMessage(message: ParsedNiddlerMessage) {
         SwingUtilities.invokeLater {
-            val model = windowContents.messagesTree.model as DefaultTreeModel
-            val rootNode = (model.root as DefaultMutableTreeNode)
-
-            val selectedPath = windowContents.messagesTree.selectionPath
-
-            val node = NiddlerMessageTreeNode(message)
-            model.insertNodeInto(node, rootNode, rootNode.childCount)
-            model.reload(rootNode)
-            windowContents.messagesTree.selectionPath = selectedPath
+            val previousSelection = windowContents.messages.selectedRow
+            (windowContents.messages.model as TimelineMessagesTableModel).updateMessages(messages)
+            if (previousSelection != -1)
+                windowContents.messages.addRowSelectionInterval(previousSelection,previousSelection)
         }
     }
 

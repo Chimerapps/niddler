@@ -91,11 +91,13 @@
             <properties/>
             <border type="none"/>
             <children>
-              <component id="68f63" class="com.icapps.niddler.ui.model.ui.ColorizedJTree" binding="messagesTree">
+              <component id="638a8" class="javax.swing.JTable" binding="messages">
                 <constraints/>
                 <properties>
-                  <rootVisible value="false"/>
-                  <showsRootHandles value="true"/>
+                  <fillsViewportHeight value="false"/>
+                  <rowHeight value="32"/>
+                  <showHorizontalLines value="true"/>
+                  <showVerticalLines value="false"/>
                 </properties>
               </component>
             </children>

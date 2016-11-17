@@ -10,22 +10,39 @@ import java.util.*
  */
 class MessageContainer(private var bodyParser: NiddlerMessageBodyParser) : NiddlerClientMessageListener {
 
-    private val messages: MutableSet<ParsedNiddlerMessage> = hashSetOf()
+    private val knownMessageIds: MutableSet<String> = hashSetOf()
+    private val messagesByMessageRequestId: MutableMap<String, MutableList<ParsedNiddlerMessage>> = hashMapOf()
+
     private val gson = Gson()
     private val listeners: MutableSet<NiddlerMessageListener> = hashSetOf()
 
     fun clear() {
-        messages.clear()
+        synchronized(knownMessageIds) {
+            knownMessageIds.clear()
+            messagesByMessageRequestId.clear()
+        }
     }
 
     fun addMessage(msg: ParsedNiddlerMessage) {
-        synchronized(messages) {
-            messages.add(msg)
+        synchronized(knownMessageIds) {
+            if (knownMessageIds.add(msg.messageId)) {
+                var list = messagesByMessageRequestId[msg.requestId]
+                if (list == null) {
+                    list = arrayListOf(msg)
+                    messagesByMessageRequestId[msg.requestId] = list
+                } else {
+                    list.add(msg)
+                    list.sortBy { it.timestamp }
+                }
+            }
         }
     }
 
     fun getMessagesChronological(): List<ParsedNiddlerMessage> {
-        val sortedMessages = synchronized(messages) { ArrayList(messages) }
+        val sortedMessages = ArrayList<ParsedNiddlerMessage>(knownMessageIds.size)
+        synchronized(knownMessageIds) {
+            messagesByMessageRequestId.forEach { it -> sortedMessages.addAll(it.value) }
+        }
         sortedMessages.sortBy { it.timestamp }
         return sortedMessages
     }
@@ -67,10 +84,8 @@ class MessageContainer(private var bodyParser: NiddlerMessageBodyParser) : Niddl
         }
     }
 
-    fun getMessageWithId(messageId: String): ParsedNiddlerMessage? {
-        return synchronized(messages) {
-            messages.find { it.messageId == messageId }
-        }
+    fun getMessagesWithRequestId(requestId: String): List<ParsedNiddlerMessage>? {
+        return synchronized(knownMessageIds) { messagesByMessageRequestId[requestId] }
     }
 
 }
