@@ -51,7 +51,7 @@ public class NiddlerService extends Service {
 		if ((intent != null) && (intent.getAction() != null) && intent.getAction().equals("STOP")) {
 			closeNiddler();
 		}
-		return START_STICKY;
+		return START_NOT_STICKY;
 	}
 
 	@Override
