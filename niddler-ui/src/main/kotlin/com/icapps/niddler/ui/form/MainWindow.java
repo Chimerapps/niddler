@@ -14,7 +14,6 @@ public class MainWindow {
 	private JToggleButton buttonTimeline;
 	private JToggleButton buttonLinkedMode;
 	private JButton buttonClear;
-	private JPanel detailPanel;
 	private JSplitPane splitPane;
 	private JLabel statusText;
 	private JPanel statusBar;
@@ -42,10 +41,6 @@ public class MainWindow {
 
 	public JButton getButtonClear() {
 		return buttonClear;
-	}
-
-	public JPanel getDetailPanel() {
-		return detailPanel;
 	}
 
 	public JSplitPane getSplitPane() {
@@ -129,10 +124,6 @@ public class MainWindow {
 		messages.setShowHorizontalLines(true);
 		messages.setShowVerticalLines(false);
 		scrollPane1.setViewportView(messages);
-		detailPanel = new JPanel();
-		detailPanel.setLayout(new BorderLayout(0, 0));
-		detailPanel.setMinimumSize(new Dimension(100, 100));
-		splitPane.setRightComponent(detailPanel);
 		statusBar = new JPanel();
 		statusBar.setLayout(new BorderLayout(0, 0));
 		rootPanel.add(statusBar, BorderLayout.SOUTH);

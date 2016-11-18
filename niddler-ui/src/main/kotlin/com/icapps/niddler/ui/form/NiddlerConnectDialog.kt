@@ -2,6 +2,8 @@ package com.icapps.niddler.ui.form
 
 import com.icapps.niddler.ui.addChangeListener
 import se.vidstige.jadb.JadbConnection
+import java.awt.event.MouseAdapter
+import java.awt.event.MouseEvent
 import javax.swing.DefaultListModel
 import javax.swing.JFrame
 import javax.swing.JOptionPane
@@ -51,6 +53,15 @@ class NiddlerConnectDialog(parent: JFrame?, val adbConnection: JadbConnection, v
             if (!directIP.text.isNullOrBlank())
                 adbList.clearSelection()
         }
+
+        adbList.addMouseListener(object : MouseAdapter() {
+            override fun mouseClicked(e: MouseEvent) {
+                if (e.clickCount == 2)
+                    onOK()
+                else
+                    super.mouseClicked(e)
+            }
+        })
     }
 
     override fun onOK() {
