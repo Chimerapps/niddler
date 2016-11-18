@@ -1,11 +1,17 @@
-apply plugin: 'java'
+apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'
 
 dependencies {
+    provided 'com.squareup.okhttp3:okhttp:3.4.2'
 }
 
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "24.0.3"
+}
 
 publishing {
     repositories {
