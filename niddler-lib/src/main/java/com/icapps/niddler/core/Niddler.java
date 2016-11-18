@@ -145,7 +145,11 @@ public final class Niddler implements NiddlerServer.WebSocketListener, Closeable
 
 			@Override
 			public void onActivityStopped(Activity activity) {
-				activity.unbindService(mServiceConnection);
+				try {
+					activity.unbindService(mServiceConnection);
+				} catch (final IllegalArgumentException ignored) {
+					//Ignore
+				}
 			}
 
 			@Override

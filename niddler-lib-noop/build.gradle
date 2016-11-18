@@ -29,7 +29,7 @@ publishing {
             groupId "$ARTIFACT_PACKAGE"
             version "$ARTIFACT_VERSION"
             artifactId "$ARTIFACT_NAME"
-            artifact("$buildDir/libs/niddler-lib-noop.jar")
+            artifact("$buildDir/outputs/aar/niddler-lib-noop-release.aar")
 
             pom.withXml {
                 def dependenciesNode = asNode().appendNode('dependencies')

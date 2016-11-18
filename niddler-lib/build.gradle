@@ -36,7 +36,7 @@ publishing {
             groupId "$ARTIFACT_PACKAGE"
             version "$ARTIFACT_VERSION"
             artifactId "$ARTIFACT_NAME"
-            artifact("$buildDir/libs/niddler-lib.jar")
+            artifact("$buildDir/outputs/aar/niddler-lib-release.aar")
 
             pom.withXml {
                 def dependenciesNode = asNode().appendNode('dependencies')
