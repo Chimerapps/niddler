@@ -3,10 +3,12 @@ package com.icapps.niddler.ui.form
 import com.icapps.niddler.ui.NiddlerClient
 import com.icapps.niddler.ui.NiddlerClientListener
 import com.icapps.niddler.ui.adb.ADBBootstrap
-import com.icapps.niddler.ui.model.*
+import com.icapps.niddler.ui.model.MessageContainer
+import com.icapps.niddler.ui.model.NiddlerMessageBodyParser
+import com.icapps.niddler.ui.model.NiddlerMessageListener
+import com.icapps.niddler.ui.model.ParsedNiddlerMessage
 import com.icapps.niddler.ui.model.ui.TimelineMessagesTableModel
 import com.icapps.niddler.ui.setColumnFixedWidth
-import java.awt.BorderLayout
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.net.URI
@@ -23,10 +25,12 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
     private val adbConnection = ADBBootstrap()
 
     private val messages = MessageContainer(NiddlerMessageBodyParser())
-    private var currentDetailMessage: ParsedNiddlerMessage? = null
+    private val detailContainer = MessageDetailContainer(messages)
 
     fun init() {
         add(windowContents.rootPanel)
+
+        windowContents.splitPane.rightComponent = detailContainer
 
         windowContents.messages.model = TimelineMessagesTableModel()
         windowContents.messages.setColumnFixedWidth(0, 90)
@@ -41,20 +45,23 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
         windowContents.messages.selectionModel.addListSelectionListener {
             SwingUtilities.invokeLater {
                 if (windowContents.messages.selectedRowCount == 0) {
-                    clearDetailPanel()
+                    val timer = Timer(200) {
+                        checkRowSelectionState()
+                    }
+                    timer.isRepeats = false
+                    timer.start()
                 } else {
-                    val selectedRow = windowContents.messages.selectedRow
-                    val row = (windowContents.messages.model as TimelineMessagesTableModel).getRow(selectedRow)
-                    showMessageDetails(row)
+                    checkRowSelectionState()
                 }
             }
         }
 
-        clearDetailPanel()
+        detailContainer.clear()
         windowContents.buttonClear.addActionListener {
             messages.clear()
             val model = windowContents.messages.model as TimelineMessagesTableModel
             windowContents.messages.clearSelection()
+            checkRowSelectionState()
             model.updateMessages(messages)
         }
 
@@ -77,6 +84,16 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
             }
         })
         isVisible = true
+    }
+
+    private fun checkRowSelectionState() {
+        if (windowContents.messages.selectedRowCount == 0) {
+            detailContainer.clear()
+        } else {
+            val selectedRow = windowContents.messages.selectedRow
+            val row = (windowContents.messages.model as TimelineMessagesTableModel).getRow(selectedRow)
+            detailContainer.setMessage(row)
+        }
     }
 
     private fun onDeviceSelectionChanged(params: NiddlerConnectDialog.ConnectSelection) {
@@ -103,42 +120,6 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
         niddlerClient?.registerClientListener(this)
         niddlerClient?.registerMessageListener(messages)
         niddlerClient?.connectBlocking()
-    }
-
-    private fun clearDetailPanel() {
-        currentDetailMessage = null
-        windowContents.detailPanel.removeAll()
-        windowContents.detailPanel.add(JLabel("Select a request/response to the body", SwingConstants.CENTER), BorderLayout.CENTER)
-        windowContents.detailPanel.revalidate()
-        windowContents.splitPane.revalidate()
-        windowContents.detailPanel.repaint()
-    }
-
-    private fun showEmptyMessageDetails() {
-        windowContents.detailPanel.removeAll()
-        windowContents.detailPanel.add(JLabel("This request/response has no body", SwingConstants.CENTER), BorderLayout.CENTER)
-        windowContents.detailPanel.revalidate()
-        windowContents.splitPane.revalidate()
-        windowContents.detailPanel.repaint()
-    }
-
-    private fun showMessageDetails(message: ParsedNiddlerMessage) {
-        if (currentDetailMessage?.messageId == message.messageId)
-            return
-        currentDetailMessage = message
-
-        windowContents.detailPanel.removeAll()
-        if (message.bodyFormat.type == BodyFormatType.FORMAT_JSON) {
-            windowContents.detailPanel.add(NiddlerJsonDataPanel(message), BorderLayout.CENTER)
-        } else if (message.bodyFormat.type == BodyFormatType.FORMAT_XML) {
-            windowContents.detailPanel.add(NiddlerXMLDataPanel(message), BorderLayout.CENTER)
-        } else if (message.body.isNullOrBlank()) {
-            showEmptyMessageDetails()
-            return
-        }
-        windowContents.splitPane.revalidate()
-        windowContents.detailPanel.revalidate()
-        windowContents.detailPanel.repaint()
     }
 
     override fun onConnected() {
