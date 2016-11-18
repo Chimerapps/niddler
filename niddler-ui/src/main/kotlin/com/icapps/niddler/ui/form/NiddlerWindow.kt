@@ -35,7 +35,7 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
         windowContents.messages.model = TimelineMessagesTableModel()
         windowContents.messages.setColumnFixedWidth(0, 90)
         windowContents.messages.setColumnFixedWidth(1, 36)
-        windowContents.messages.setColumnFixedWidth(2, 40)
+        windowContents.messages.setColumnFixedWidth(2, 70)
         windowContents.messages.setColumnFixedWidth(3, 400)
         windowContents.messages.tableHeader = null
         windowContents.messages.setSelectionMode(ListSelectionModel.SINGLE_SELECTION)
