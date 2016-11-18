@@ -48,7 +48,7 @@ public class NiddlerService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		if (intent.getAction() != null && intent.getAction().equals("STOP")) {
+		if ((intent != null) && (intent.getAction() != null) && intent.getAction().equals("STOP")) {
 			closeNiddler();
 		}
 		return START_STICKY;
