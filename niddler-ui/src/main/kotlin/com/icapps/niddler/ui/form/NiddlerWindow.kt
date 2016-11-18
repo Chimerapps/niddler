@@ -45,11 +45,13 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
         windowContents.messages.selectionModel.addListSelectionListener {
             SwingUtilities.invokeLater {
                 if (windowContents.messages.selectedRowCount == 0) {
-                    detailContainer.clear()
+                    val timer = Timer(200) {
+                        checkRowSelectionState()
+                    }
+                    timer.isRepeats = false
+                    timer.start()
                 } else {
-                    val selectedRow = windowContents.messages.selectedRow
-                    val row = (windowContents.messages.model as TimelineMessagesTableModel).getRow(selectedRow)
-                    detailContainer.setMessage(row)
+                    checkRowSelectionState()
                 }
             }
         }
@@ -59,6 +61,7 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
             messages.clear()
             val model = windowContents.messages.model as TimelineMessagesTableModel
             windowContents.messages.clearSelection()
+            checkRowSelectionState()
             model.updateMessages(messages)
         }
 
@@ -81,6 +84,16 @@ class NiddlerWindow : JFrame(), NiddlerClientListener, NiddlerMessageListener {
             }
         })
         isVisible = true
+    }
+
+    private fun checkRowSelectionState() {
+        if (windowContents.messages.selectedRowCount == 0) {
+            detailContainer.clear()
+        } else {
+            val selectedRow = windowContents.messages.selectedRow
+            val row = (windowContents.messages.model as TimelineMessagesTableModel).getRow(selectedRow)
+            detailContainer.setMessage(row)
+        }
     }
 
     private fun onDeviceSelectionChanged(params: NiddlerConnectDialog.ConnectSelection) {

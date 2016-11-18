@@ -31,6 +31,7 @@ class MessageDetailContainer(message: MessageContainer) : JTabbedPane() {
         if (currentMessage?.messageId == message.messageId)
             return
 
+        currentMessage = message
         bodyRoot.removeAll()
         detailPanel.setMessage(message)
 
