@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import com.icapps.niddler.core.Niddler;
 import com.icapps.niddler.util.Logging;
@@ -93,15 +94,16 @@ public class NiddlerService extends Service {
 		intent.setAction("STOP");
 		final PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-		final Notification notification = new Notification.Builder(this)
+		final Notification notification = new NotificationCompat.Builder(this)
 				.setContentTitle("Niddler")
-				.setContentText("Niddler is running for '" + getPackageName() + "'. Touch to stop.")
+				.setContentText("Niddler is running. Touch to stop.")
+				.setStyle(new NotificationCompat.BigTextStyle().bigText("Niddler is running for '" + getPackageName() + "'. Touch to stop"))
 				.setContentIntent(pendingIntent)
 				.setSmallIcon(android.R.drawable.ic_menu_preferences)
 				.setLocalOnly(true)
 				.build();
 
-		notification.flags |= Notification.FLAG_NO_CLEAR | Notification.FLAG_ONGOING_EVENT;
+		notification.flags |= NotificationCompat.FLAG_NO_CLEAR | NotificationCompat.FLAG_ONGOING_EVENT;
 		mNotificationManager.notify(NOTIFICATION_ID, notification);
 	}
 
