@@ -2,7 +2,7 @@ package com.icapps.sampleapplication;
 
 import android.app.Application;
 import com.icapps.niddler.core.Niddler;
-import com.icapps.niddler.interceptor.NiddlerOkHttpInterceptor;
+import com.icapps.niddler.interceptor.okhttp.NiddlerOkHttpInterceptor;
 import com.icapps.sampleapplication.api.ExampleJsonApi;
 import com.icapps.sampleapplication.api.ExampleXMLApi;
 import okhttp3.OkHttpClient;

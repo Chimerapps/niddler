@@ -4,7 +4,7 @@
     <uses-sdk android:minSdkVersion="16"/>
 
     <application>
-        <service android:name=".service.NiddlerService"/>
+        <service android:name=".service.NiddlerService" android:exported="false" android:label="Niddler server"/>
     </application>
 
 </manifest>

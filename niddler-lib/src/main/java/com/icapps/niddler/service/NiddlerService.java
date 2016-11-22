@@ -8,27 +8,32 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.util.Log;
 import com.icapps.niddler.core.Niddler;
+import com.icapps.niddler.util.Logging;
 
 import java.io.IOException;
 
 /**
- * Created by maartenvangiel on 18/11/2016.
+ * @author Maarten Van Giel
+ * @author Nicola Verbeeck
  */
+@SuppressWarnings("DesignForExtension")
 public class NiddlerService extends Service {
 
-	private static final int NOTIFICATION_ID = 1;
+	private static final String LOG_TAG = NiddlerService.class.getSimpleName();
+	private static final int NOTIFICATION_ID = 147;
 
 	private final IBinder mBinder = new NiddlerBinder();
 	private NotificationManager mNotificationManager;
 	private Niddler mNiddler;
 
 	@Override
-	public IBinder onBind(Intent intent) {
+	public IBinder onBind(final Intent intent) {
 		return mBinder;
 	}
 
-	public void initialize(Niddler niddler) {
+	public void initialize(final Niddler niddler) {
 		if (niddler == null || niddler.isClosed()) {
 			stopSelf();
 			return;
@@ -47,7 +52,7 @@ public class NiddlerService extends Service {
 	}
 
 	@Override
-	public int onStartCommand(Intent intent, int flags, int startId) {
+	public int onStartCommand(final Intent intent, final int flags, final int startId) {
 		if ((intent != null) && (intent.getAction() != null) && intent.getAction().equals("STOP")) {
 			closeNiddler();
 		}
@@ -58,37 +63,42 @@ public class NiddlerService extends Service {
 	public void onCreate() {
 		super.onCreate();
 		mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		System.out.println("NiddlerService created!");
+		if (Logging.DO_LOG) {
+			Log.d(LOG_TAG, "NiddlerService created!");
+		}
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
 		removeNotification();
-		System.out.println("NiddlerService destroyed!");
+		if (Logging.DO_LOG) {
+			Log.d(LOG_TAG, "NiddlerService destroyed!");
+		}
 	}
 
 	private void closeNiddler() {
 		if (mNiddler != null) {
 			try {
 				mNiddler.close();
-			} catch (IOException e) {
-				e.printStackTrace();
+			} catch (final IOException e) {
+				Log.w(LOG_TAG, "Failed to close niddler", e);
 			}
 			removeNotification();
 		}
 	}
 
 	private void createNotification() {
-		Intent intent = new Intent(this, NiddlerService.class);
+		final Intent intent = new Intent(this, NiddlerService.class);
 		intent.setAction("STOP");
-		PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+		final PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-		Notification notification = new Notification.Builder(this)
+		final Notification notification = new Notification.Builder(this)
 				.setContentTitle("Niddler")
-				.setContentText("Niddler is running. Touch to stop.")
+				.setContentText("Niddler is running for '" + getPackageName() + "'. Touch to stop.")
 				.setContentIntent(pendingIntent)
 				.setSmallIcon(android.R.drawable.ic_menu_preferences)
+				.setLocalOnly(true)
 				.build();
 
 		notification.flags |= Notification.FLAG_NO_CLEAR | Notification.FLAG_ONGOING_EVENT;

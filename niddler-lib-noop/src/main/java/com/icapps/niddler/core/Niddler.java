@@ -8,8 +8,8 @@ import java.io.IOException;
 
 /**
  * @author Maarten Van Giel
+ * @author Nicola Verbeeck
  */
-
 @SuppressWarnings({"UnusedParameters", "unused"})
 public final class Niddler implements Closeable {
 
@@ -25,14 +25,6 @@ public final class Niddler implements Closeable {
 		// Do nothing
 	}
 
-	private String generateMessage(final String messageId, final String requestId, final long timestamp, final String messageContents) {
-		return null;
-	}
-
-	private String generateControlMessageContents(final int controlCode, final String data) {
-		return null;
-	}
-
 	public void start() {
 		// Do nothing
 	}
@@ -46,41 +38,30 @@ public final class Niddler implements Closeable {
 		// Do nothing
 	}
 
-	public boolean enabled() {
+	public static boolean enabled() {
 		return false;
 	}
 
+	@SuppressWarnings("MethodMayBeStatic")
 	public boolean isStarted() {
 		return false;
 	}
 
+	@SuppressWarnings("MethodMayBeStatic")
 	public boolean isClosed() {
 		return false;
 	}
 
-	private void sendWithCache(final String message) {
-		// Do nothing
-	}
-
-	private String transformBody(final NiddlerMessageBase base) {
-		return null;
-	}
-
-	private StringBuilder transformHeaders(final StringBuilder builder, final NiddlerMessageBase base) {
-		return null;
-	}
-
+	@SuppressWarnings("WeakerAccess")
 	public final static class NiddlerServerInfo {
 
-		public NiddlerServerInfo(String mName, String mDescription) {
+		public NiddlerServerInfo(final String name, final String description) {
 			// Do nothing
 		}
 
-		public String toJsonString() {
-			return null;
-		}
 	}
 
+	@SuppressWarnings("WeakerAccess")
 	public final static class Builder {
 
 		/**
@@ -114,20 +95,11 @@ public final class Niddler implements Closeable {
 		}
 
 		/**
-		 * Sets the NiddlerServerInformation to the application's package name and device info
-		 *
-		 * @param application the current application
-		 * @return Builder
-		 */
-		public Builder forApplication(final Application application) {
-			return this;
-		}
-
-		/**
 		 * Builds a Niddler instance with the configured parameters
 		 *
 		 * @return a Niddler instance
 		 */
+		@SuppressWarnings("MethodMayBeStatic")
 		public Niddler build() {
 			return new Niddler(0, 0, null);
 		}

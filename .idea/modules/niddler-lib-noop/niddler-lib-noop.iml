@@ -12,21 +12,100 @@
         <option name="BUILDABLE" value="true" />
       </configuration>
     </facet>
+    <facet type="android" name="Android">
+      <configuration>
+        <option name="SELECTED_BUILD_VARIANT" value="debug" />
+        <option name="SELECTED_TEST_ARTIFACT" value="_android_test_" />
+        <option name="ASSEMBLE_TASK_NAME" value="assembleDebug" />
+        <option name="COMPILE_JAVA_TASK_NAME" value="compileDebugSources" />
+        <afterSyncTasks>
+          <task>generateDebugSources</task>
+        </afterSyncTasks>
+        <option name="ALLOW_USER_CONFIGURATION" value="false" />
+        <option name="MANIFEST_FILE_RELATIVE_PATH" value="/src/main/AndroidManifest.xml" />
+        <option name="RES_FOLDER_RELATIVE_PATH" value="/src/main/res" />
+        <option name="RES_FOLDERS_RELATIVE_PATH" value="" />
+        <option name="ASSETS_FOLDER_RELATIVE_PATH" value="/src/main/assets" />
+        <option name="LIBRARY_PROJECT" value="true" />
+      </configuration>
+    </facet>
   </component>
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_7" inherit-compiler-output="false">
-    <output url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/classes/main" />
-    <output-test url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/classes/test" />
+    <output url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/intermediates/classes/debug" />
+    <output-test url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/intermediates/classes/test/debug" />
     <exclude-output />
     <content url="file://$MODULE_DIR$/../../../niddler-lib-noop">
-      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/generated/source/r/debug" isTestSource="false" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/generated/source/aidl/debug" isTestSource="false" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/generated/source/buildConfig/debug" isTestSource="false" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/generated/source/rs/debug" isTestSource="false" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/generated/source/apt/debug" isTestSource="false" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/generated/res/rs/debug" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/generated/res/resValues/debug" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/generated/source/r/androidTest/debug" isTestSource="true" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/generated/source/aidl/androidTest/debug" isTestSource="true" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/generated/source/buildConfig/androidTest/debug" isTestSource="true" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/generated/source/rs/androidTest/debug" isTestSource="true" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/generated/source/apt/androidTest/debug" isTestSource="true" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/generated/res/rs/androidTest/debug" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/generated/res/resValues/androidTest/debug" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/debug/res" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/debug/resources" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/debug/assets" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/debug/aidl" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/debug/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/debug/jni" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/debug/rs" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/testDebug/res" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/testDebug/resources" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/testDebug/assets" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/testDebug/aidl" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/testDebug/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/testDebug/jni" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/testDebug/rs" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/main/res" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/main/resources" type="java-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/test/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/main/assets" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/main/aidl" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/main/jni" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/main/rs" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/androidTest/res" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/androidTest/resources" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/androidTest/assets" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/androidTest/aidl" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/androidTest/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/androidTest/jni" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/androidTest/rs" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/test/res" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/test/resources" type="java-test-resource" />
-      <excludeFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/.gradle" />
-      <excludeFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/test/assets" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/test/aidl" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/test/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/test/jni" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/test/rs" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/intermediates/blame" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/intermediates/bundles" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/intermediates/classes" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/intermediates/dependency-cache" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/intermediates/incremental" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/intermediates/incremental-safeguard" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/intermediates/jniLibs" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/intermediates/lint" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/intermediates/manifests" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/intermediates/res" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/intermediates/rs" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/intermediates/shaders" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/intermediates/symbols" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/intermediates/transforms" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/outputs" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/publications" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/tmp" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" exported="" name="niddler-lib-noop.niddler-lib-noop" level="project" />
+    <orderEntry type="library" exported="" name="okio-1.9.0" level="project" />
+    <orderEntry type="library" exported="" name="okhttp-3.4.2" level="project" />
+    <orderEntry type="library" exported="" name="android-android-23" level="project" />
   </component>
 </module>

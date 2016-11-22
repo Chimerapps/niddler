@@ -16,8 +16,8 @@
       <sourceFolder url="file://$MODULE_DIR$/../../../niddler-ui/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../../niddler-ui/src/main/kotlin" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../../niddler-ui/src/main/resources" type="java-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-ui/src/test/kotlin" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../../niddler-ui/src/test/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-ui/src/test/kotlin" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../../niddler-ui/src/test/resources" type="java-test-resource" />
       <excludeFolder url="file://$MODULE_DIR$/../../../niddler-ui/.gradle" />
     </content>
@@ -33,5 +33,6 @@
     <orderEntry type="library" exported="" name="kotlin-runtime-1.0.5" level="project" />
     <orderEntry type="library" exported="" name="filters-2.0.235" level="project" />
     <orderEntry type="library" exported="" name="swing-worker-1.1" level="project" />
+    <orderEntry type="library" exported="" name="niddler-ui.niddler-ui-0.0.1" level="project" />
   </component>
 </module>
