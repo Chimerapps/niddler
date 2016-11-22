@@ -11,7 +11,6 @@ import org.json.JSONObject;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.channels.NotYetConnectedException;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -126,14 +125,17 @@ class NiddlerServer extends WebSocketServer {
 	 * @param message the message to be sent
 	 */
 	final synchronized void sendToAll(final String message) {
-		final Collection<WebSocket> connections = connections();
-		for (final WebSocket socket : connections) {
-			try {
-				socket.send(message);
-			} catch (final NotYetConnectedException ignored) {
-				//Nothing to do, wait for the connection to complete
-			} catch (final IllegalArgumentException ignored) {
-				Log.e(LOG_TAG, "WebSocket error", ignored);
+		synchronized (mConnections) {
+			for (final ServerConnection connection : mConnections) {
+				try {
+					if (connection.canReceiveData()) {
+						connection.send(message);
+					}
+				} catch (final NotYetConnectedException ignored) {
+					//Nothing to do, wait for the connection to complete
+				} catch (final IllegalArgumentException ignored) {
+					Log.e(LOG_TAG, "WebSocket error", ignored);
+				}
 			}
 		}
 	}

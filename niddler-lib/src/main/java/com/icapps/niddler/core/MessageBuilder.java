@@ -57,7 +57,6 @@ final class MessageBuilder {
 		final JSONObject object = new JSONObject();
 		try {
 			object.put("type", "serverInfo");
-			object.put("protocolVersion", Niddler.NiddlerServerInfo.PROTOCOL_VERSION);
 			object.put("serverName", serverInfo.mName);
 			object.put("serverDescription", serverInfo.mDescription);
 		} catch (final JSONException e) {
@@ -73,7 +72,6 @@ final class MessageBuilder {
 		final JSONObject object = new JSONObject();
 		try {
 			object.put("type", "authRequest");
-			object.put("protocolVersion", "1");
 			object.put("hash", request.hashKey);
 		} catch (final JSONException e) {
 			if (Logging.DO_LOG) {
@@ -130,4 +128,7 @@ final class MessageBuilder {
 		return object;
 	}
 
+	static String buildProtocolVersionMessage() {
+		return "{\"type\":\"protocol\",\"protocolVersion\":" + Niddler.NiddlerServerInfo.PROTOCOL_VERSION + "}";
+	}
 }

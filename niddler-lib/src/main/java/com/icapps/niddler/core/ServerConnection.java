@@ -19,23 +19,20 @@ final class ServerConnection {
 
 	ServerConnection(final WebSocket socket) {
 		mSocket = socket;
+		sendProtocolInfo();
 	}
 
 	public boolean canReceiveData() {
 		return mState == STATE_READY;
 	}
 
-	public void sendAuthRequest() {
+	void sendAuthRequest() {
 		mState = STATE_AUTH_REQ_SENT;
 		mAuthRequest = ServerAuth.generateAuthenticationRequest();
 		mSocket.send(MessageBuilder.buildMessage(mAuthRequest));
 	}
 
-	private void sendAuthSuccess() {
-		mSocket.send(MessageBuilder.buildAuthSuccess());
-	}
-
-	public boolean checkAuthReply(final ServerAuth.AuthReply authReply, final String password) {
+	boolean checkAuthReply(final ServerAuth.AuthReply authReply, final String password) {
 		if ((mState != STATE_AUTH_REQ_SENT) || !ServerAuth.checkAuthReply(mAuthRequest, authReply, password)) {
 			mState = STATE_CLOSED;
 			mSocket.close(401);
@@ -46,12 +43,20 @@ final class ServerConnection {
 		return true;
 	}
 
-
 	boolean isFor(final WebSocket socket) {
 		return this.mSocket == socket;
 	}
 
-	void close() {
-		mSocket.close();
+	void send(final String message) {
+		mSocket.send(message);
 	}
+
+	private void sendProtocolInfo() {
+		mSocket.send(MessageBuilder.buildProtocolVersionMessage());
+	}
+
+	private void sendAuthSuccess() {
+		mSocket.send(MessageBuilder.buildAuthSuccess());
+	}
+
 }
