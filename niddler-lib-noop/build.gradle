@@ -11,6 +11,10 @@ targetCompatibility = "1.7"
 android {
     compileSdkVersion 23
     buildToolsVersion "24.0.3"
+
+    defaultConfig {
+        consumerProguardFiles 'proguard-rules.txt'
+    }
 }
 
 publishing {

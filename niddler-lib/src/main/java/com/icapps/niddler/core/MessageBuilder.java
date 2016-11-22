@@ -69,6 +69,25 @@ final class MessageBuilder {
 		return object.toString();
 	}
 
+	static String buildMessage(final ServerAuth.AuthRequest request) {
+		final JSONObject object = new JSONObject();
+		try {
+			object.put("type", "authRequest");
+			object.put("protocolVersion", "1");
+			object.put("hash", request.hashKey);
+		} catch (final JSONException e) {
+			if (Logging.DO_LOG) {
+				Log.e("MessageBuilder", "Failed to create json: ", e);
+			}
+			return "";
+		}
+		return object.toString();
+	}
+
+	static String buildAuthSuccess() {
+		return "{\"type\":\"authSuccess\"}";
+	}
+
 	private static void initGeneric(final JSONObject object, final NiddlerMessageBase base) throws JSONException {
 		object.put("messageId", base.getMessageId());
 		object.put("requestId", base.getRequestId());
@@ -91,7 +110,7 @@ final class MessageBuilder {
 		if (bytes == null) {
 			return null;
 		}
-		return Base64.encodeToString(bytes, Base64.NO_WRAP | Base64.NO_PADDING);
+		return Base64.encodeToString(bytes, Base64.URL_SAFE | Base64.NO_PADDING | Base64.NO_WRAP);
 	}
 
 	private static JSONObject createHeadersObject(final NiddlerMessageBase base) throws JSONException {

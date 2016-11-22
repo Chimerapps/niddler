@@ -31,9 +31,9 @@ public final class Niddler implements NiddlerServer.WebSocketListener, Closeable
 	private boolean mIsStarted = false;
 	private boolean mIsClosed = false;
 
-	private Niddler(final int port, final long cacheSize, final NiddlerServerInfo niddlerServerInfo) {
+	private Niddler(final String password, final int port, final long cacheSize, final NiddlerServerInfo niddlerServerInfo) {
 		try {
-			mServer = new NiddlerServer(port, this);
+			mServer = new NiddlerServer(password, port, this);
 		} catch (final UnknownHostException ex) {
 			Log.e(LOG_TAG, "Failed to start server: " + ex.getLocalizedMessage());
 		}
@@ -169,6 +169,16 @@ public final class Niddler implements NiddlerServer.WebSocketListener, Closeable
 		private int mPort = 6555;
 		private long mCacheSize = 1024 * 1024; // By default use 1 MB cache
 		private NiddlerServerInfo mNiddlerServerInfo = null;
+		private final String mPassword;
+
+		/**
+		 * Creates a new builder with a given password to use for the niddler server authentication
+		 *
+		 * @param password The password to use
+		 */
+		public Builder(final String password) {
+			mPassword = password;
+		}
 
 		/**
 		 * Sets the port on which Niddler will listen for incoming connections
@@ -209,7 +219,7 @@ public final class Niddler implements NiddlerServer.WebSocketListener, Closeable
 		 * @return a Niddler instance
 		 */
 		public Niddler build() {
-			return new Niddler(mPort, mCacheSize, mNiddlerServerInfo);
+			return new Niddler(mPassword, mPort, mCacheSize, mNiddlerServerInfo);
 		}
 
 	}

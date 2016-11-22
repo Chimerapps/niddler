@@ -13,8 +13,7 @@ import java.io.IOException;
 @SuppressWarnings({"UnusedParameters", "unused"})
 public final class Niddler implements Closeable {
 
-	private Niddler(final int port, final long cacheSize, final NiddlerServerInfo niddlerServerInfo) {
-		// Dummy implementation
+	private Niddler() {
 	}
 
 	public void logRequest(final NiddlerRequest request) {
@@ -64,6 +63,9 @@ public final class Niddler implements Closeable {
 	@SuppressWarnings("WeakerAccess")
 	public final static class Builder {
 
+		public Builder(final String a) {
+		}
+
 		/**
 		 * Sets the port on which Niddler will listen for incoming connections
 		 *
@@ -101,7 +103,7 @@ public final class Niddler implements Closeable {
 		 */
 		@SuppressWarnings("MethodMayBeStatic")
 		public Niddler build() {
-			return new Niddler(0, 0, null);
+			return new Niddler();
 		}
 
 	}

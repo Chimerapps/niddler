@@ -70,13 +70,6 @@
       <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/main/jni" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/main/rs" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/androidTest/res" type="java-test-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/androidTest/resources" type="java-test-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/androidTest/assets" type="java-test-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/androidTest/aidl" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/androidTest/java" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/androidTest/jni" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/androidTest/rs" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/test/res" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/test/resources" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/test/assets" type="java-test-resource" />
@@ -84,6 +77,13 @@
       <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/test/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/test/jni" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/test/rs" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/androidTest/res" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/androidTest/resources" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/androidTest/assets" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/androidTest/aidl" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/androidTest/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/androidTest/jni" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/src/androidTest/rs" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/intermediates/blame" />
       <excludeFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/intermediates/bundles" />
       <excludeFolder url="file://$MODULE_DIR$/../../../niddler-lib-noop/build/intermediates/classes" />

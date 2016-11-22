@@ -21,9 +21,9 @@ public class NiddlerSampleApplication extends Application {
 	public void onCreate() {
 		super.onCreate();
 
-		Niddler niddler = new Niddler.Builder()
+		final Niddler niddler = new Niddler.Builder("superSecretPassword")
 				.setPort(6555)
-				.forApplication(this)
+				.setNiddlerInformation(Niddler.NiddlerServerInfo.fromApplication(this))
 				.build();
 
 		niddler.attachToApplication(this);

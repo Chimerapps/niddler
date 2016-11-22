@@ -12,6 +12,10 @@ repositories {
 android {
     compileSdkVersion 23
     buildToolsVersion "24.0.3"
+
+    defaultConfig {
+        consumerProguardFiles 'proguard-rules.txt'
+    }
 }
 
 dependencies {
