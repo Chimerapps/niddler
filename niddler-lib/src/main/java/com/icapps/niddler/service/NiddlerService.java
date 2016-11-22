@@ -84,8 +84,8 @@ public class NiddlerService extends Service {
 			} catch (final IOException e) {
 				Log.w(LOG_TAG, "Failed to close niddler", e);
 			}
-			removeNotification();
 		}
+		removeNotification();
 	}
 
 	private void createNotification() {
