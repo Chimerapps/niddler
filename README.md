@@ -40,3 +40,5 @@ public class NiddlerSampleApplication extends Application {
 Calling `Niddler.attachToApplication(application)` will launch a service with a notification. The service is bound to the lifecycle of your app (meaning that if your last activity closes, the service will be unbound). The notification provides visual feedback that Niddler is running, and allows you to stop the Niddler service. It is also a good reminder that Niddler is a debugging tool and not meant to be included in production apps.
 
 Using the service is not required. You can also call `Niddler.start()` and `Niddler.stop()` if you wish to start and stop Niddler manually.
+
+For instructions on how to access the cached network data, see [niddler-ui](https://github.com/icapps/niddler-ui)
