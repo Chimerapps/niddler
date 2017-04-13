@@ -1,5 +1,6 @@
 package com.icapps.niddler.core;
 
+import android.support.annotation.Nullable;
 import android.util.Base64;
 import android.util.Log;
 import com.icapps.niddler.util.Logging;
@@ -11,7 +12,7 @@ import java.security.SecureRandom;
 
 /**
  * @author Nicola Verbeeck
- * @date 22/11/16.
+ * Date 22/11/16.
  */
 final class ServerAuth {
 
@@ -29,11 +30,11 @@ final class ServerAuth {
 		mRandom = new SecureRandom();
 	}
 
-	static AuthRequest generateAuthenticationRequest() {
+	static AuthRequest generateAuthenticationRequest(@Nullable final String packageName) {
 		init();
 		final byte[] randomBytes = new byte[512];
 		mRandom.nextBytes(randomBytes);
-		return new AuthRequest(Base64.encodeToString(randomBytes, Base64.URL_SAFE | Base64.NO_PADDING | Base64.NO_WRAP));
+		return new AuthRequest(Base64.encodeToString(randomBytes, Base64.URL_SAFE | Base64.NO_PADDING | Base64.NO_WRAP), packageName);
 	}
 
 	static boolean checkAuthReply(final AuthRequest request, final AuthReply reply, final String password) {
@@ -55,9 +56,12 @@ final class ServerAuth {
 
 	static class AuthRequest {
 		final String hashKey;
+		@Nullable
+		final String packageName;
 
-		AuthRequest(final String hashKey) {
+		AuthRequest(final String hashKey, @Nullable final String packageName) {
 			this.hashKey = hashKey;
+			this.packageName = packageName;
 		}
 	}
 

@@ -7,7 +7,7 @@ import java.util.Map;
 
 /**
  * @author Nicola Verbeeck
- * @date 10/11/16.
+ * Date 10/11/16.
  */
 public interface NiddlerMessageBase {
 

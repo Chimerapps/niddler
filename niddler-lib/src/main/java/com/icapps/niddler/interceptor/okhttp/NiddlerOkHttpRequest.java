@@ -8,6 +8,7 @@ import okio.Okio;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -51,7 +52,11 @@ final class NiddlerOkHttpRequest implements NiddlerRequest {
 
 	@Override
 	public Map<String, List<String>> getHeaders() {
-		return mRequest.headers().toMultimap();
+		final Map<String, List<String>> headers = mRequest.headers().toMultimap();
+		if (!headers.containsKey("Content-Type") && mRequest.body() != null && mRequest.body().contentType() != null) {
+			headers.put("Content-Type", Collections.singletonList(mRequest.body().contentType().toString()));
+		}
+		return headers;
 	}
 
 	@Override
@@ -69,7 +74,7 @@ final class NiddlerOkHttpRequest implements NiddlerRequest {
 				mRequest.body().writeTo(buffer);
 				buffer.flush();
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			e.printStackTrace();
 		}
 	}

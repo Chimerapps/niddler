@@ -1,5 +1,6 @@
 package com.icapps.niddler.core;
 
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import com.icapps.niddler.util.Logging;
@@ -14,7 +15,7 @@ import java.util.Map;
 
 /**
  * @author Nicola Verbeeck
- * @date 22/11/16.
+ * Date 22/11/16.
  */
 final class MessageBuilder {
 
@@ -57,8 +58,8 @@ final class MessageBuilder {
 		final JSONObject object = new JSONObject();
 		try {
 			object.put("type", "serverInfo");
-			object.put("serverName", serverInfo.mName);
-			object.put("serverDescription", serverInfo.mDescription);
+			object.put("serverName", serverInfo.name);
+			object.put("serverDescription", serverInfo.description);
 		} catch (final JSONException e) {
 			if (Logging.DO_LOG) {
 				Log.e("MessageBuilder", "Failed to create json: ", e);
@@ -73,6 +74,9 @@ final class MessageBuilder {
 		try {
 			object.put("type", "authRequest");
 			object.put("hash", request.hashKey);
+			if (!TextUtils.isEmpty(request.packageName)) {
+				object.put("package", request.packageName);
+			}
 		} catch (final JSONException e) {
 			if (Logging.DO_LOG) {
 				Log.e("MessageBuilder", "Failed to create json: ", e);

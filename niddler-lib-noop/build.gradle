@@ -17,6 +17,19 @@ android {
     }
 }
 
+task androidJavadocs(type: Javadoc) {
+    source = android.sourceSets.main.java.getSrcDirs()
+}
+
+task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+    classifier = 'javadoc'
+    from androidJavadocs.destinationDir
+}
+
+task sourceJar(type: Jar) {
+    from android.sourceSets.main.java.getSrcDirs()
+}
+
 publishing {
     repositories {
         maven {
@@ -34,6 +47,10 @@ publishing {
             version "$ARTIFACT_VERSION"
             artifactId "$ARTIFACT_NAME"
             artifact("$buildDir/outputs/aar/niddler-lib-noop-release.aar")
+            artifact sourceJar {
+                classifier "sources"
+            }
+            artifact androidJavadocsJar
 
             pom.withXml {
                 def dependenciesNode = asNode().appendNode('dependencies')

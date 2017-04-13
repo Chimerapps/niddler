@@ -66,6 +66,9 @@ public final class Niddler implements Closeable {
 		public Builder(final String a) {
 		}
 
+		public Builder() {
+		}
+
 		/**
 		 * Sets the port on which Niddler will listen for incoming connections
 		 *

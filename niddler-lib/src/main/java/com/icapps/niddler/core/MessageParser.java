@@ -4,7 +4,7 @@ import org.json.JSONObject;
 
 /**
  * @author Nicola Verbeeck
- * @date 22/11/16.
+ * Date 22/11/16.
  */
 final class MessageParser {
 

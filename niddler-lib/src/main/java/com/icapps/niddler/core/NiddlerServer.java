@@ -1,5 +1,6 @@
 package com.icapps.niddler.core;
 
+import android.text.TextUtils;
 import android.util.Log;
 import com.icapps.niddler.util.Logging;
 import org.java_websocket.WebSocket;
@@ -22,19 +23,23 @@ import java.util.List;
 class NiddlerServer extends WebSocketServer {
 
 	private static final String LOG_TAG = NiddlerServer.class.getSimpleName();
+	private final String mPackageName;
 	private final WebSocketListener mListener;
 	private final List<ServerConnection> mConnections;
 	private final String mPassword;
 
-	private NiddlerServer(final String password, final InetSocketAddress address, final WebSocketListener listener) {
+	private NiddlerServer(final String password, final InetSocketAddress address, final String packageName,
+	                      final WebSocketListener listener) {
 		super(address);
+		mPackageName = packageName;
 		mListener = listener;
 		mPassword = password;
 		mConnections = new LinkedList<>();
 	}
 
-	NiddlerServer(final String password, final int port, final WebSocketListener listener) throws UnknownHostException {
-		this(password, new InetSocketAddress(port), listener);
+	NiddlerServer(final String password, final int port, final String packageName,
+	              final WebSocketListener listener) throws UnknownHostException {
+		this(password, new InetSocketAddress(port), packageName, listener);
 	}
 
 	@Override
@@ -46,7 +51,11 @@ class NiddlerServer extends WebSocketServer {
 		synchronized (mConnections) {
 			mConnections.add(connection);
 		}
-		connection.sendAuthRequest();
+		if (TextUtils.isEmpty(mPassword)) {
+			authSuccess(conn);
+		} else {
+			connection.sendAuthRequest(mPackageName);
+		}
 	}
 
 	@Override
@@ -85,9 +94,7 @@ class NiddlerServer extends WebSocketServer {
 							Log.w(LOG_TAG, "Client sent wrong authentication code!");
 						}
 					}
-					if (mListener != null) {
-						mListener.onConnectionOpened(conn);
-					}
+					authSuccess(conn);
 					break;
 				default:
 					if (Logging.DO_LOG) {
@@ -110,6 +117,12 @@ class NiddlerServer extends WebSocketServer {
 			}
 		}
 		return null;
+	}
+
+	private void authSuccess(final WebSocket conn) {
+		if (mListener != null) {
+			mListener.onConnectionOpened(conn);
+		}
 	}
 
 	@Override

@@ -2,7 +2,7 @@ package com.icapps.niddler.util;
 
 /**
  * @author Nicola Verbeeck
- * @date 22/11/16.
+ * Date 22/11/16.
  */
 public class Logging {
 

@@ -10,7 +10,7 @@ import com.icapps.niddler.service.NiddlerService;
 
 /**
  * @author Nicola Verbeeck
- * @date 22/11/16.
+ * Date 22/11/16.
  */
 class NiddlerServiceLifeCycleWatcher implements  Application.ActivityLifecycleCallbacks{
 

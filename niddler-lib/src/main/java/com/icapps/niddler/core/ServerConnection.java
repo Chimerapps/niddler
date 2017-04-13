@@ -1,10 +1,11 @@
 package com.icapps.niddler.core;
 
+import android.support.annotation.Nullable;
 import org.java_websocket.WebSocket;
 
 /**
  * @author Nicola Verbeeck
- * @date 22/11/16.
+ * Date 22/11/16.
  */
 final class ServerConnection {
 
@@ -26,9 +27,9 @@ final class ServerConnection {
 		return mState == STATE_READY;
 	}
 
-	void sendAuthRequest() {
+	void sendAuthRequest(@Nullable final String packageName) {
 		mState = STATE_AUTH_REQ_SENT;
-		mAuthRequest = ServerAuth.generateAuthenticationRequest();
+		mAuthRequest = ServerAuth.generateAuthenticationRequest(packageName);
 		mSocket.send(MessageBuilder.buildMessage(mAuthRequest));
 	}
 
