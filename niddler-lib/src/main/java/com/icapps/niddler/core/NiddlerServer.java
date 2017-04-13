@@ -52,6 +52,7 @@ class NiddlerServer extends WebSocketServer {
 			mConnections.add(connection);
 		}
 		if (TextUtils.isEmpty(mPassword)) {
+			connection.noAuth();
 			authSuccess(conn);
 		} else {
 			connection.sendAuthRequest(mPackageName);

@@ -5,7 +5,7 @@ import org.java_websocket.WebSocket;
 
 /**
  * @author Nicola Verbeeck
- * Date 22/11/16.
+ *         Date 22/11/16.
  */
 final class ServerConnection {
 
@@ -23,8 +23,14 @@ final class ServerConnection {
 		sendProtocolInfo();
 	}
 
-	public boolean canReceiveData() {
+	boolean canReceiveData() {
 		return mState == STATE_READY;
+	}
+
+	void noAuth() {
+		if (mState == STATE_NEW) {
+			mState = STATE_READY;
+		}
 	}
 
 	void sendAuthRequest(@Nullable final String packageName) {
