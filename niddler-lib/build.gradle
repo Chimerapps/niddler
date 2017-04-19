@@ -1,3 +1,7 @@
+plugins {
+    id "com.jfrog.bintray" version "1.7.3"
+}
+
 group 'com.icapps'
 
 apply plugin: 'com.android.library'
@@ -38,6 +42,47 @@ task sourceJar(type: Jar) {
     from android.sourceSets.main.java.getSrcDirs()
 }
 
+bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_KEY')
+    pkg {
+        repo = 'maven'
+        name = 'niddler'
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/icapps/niddler'
+
+        version {
+            name = "$ARTIFACT_VERSION"
+            desc = "Niddler network inspector library"
+            released = new Date()
+        }
+    }
+    publications = ['MyPublication']
+}
+
+def pomConfig = {
+    licenses {
+        license {
+            name "The Apache Software License, Version 2.0"
+            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            distribution "repo"
+        }
+    }
+    developers {
+        developer {
+            name "Nicola Verbeeck"
+            email "nicola@chimerapps.com"
+            organization "Chimerapps"
+        }
+        developer {
+            name "Maarten Van Giel"
+            email "contact@maarten.vg"
+            organization "iCapps"
+        }
+    }
+}
+
+
 publishing {
     repositories {
         maven {
@@ -62,6 +107,35 @@ publishing {
 
             pom.withXml {
                 def dependenciesNode = asNode().appendNode('dependencies')
+
+                //Iterate over the compile dependencies (we don't want the test ones), adding a <dependency> node for each
+                configurations.compile.allDependencies.each {
+                    if (it instanceof ExternalModuleDependency) {
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', it.group)
+                        dependencyNode.appendNode('artifactId', it.name)
+                        dependencyNode.appendNode('version', it.version)
+                    }
+                }
+            }
+        }
+        MyPublication(MavenPublication) {
+            artifact("$buildDir/outputs/aar/niddler-lib-release.aar")
+            artifact sourceJar {
+                classifier "sources"
+            }
+            artifact androidJavadocsJar
+            groupId "$ARTIFACT_PACKAGE"
+            version "$ARTIFACT_VERSION"
+            artifactId "$ARTIFACT_NAME"
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('description', 'Niddler network inspector library')
+                root.appendNode('name', 'niddler')
+                root.appendNode('url', 'https://github.com/icapps/niddler')
+                root.children().last() + pomConfig
+
+                def dependenciesNode = root.appendNode('dependencies')
 
                 //Iterate over the compile dependencies (we don't want the test ones), adding a <dependency> node for each
                 configurations.compile.allDependencies.each {
