@@ -7,7 +7,9 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import com.icapps.niddler.core.Niddler;
@@ -28,17 +30,49 @@ public class NiddlerService extends Service {
 	private final IBinder mBinder = new NiddlerBinder();
 	private NotificationManager mNotificationManager;
 	private Niddler mNiddler;
+	private int mBindCount;
+	private long mAutoStopAfter;
+	private Handler mHandler;
 
 	@Override
 	public IBinder onBind(final Intent intent) {
+		++mBindCount;
+		mHandler.removeCallbacksAndMessages(null);
 		return mBinder;
 	}
 
-	public void initialize(final Niddler niddler) {
+	@Override
+	public boolean onUnbind(final Intent intent) {
+		if (--mBindCount <= 0) {
+			mBindCount = 0;
+
+			if (mAutoStopAfter > 0) {
+				mHandler.postDelayed(new Runnable() {
+					@Override
+					public void run() {
+						closeNiddler();
+					}
+				}, mAutoStopAfter);
+			} else if (mAutoStopAfter == 0) {
+				closeNiddler();
+			}
+		}
+		return true;
+	}
+
+	@Override
+	public void onRebind(final Intent intent) {
+		++mBindCount;
+		mHandler.removeCallbacksAndMessages(null);
+		super.onRebind(intent);
+	}
+
+	public void initialize(final Niddler niddler, final long autoStopAfter) {
 		if (niddler == null || niddler.isClosed()) {
 			stopSelf();
 			return;
 		}
+		mAutoStopAfter = autoStopAfter;
 		mNiddler = niddler;
 		if (!mNiddler.isStarted()) {
 			mNiddler.start();
@@ -63,6 +97,7 @@ public class NiddlerService extends Service {
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		mHandler = new Handler(Looper.getMainLooper());
 		mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		if (Logging.DO_LOG) {
 			Log.d(LOG_TAG, "NiddlerService created!");

@@ -32,6 +32,10 @@ public final class Niddler implements Closeable {
 		// Do nothing
 	}
 
+	public void attachToApplication(final Application application, long timeOut) {
+		// Do nothing
+	}
+
 	@Override
 	public void close() throws IOException {
 		// Do nothing

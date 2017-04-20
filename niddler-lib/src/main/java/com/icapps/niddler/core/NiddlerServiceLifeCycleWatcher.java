@@ -10,13 +10,13 @@ import com.icapps.niddler.service.NiddlerService;
 
 /**
  * @author Nicola Verbeeck
- * Date 22/11/16.
+ *         Date 22/11/16.
  */
-class NiddlerServiceLifeCycleWatcher implements  Application.ActivityLifecycleCallbacks{
+class NiddlerServiceLifeCycleWatcher implements Application.ActivityLifecycleCallbacks {
 
 	private final ServiceConnection mServiceConnection;
 
-	NiddlerServiceLifeCycleWatcher(final ServiceConnection connection){
+	NiddlerServiceLifeCycleWatcher(final ServiceConnection connection) {
 		mServiceConnection = connection;
 	}
 

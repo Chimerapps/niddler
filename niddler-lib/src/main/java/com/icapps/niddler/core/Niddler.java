@@ -30,6 +30,7 @@ public final class Niddler implements NiddlerServer.WebSocketListener, Closeable
 	private NiddlerServer mServer;
 	private boolean mIsStarted = false;
 	private boolean mIsClosed = false;
+	private long mAutoStopAfter = -1;
 
 	private Niddler(final String password, final int port, final long cacheSize, final NiddlerServerInfo niddlerServerInfo) {
 		try {
@@ -44,7 +45,7 @@ public final class Niddler implements NiddlerServer.WebSocketListener, Closeable
 			@Override
 			public void onServiceConnected(final ComponentName name, final IBinder service) {
 				mNiddlerService = ((NiddlerService.NiddlerBinder) service).getService();
-				mNiddlerService.initialize(Niddler.this);
+				mNiddlerService.initialize(Niddler.this, mAutoStopAfter);
 			}
 
 			@Override
@@ -79,6 +80,18 @@ public final class Niddler implements NiddlerServer.WebSocketListener, Closeable
 	 * @param application the application to attach the Niddler instance to
 	 */
 	public void attachToApplication(final Application application) {
+		attachToApplication(application, -1L);
+	}
+
+	/**
+	 * Attaches the Niddler instance to the application's activity lifecycle callbacks, thus starting and stopping a NiddlerService
+	 * when activities start and stop. This will show a notification with which you can stop Niddler at any time.
+	 *
+	 * @param application   the application to attach the Niddler instance to
+	 * @param autoStopAfter Automatically stop the niddler background service after x milliseconds. Use -1 to keep the service running and use 0 to stop the service immediately
+	 */
+	public void attachToApplication(final Application application, final long autoStopAfter) {
+		mAutoStopAfter = autoStopAfter;
 		application.unregisterActivityLifecycleCallbacks(mLifeCycleWatcher);
 		application.registerActivityLifecycleCallbacks(mLifeCycleWatcher);
 	}
@@ -183,7 +196,7 @@ public final class Niddler implements NiddlerServer.WebSocketListener, Closeable
 		/**
 		 * Creates a new builder that has authentication disabled
 		 */
-		public Builder(){
+		public Builder() {
 		}
 
 		/**
