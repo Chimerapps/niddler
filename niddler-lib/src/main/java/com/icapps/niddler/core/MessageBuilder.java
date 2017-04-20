@@ -11,11 +11,12 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
  * @author Nicola Verbeeck
- * Date 22/11/16.
+ *         Date 22/11/16.
  */
 final class MessageBuilder {
 
@@ -127,7 +128,7 @@ final class MessageBuilder {
 			for (final String s : headerEntry.getValue()) {
 				array.put(s);
 			}
-			object.put(headerEntry.getKey(), array);
+			object.put(headerEntry.getKey().toLowerCase(Locale.getDefault()), array);
 		}
 		return object;
 	}
