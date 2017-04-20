@@ -1,5 +1,7 @@
 #Niddler
+
 [![Download](https://api.bintray.com/packages/nicolaverbeeck/maven/niddler/images/download.svg)](https://bintray.com/nicolaverbeeck/maven/niddler/_latestVersion)
+
 ![Logo](niddler_logo.png)
 
 Niddler is a network debugging utility for Android apps that caches network requests/responses, and exposes them over a websocket. It comes with a simple interceptor for Square's [OkHttpClient](http://square.github.io/okhttp/), as well as a No-op interceptor for use in release scenario's.
