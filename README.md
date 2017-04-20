@@ -1,6 +1,4 @@
-#Niddler
-
-[![Download](https://api.bintray.com/packages/nicolaverbeeck/maven/niddler/images/download.svg)](https://bintray.com/nicolaverbeeck/maven/niddler/_latestVersion)
+# Niddler [![Download](https://api.bintray.com/packages/nicolaverbeeck/maven/niddler/images/download.svg)](https://bintray.com/nicolaverbeeck/maven/niddler/_latestVersion)
 
 ![Logo](niddler_logo.png)
 
@@ -10,7 +8,7 @@ Niddler is meant to be used with [Niddler-ui](https://github.com/icapps/niddler-
 
 Niddler is a collaboration of [iCapps](http://www.icapps.com) and [Chimerapps](http://www.chimerapps.com/).
 
-##Example use
+## Example use
 build.gradle:
 ```
 //Ensure jcenter is in the repo list
