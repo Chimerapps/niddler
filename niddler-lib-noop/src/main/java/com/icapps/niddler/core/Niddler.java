@@ -62,6 +62,15 @@ public final class Niddler implements Closeable {
 			// Do nothing
 		}
 
+		/**
+		 * Creates a server info based on the application's package name and some device fields
+		 *
+		 * @param application The application niddler is instrumenting
+		 * @return A server info document to use in the {@link Builder}
+		 */
+		public static NiddlerServerInfo fromApplication(final Application application) {
+			return new NiddlerServerInfo("", "");
+		}
 	}
 
 	@SuppressWarnings("WeakerAccess")
