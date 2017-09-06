@@ -17,7 +17,7 @@ import java.net.UnknownHostException;
 /**
  * @author Maarten Van Giel
  * @author Nicola Verbeeck
- *         TODO: 22/11/16 - Hide the interface we implement, this pollutes the public api
+ * TODO: 22/11/16 - Hide the interface we implement, this pollutes the public api
  */
 public final class Niddler implements NiddlerServer.WebSocketListener, Closeable {
 
@@ -156,7 +156,7 @@ public final class Niddler implements NiddlerServer.WebSocketListener, Closeable
 	@SuppressWarnings({"WeakerAccess", "unused"})
 	public final static class NiddlerServerInfo {
 
-		static final int PROTOCOL_VERSION = 2;
+		static final int PROTOCOL_VERSION = 3;
 		final String name;
 		final String description;
 

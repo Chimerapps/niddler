@@ -1,5 +1,6 @@
 package com.icapps.niddler.core;
 
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -16,7 +17,7 @@ import java.util.Map;
 
 /**
  * @author Nicola Verbeeck
- *         Date 22/11/16.
+ * Date 22/11/16.
  */
 final class MessageBuilder {
 
@@ -25,6 +26,18 @@ final class MessageBuilder {
 	}
 
 	static String buildMessage(final NiddlerRequest request) {
+		final JSONObject object = buildMessageJson(request);
+		if (object == null) {
+			return null;
+		}
+		return object.toString();
+	}
+
+	@Nullable
+	private static JSONObject buildMessageJson(final NiddlerRequest request) {
+		if (request == null) {
+			return null;
+		}
 		final JSONObject object = new JSONObject();
 		try {
 			object.put("type", "request");
@@ -35,24 +48,38 @@ final class MessageBuilder {
 			if (Logging.DO_LOG) {
 				Log.e("MessageBuilder", "Failed to create json: ", e);
 			}
-			return "";
+			return null;
+		}
+		return object;
+	}
+
+	static String buildMessage(final NiddlerResponse response) {
+		final JSONObject object = buildMessageJson(response);
+		if (object == null) {
+			return null;
 		}
 		return object.toString();
 	}
 
-	static String buildMessage(final NiddlerResponse response) {
+	@Nullable
+	private static JSONObject buildMessageJson(final NiddlerResponse response) {
+		if (response == null) {
+			return null;
+		}
 		final JSONObject object = new JSONObject();
 		try {
 			object.put("type", "response");
 			initGeneric(object, response);
 			object.put("statusCode", response.getStatusCode());
+			object.put("networkRequest", buildMessageJson(response.actualNetworkRequest()));
+			object.put("networkReply", buildMessageJson(response.actualNetworkReply()));
 		} catch (final JSONException e) {
 			if (Logging.DO_LOG) {
 				Log.e("MessageBuilder", "Failed to create json: ", e);
 			}
-			return "";
+			return null;
 		}
-		return object.toString();
+		return object;
 	}
 
 	static String buildMessage(final Niddler.NiddlerServerInfo serverInfo) {

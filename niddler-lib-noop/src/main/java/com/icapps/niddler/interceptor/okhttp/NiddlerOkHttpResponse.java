@@ -1,5 +1,7 @@
 package com.icapps.niddler.interceptor.okhttp;
 
+import android.support.annotation.Nullable;
+import com.icapps.niddler.core.NiddlerRequest;
 import com.icapps.niddler.core.NiddlerResponse;
 import okhttp3.Response;
 
@@ -48,4 +50,15 @@ public class NiddlerOkHttpResponse implements NiddlerResponse {
 		// Do nothing
 	}
 
+	@Nullable
+	@Override
+	public NiddlerRequest actualNetworkRequest() {
+		return null;
+	}
+
+	@Nullable
+	@Override
+	public NiddlerResponse actualNetworkReply() {
+		return null;
+	}
 }
