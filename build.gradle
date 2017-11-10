@@ -5,18 +5,17 @@ buildscript {
     repositories {
         mavenCentral()
         jcenter()
+        google()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.3.0'
     }
 }
 
-ext.awsKey = System.env.AWS_ACCESS_KEY ?: AWS_ACCESS_KEY
-ext.awsSecretKey = System.env.AWS_SECRET_KEY ?: AWS_SECRET_KEY
-
 allprojects {
     repositories {
         mavenCentral()
         jcenter()
+        google()
     }
 }

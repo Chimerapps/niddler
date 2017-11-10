@@ -19,48 +19,56 @@ import okhttp3.Response;
  */
 public class NiddlerOkHttpInterceptor implements Interceptor {
 
-    private final Niddler mNiddler;
-    private final List<Pattern> mBlacklist;
+	private final Niddler mNiddler;
+	private final List<Pattern> mBlacklist;
 
-    public NiddlerOkHttpInterceptor(final Niddler niddler) {
-        mNiddler = niddler;
-        mBlacklist = new ArrayList<>();
-    }
+	public NiddlerOkHttpInterceptor(final Niddler niddler) {
+		mNiddler = niddler;
+		mBlacklist = new ArrayList<>();
+	}
 
-    public NiddlerOkHttpInterceptor blacklist(@NonNull final String urlPattern) {
-        mBlacklist.add(Pattern.compile(urlPattern));
-        return this;
-    }
+	public NiddlerOkHttpInterceptor blacklist(@NonNull final String urlPattern) {
+		mBlacklist.add(Pattern.compile(urlPattern));
+		return this;
+	}
 
-    @Override
-    public Response intercept(final Chain chain) throws IOException {
-        final Request request = chain.request();
-        if (isBlacklisted(request.url().toString())) {
-            return chain.proceed(request);
-        }
+	@Override
+	public Response intercept(final Chain chain) throws IOException {
+		final Request request = chain.request();
+		if (isBlacklisted(request.url().toString())) {
+			return chain.proceed(request);
+		}
 
-        final String uuid = UUID.randomUUID().toString();
+		final String uuid = UUID.randomUUID().toString();
 
-        mNiddler.logRequest(new NiddlerOkHttpRequest(request, uuid));
+		mNiddler.logRequest(new NiddlerOkHttpRequest(request, uuid));
 
-        final Response response = chain.proceed(request);
+		final Response response = chain.proceed(request);
 
-        final Response networkResponse = response.networkResponse();
-        final Request networkRequest = (networkResponse == null) ? null : networkResponse.request();
-        mNiddler.logResponse(new NiddlerOkHttpResponse(response,
-                uuid,
-                (networkRequest == null) ? null : new NiddlerOkHttpRequest(networkRequest, uuid),
-                (networkResponse == null) ? null : new NiddlerOkHttpResponse(networkResponse, uuid, null, null)));
+		final long now = System.currentTimeMillis();
+		final long sentAt = response.sentRequestAtMillis();
+		final long receivedAt = response.receivedResponseAtMillis();
+		final int wait = (int) (receivedAt - sentAt);
+		final int writeTime = 0; //Unknown
+		final int readTime = (int) (now - sentAt); //Unknown-ish
 
-        return response;
-    }
+		final Response networkResponse = response.networkResponse();
+		final Request networkRequest = (networkResponse == null) ? null : networkResponse.request();
+		mNiddler.logResponse(new NiddlerOkHttpResponse(response,
+				uuid,
+				(networkRequest == null) ? null : new NiddlerOkHttpRequest(networkRequest, uuid),
+				(networkResponse == null) ? null : new NiddlerOkHttpResponse(networkResponse, uuid, null, null, writeTime, readTime, wait),
+				writeTime, readTime, wait));
 
-    private boolean isBlacklisted(@NonNull final CharSequence url) {
-        for (final Pattern pattern : mBlacklist) {
-            if (pattern.matcher(url).matches()) {
-                return true;
-            }
-        }
-        return false;
-    }
+		return response;
+	}
+
+	private boolean isBlacklisted(@NonNull final CharSequence url) {
+		for (final Pattern pattern : mBlacklist) {
+			if (pattern.matcher(url).matches()) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

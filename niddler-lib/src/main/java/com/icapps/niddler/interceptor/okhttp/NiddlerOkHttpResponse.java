@@ -1,18 +1,21 @@
 package com.icapps.niddler.interceptor.okhttp;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+
 import com.icapps.niddler.core.NiddlerRequest;
 import com.icapps.niddler.core.NiddlerResponse;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
-import okio.Buffer;
-import okio.BufferedSource;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+import okio.Buffer;
+import okio.BufferedSource;
 
 /**
  * @author Maarten Van Giel
@@ -27,16 +30,25 @@ final class NiddlerOkHttpResponse implements NiddlerResponse {
 	private final NiddlerRequest mActualNetworkRequest;
 	@Nullable
 	private final NiddlerResponse mActualNetworkReply;
+	private final int mWriteTime;
+	private final int mReadTime;
+	private final int mWaitTime;
 
 	NiddlerOkHttpResponse(final Response response,
-	                      final String requestId,
-	                      @Nullable final NiddlerRequest actualNetworkRequest,
-	                      @Nullable final NiddlerResponse actualNetworkReply) {
-		this.mResponse = response;
-		this.mRequestId = requestId;
+			final String requestId,
+			@Nullable final NiddlerRequest actualNetworkRequest,
+			@Nullable final NiddlerResponse actualNetworkReply,
+			final int writeTime,
+			final int readTime,
+			final int waitTime) {
+		mResponse = response;
+		mRequestId = requestId;
 		mActualNetworkRequest = actualNetworkRequest;
 		mActualNetworkReply = actualNetworkReply;
-		this.mMessageId = UUID.randomUUID().toString();
+		mWriteTime = writeTime;
+		mReadTime = readTime;
+		mWaitTime = waitTime;
+		mMessageId = UUID.randomUUID().toString();
 		mTimestamp = System.currentTimeMillis();
 	}
 
@@ -75,6 +87,33 @@ final class NiddlerOkHttpResponse implements NiddlerResponse {
 	@Override
 	public NiddlerResponse actualNetworkReply() {
 		return mActualNetworkReply;
+	}
+
+	@NonNull
+	@Override
+	public String getStatusLine() {
+		return mResponse.message();
+	}
+
+	@NonNull
+	@Override
+	public String getHttpVersion() {
+		return NiddlerOkHttpRequest.httpVersion(mResponse.protocol());
+	}
+
+	@Override
+	public int getWriteTime() {
+		return mWriteTime;
+	}
+
+	@Override
+	public int getReadTime() {
+		return mReadTime;
+	}
+
+	@Override
+	public int getWaitTime() {
+		return mWaitTime;
 	}
 
 	@Override

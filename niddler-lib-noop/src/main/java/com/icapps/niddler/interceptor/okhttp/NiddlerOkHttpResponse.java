@@ -1,14 +1,17 @@
 package com.icapps.niddler.interceptor.okhttp;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+
 import com.icapps.niddler.core.NiddlerRequest;
 import com.icapps.niddler.core.NiddlerResponse;
-import okhttp3.Response;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
+
+import okhttp3.Response;
 
 /**
  * @author Maarten Van Giel
@@ -60,5 +63,32 @@ public class NiddlerOkHttpResponse implements NiddlerResponse {
 	@Override
 	public NiddlerResponse actualNetworkReply() {
 		return null;
+	}
+
+	@NonNull
+	@Override
+	public String getStatusLine() {
+		return "";
+	}
+
+	@NonNull
+	@Override
+	public String getHttpVersion() {
+		return "";
+	}
+
+	@Override
+	public int getWriteTime() {
+		return -1;
+	}
+
+	@Override
+	public int getReadTime() {
+		return -1;
+	}
+
+	@Override
+	public int getWaitTime() {
+		return -1;
 	}
 }

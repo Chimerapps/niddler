@@ -14,7 +14,7 @@ repositories {
 }
 
 android {
-    compileSdkVersion 25
+    compileSdkVersion 26
     buildToolsVersion "25.0.3"
 
     defaultConfig {
@@ -24,9 +24,9 @@ android {
 
 dependencies {
     compile 'org.java-websocket:Java-WebSocket:1.3.0'
-    provided 'com.squareup.okhttp3:okhttp:3.4.2'
+    provided 'com.squareup.okhttp3:okhttp:3.9.0'
 
-    compile "com.android.support:support-compat:25.3.1"
+    compile "com.android.support:support-compat:26.1.0"
 }
 
 task androidJavadocs(type: Javadoc) {
@@ -84,41 +84,7 @@ def pomConfig = {
 
 
 publishing {
-    repositories {
-        maven {
-            url "s3://icappsmaven/release"
-            credentials(AwsCredentials) {
-                accessKey rootProject.ext.awsKey
-                secretKey rootProject.ext.awsSecretKey
-            }
-        }
-    }
-
     publications {
-        maven(MavenPublication) {
-            groupId "$ARTIFACT_PACKAGE"
-            version "$ARTIFACT_VERSION"
-            artifactId "$ARTIFACT_NAME"
-            artifact("$buildDir/outputs/aar/niddler-lib-release.aar")
-            artifact sourceJar {
-                classifier "sources"
-            }
-            artifact androidJavadocsJar
-
-            pom.withXml {
-                def dependenciesNode = asNode().appendNode('dependencies')
-
-                //Iterate over the compile dependencies (we don't want the test ones), adding a <dependency> node for each
-                configurations.compile.allDependencies.each {
-                    if (it instanceof ExternalModuleDependency) {
-                        def dependencyNode = dependenciesNode.appendNode('dependency')
-                        dependencyNode.appendNode('groupId', it.group)
-                        dependencyNode.appendNode('artifactId', it.name)
-                        dependencyNode.appendNode('version', it.version)
-                    }
-                }
-            }
-        }
         MyPublication(MavenPublication) {
             artifact("$buildDir/outputs/aar/niddler-lib-release.aar")
             artifact sourceJar {

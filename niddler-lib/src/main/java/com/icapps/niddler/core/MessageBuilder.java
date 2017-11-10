@@ -4,7 +4,9 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
+
 import com.icapps.niddler.util.Logging;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,7 +19,7 @@ import java.util.Map;
 
 /**
  * @author Nicola Verbeeck
- * Date 22/11/16.
+ *         Date 22/11/16.
  */
 final class MessageBuilder {
 
@@ -73,6 +75,11 @@ final class MessageBuilder {
 			object.put("statusCode", response.getStatusCode());
 			object.put("networkRequest", buildMessageJson(response.actualNetworkRequest()));
 			object.put("networkReply", buildMessageJson(response.actualNetworkReply()));
+			object.put("writeTime", response.getWriteTime());
+			object.put("readTime", response.getReadTime());
+			object.put("waitTime", response.getWaitTime());
+			object.put("httpVersion", response.getHttpVersion());
+			object.put("statusLine", response.getStatusLine());
 		} catch (final JSONException e) {
 			if (Logging.DO_LOG) {
 				Log.e("MessageBuilder", "Failed to create json: ", e);
