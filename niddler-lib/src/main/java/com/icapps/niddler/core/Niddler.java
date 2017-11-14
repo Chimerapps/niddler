@@ -4,10 +4,13 @@ package com.icapps.niddler.core;
 import android.app.Application;
 import android.content.ComponentName;
 import android.content.ServiceConnection;
+import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
+
 import com.icapps.niddler.service.NiddlerService;
 import com.icapps.niddler.util.Logging;
+
 import org.java_websocket.WebSocket;
 
 import java.io.Closeable;
@@ -17,8 +20,9 @@ import java.net.UnknownHostException;
 /**
  * @author Maarten Van Giel
  * @author Nicola Verbeeck
- * TODO: 22/11/16 - Hide the interface we implement, this pollutes the public api
+ *         TODO: 22/11/16 - Hide the interface we implement, this pollutes the public api
  */
+@SuppressWarnings("WeakerAccess")
 public final class Niddler implements NiddlerServer.WebSocketListener, Closeable {
 
 	private static final String LOG_TAG = Niddler.class.getSimpleName();
@@ -64,7 +68,7 @@ public final class Niddler implements NiddlerServer.WebSocketListener, Closeable
 	}
 
 	public void start() {
-		if (mServer != null && !mIsStarted) {
+		if ((mServer != null) && !mIsStarted) {
 			mServer.start();
 			mIsStarted = true;
 			if (Logging.DO_LOG) {
@@ -153,8 +157,15 @@ public final class Niddler implements NiddlerServer.WebSocketListener, Closeable
 		}
 	}
 
-	@SuppressWarnings({"WeakerAccess", "unused"})
-	public final static class NiddlerServerInfo {
+	/**
+	 * @return The socket port we are listening on
+	 */
+	public int getPort() {
+		return mServer.getPort();
+	}
+
+	@SuppressWarnings({"WeakerAccess", "unused", "PackageVisibleField", "StaticMethodOnlyUsedInOneClass"})
+	public static final class NiddlerServerInfo {
 
 		static final int PROTOCOL_VERSION = 3;
 		final String name;
@@ -172,12 +183,12 @@ public final class Niddler implements NiddlerServer.WebSocketListener, Closeable
 		 * @return A server info document to use in the {@link Builder}
 		 */
 		public static NiddlerServerInfo fromApplication(final Application application) {
-			return new NiddlerServerInfo(application.getPackageName(), android.os.Build.MANUFACTURER + " " + android.os.Build.PRODUCT);
+			return new NiddlerServerInfo(application.getPackageName(), Build.MANUFACTURER + " " + Build.PRODUCT);
 		}
 	}
 
-	@SuppressWarnings("unused")
-	public final static class Builder {
+	@SuppressWarnings({"unused", "SameParameterValue", "MagicNumber"})
+	public static final class Builder {
 
 		private int mPort = 6555;
 		private long mCacheSize = 1024 * 1024; // By default use 1 MB cache

@@ -32,13 +32,17 @@ public final class Niddler implements Closeable {
 		// Do nothing
 	}
 
-	public void attachToApplication(final Application application, long timeOut) {
+	public void attachToApplication(final Application application, final long timeOut) {
 		// Do nothing
 	}
 
 	@Override
 	public void close() throws IOException {
 		// Do nothing
+	}
+
+	public int getPort() {
+		return -1;
 	}
 
 	public static boolean enabled() {
@@ -56,7 +60,7 @@ public final class Niddler implements Closeable {
 	}
 
 	@SuppressWarnings("WeakerAccess")
-	public final static class NiddlerServerInfo {
+	public static final class NiddlerServerInfo {
 
 		public NiddlerServerInfo(final String name, final String description) {
 			// Do nothing
@@ -74,7 +78,7 @@ public final class Niddler implements Closeable {
 	}
 
 	@SuppressWarnings("WeakerAccess")
-	public final static class Builder {
+	public static final class Builder {
 
 		public Builder(final String a) {
 		}

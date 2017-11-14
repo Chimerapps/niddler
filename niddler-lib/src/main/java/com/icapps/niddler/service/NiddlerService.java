@@ -7,13 +7,16 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+
 import com.icapps.niddler.core.Niddler;
 import com.icapps.niddler.util.Logging;
+import com.icapps.niddler.util.OreoCompatHelper;
 
 import java.io.IOException;
 
@@ -68,7 +71,7 @@ public class NiddlerService extends Service {
 	}
 
 	public void initialize(final Niddler niddler, final long autoStopAfter) {
-		if (niddler == null || niddler.isClosed()) {
+		if ((niddler == null) || niddler.isClosed()) {
 			stopSelf();
 			return;
 		}
@@ -125,14 +128,21 @@ public class NiddlerService extends Service {
 	}
 
 	private void createNotification() {
+		final String channelId;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			channelId = OreoCompatHelper.createNotificationChannel(this);
+		} else {
+			channelId = "";
+		}
+
 		final Intent intent = new Intent(this, NiddlerService.class);
 		intent.setAction("STOP");
 		final PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-		final Notification notification = new NotificationCompat.Builder(this)
+		final Notification notification = new NotificationCompat.Builder(this, channelId)
 				.setContentTitle("Niddler")
 				.setContentText("Niddler is running. Touch to stop.")
-				.setStyle(new NotificationCompat.BigTextStyle().bigText("Niddler is running for '" + getPackageName() + "'. Touch to stop"))
+				.setStyle(new NotificationCompat.BigTextStyle().bigText("Niddler is running for '" + getPackageName() + "' on port '" + mNiddler.getPort() + "'. Touch to stop"))
 				.setContentIntent(pendingIntent)
 				.setSmallIcon(android.R.drawable.ic_menu_preferences)
 				.setLocalOnly(true)

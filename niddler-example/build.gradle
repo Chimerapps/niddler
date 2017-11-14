@@ -10,7 +10,7 @@ android {
         }
     }
     compileSdkVersion 26
-    buildToolsVersion "25.0.3"
+    buildToolsVersion "26.0.2"
     defaultConfig {
         applicationId "com.icapps.sampleapplication"
         minSdkVersion 16
@@ -35,10 +35,10 @@ android {
 }
 
 dependencies {
-    debugCompile project(':niddler-lib')
-    releaseCompile project(':niddler-lib-noop')
-    compile 'com.android.support:appcompat-v7:26.1.0'
-    compile 'com.squareup.retrofit2:retrofit:2.1.0'
-    compile 'com.squareup.retrofit2:converter-gson:2.1.0'
-    compile 'com.google.code.gson:gson:2.6.2'
+    debugImplementation project(':niddler-lib')
+    releaseImplementation project(':niddler-lib-noop')
+    implementation 'com.android.support:appcompat-v7:26.1.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.1.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.1.0'
+    implementation 'com.google.code.gson:gson:2.6.2'
 }

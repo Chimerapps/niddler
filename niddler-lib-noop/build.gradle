@@ -6,8 +6,8 @@ apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'
 
 dependencies {
-    provided 'com.squareup.okhttp3:okhttp:3.9.0'
-    provided "com.android.support:support-annotations:26.1.0"
+    compileOnly 'com.squareup.okhttp3:okhttp:3.9.0'
+    compileOnly "com.android.support:support-annotations:26.1.0"
 }
 
 sourceCompatibility = "1.7"
@@ -15,7 +15,7 @@ targetCompatibility = "1.7"
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "25.0.3"
+    buildToolsVersion "26.0.2"
 
     defaultConfig {
         consumerProguardFiles 'proguard-rules.txt'
