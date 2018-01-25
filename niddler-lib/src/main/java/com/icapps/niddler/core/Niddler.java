@@ -6,6 +6,7 @@ import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.icapps.niddler.service.NiddlerService;
@@ -20,10 +21,12 @@ import java.net.UnknownHostException;
 /**
  * @author Maarten Van Giel
  * @author Nicola Verbeeck
- *         TODO: 22/11/16 - Hide the interface we implement, this pollutes the public api
+ * TODO: 22/11/16 - Hide the interface we implement, this pollutes the public api
  */
 @SuppressWarnings("WeakerAccess")
 public final class Niddler implements NiddlerServer.WebSocketListener, Closeable {
+
+	public static final String NIDDLER_DEBUG_RESPONSE_HEADER = "X-Niddler-Debug";
 
 	private static final String LOG_TAG = Niddler.class.getSimpleName();
 
@@ -164,6 +167,24 @@ public final class Niddler implements NiddlerServer.WebSocketListener, Closeable
 		return mServer.getPort();
 	}
 
+	/**
+	 * Registers a system which receives configurations when they are sent by a connecting client
+	 *
+	 * @param configurationAware The interface to register
+	 */
+	public void registerConfigurationListener(@NonNull final ConfigurationAware configurationAware) {
+		mServer.registerConfigurationListener(configurationAware);
+	}
+
+	/**
+	 * Removes the given configuration listener. See {@link #registerConfigurationListener(ConfigurationAware)}
+	 *
+	 * @param configurationAware The listener to remove
+	 */
+	public void unregisterConfigurationListener(@NonNull final ConfigurationAware configurationAware) {
+		mServer.unregisterConfigurationListener(configurationAware);
+	}
+
 	@SuppressWarnings({"WeakerAccess", "unused", "PackageVisibleField", "StaticMethodOnlyUsedInOneClass"})
 	public static final class NiddlerServerInfo {
 
@@ -251,6 +272,12 @@ public final class Niddler implements NiddlerServer.WebSocketListener, Closeable
 		public Niddler build() {
 			return new Niddler(mPassword, mPort, mCacheSize, mNiddlerServerInfo);
 		}
+
+	}
+
+	public interface ConfigurationAware {
+
+		void onConfigurationChanged(@NonNull final Configuration configuration);
 
 	}
 

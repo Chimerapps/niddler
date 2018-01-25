@@ -1,8 +1,12 @@
 package com.icapps.niddler.core;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
+
 import com.icapps.niddler.util.Logging;
+
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
@@ -12,9 +16,11 @@ import org.json.JSONObject;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.channels.NotYetConnectedException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Maarten Van Giel
@@ -27,10 +33,16 @@ class NiddlerServer extends WebSocketServer {
 	private final WebSocketListener mListener;
 	private final List<ServerConnection> mConnections;
 	private final String mPassword;
+	private final Set<Niddler.ConfigurationAware> mConfigurationListeners;
+	@Nullable
+	private Configuration mConfiguration;
+	@Nullable
+	private ServerConnection mDebugClientConnection;
 
 	private NiddlerServer(final String password, final InetSocketAddress address, final String packageName,
-	                      final WebSocketListener listener) {
+			final WebSocketListener listener) {
 		super(address);
+		mConfigurationListeners = new HashSet<>();
 		mPackageName = packageName;
 		mListener = listener;
 		mPassword = password;
@@ -38,7 +50,7 @@ class NiddlerServer extends WebSocketServer {
 	}
 
 	NiddlerServer(final String password, final int port, final String packageName,
-	              final WebSocketListener listener) throws UnknownHostException {
+			final WebSocketListener listener) throws UnknownHostException {
 		this(password, new InetSocketAddress(port), packageName, listener);
 	}
 
@@ -67,7 +79,9 @@ class NiddlerServer extends WebSocketServer {
 		synchronized (mConnections) {
 			final Iterator<ServerConnection> iterator = mConnections.iterator();
 			while (iterator.hasNext()) {
-				if (iterator.next().isFor(conn)) {
+				final ServerConnection connection = iterator.next();
+				connection.closed();
+				if (connection.isFor(conn)) {
 					iterator.remove();
 				}
 			}
@@ -94,8 +108,14 @@ class NiddlerServer extends WebSocketServer {
 						if (Logging.DO_LOG) {
 							Log.w(LOG_TAG, "Client sent wrong authentication code!");
 						}
+						return;
 					}
 					authSuccess(conn);
+					break;
+				case "configure":
+					if (connection.canReceiveData()) {
+						handleConfiguration(MessageParser.parseConfiguration(object), connection);
+					}
 					break;
 				default:
 					if (Logging.DO_LOG) {
@@ -126,10 +146,25 @@ class NiddlerServer extends WebSocketServer {
 		}
 	}
 
+	private void handleConfiguration(@NonNull final Configuration configuration, @NonNull final ServerConnection clientConnection) {
+		synchronized (mConfigurationListeners) {
+			mConfiguration = configuration;
+			for (final Niddler.ConfigurationAware mConfigurationListener : mConfigurationListeners) {
+				mConfigurationListener.onConfigurationChanged(configuration);
+			}
+			mDebugClientConnection = clientConnection;
+		}
+	}
+
 	@Override
 	public final void onError(final WebSocket conn, final Exception ex) {
 		if (Logging.DO_LOG) {
 			Log.e(LOG_TAG, "WebSocket error", ex);
+		}
+
+		final ServerConnection connection = getConnection(conn);
+		if (connection != null) {
+			connection.closed();
 		}
 	}
 
@@ -158,4 +193,18 @@ class NiddlerServer extends WebSocketServer {
 		void onConnectionOpened(final WebSocket conn);
 	}
 
+	void registerConfigurationListener(@NonNull final Niddler.ConfigurationAware configurationAware) {
+		synchronized (mConfigurationListeners) {
+			mConfigurationListeners.add(configurationAware);
+			if (mConfiguration != null) {
+				configurationAware.onConfigurationChanged(mConfiguration);
+			}
+		}
+	}
+
+	void unregisterConfigurationListener(@NonNull final Niddler.ConfigurationAware configurationAware) {
+		synchronized (mConfigurationListeners) {
+			mConfigurationListeners.remove(configurationAware);
+		}
+	}
 }

@@ -1,11 +1,12 @@
 package com.icapps.niddler.core;
 
 import android.support.annotation.Nullable;
+
 import org.java_websocket.WebSocket;
 
 /**
  * @author Nicola Verbeeck
- *         Date 22/11/16.
+ * Date 22/11/16.
  */
 final class ServerConnection {
 
@@ -31,6 +32,10 @@ final class ServerConnection {
 		if (mState == STATE_NEW) {
 			mState = STATE_READY;
 		}
+	}
+
+	void closed() {
+		mState = STATE_CLOSED;
 	}
 
 	void sendAuthRequest(@Nullable final String packageName) {
