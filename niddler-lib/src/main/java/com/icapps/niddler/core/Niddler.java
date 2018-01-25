@@ -112,6 +112,7 @@ public final class Niddler implements NiddlerServer.WebSocketListener, Closeable
 				if (mNiddlerService != null) {
 					mNiddlerService.stopSelf();
 				}
+				mMessageCache.clear();
 			} catch (final InterruptedException e) {
 				throw new IOException(e);
 			}
@@ -188,7 +189,11 @@ public final class Niddler implements NiddlerServer.WebSocketListener, Closeable
 	@SuppressWarnings({"WeakerAccess", "unused", "PackageVisibleField", "StaticMethodOnlyUsedInOneClass"})
 	public static final class NiddlerServerInfo {
 
-		static final int PROTOCOL_VERSION = 3;
+		/**
+		 * Protocol version 4:
+		 * - Support for configuration (blacklist, basic debugging)
+		 */
+		static final int PROTOCOL_VERSION = 4;
 		final String name;
 		final String description;
 
