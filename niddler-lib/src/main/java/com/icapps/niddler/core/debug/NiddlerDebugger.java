@@ -7,7 +7,6 @@ import com.icapps.niddler.core.NiddlerRequest;
 import com.icapps.niddler.core.NiddlerResponse;
 
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 /**
  * @author Nicola Verbeeck
@@ -24,7 +23,7 @@ public interface NiddlerDebugger {
 	DebugResponse handleRequest(@NonNull final NiddlerRequest request);
 
 	@Nullable
-	DebugResponse handleResponse(@NonNull final NiddlerRequest request, @NonNull final NiddlerResponse response) throws ExecutionException, InterruptedException;
+	DebugResponse handleResponse(@NonNull final NiddlerRequest request, @NonNull final NiddlerResponse response);
 
 	class DebugResponse {
 		public final int code;

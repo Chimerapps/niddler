@@ -7,6 +7,7 @@ import android.util.Base64;
 
 import com.icapps.niddler.core.Niddler;
 import com.icapps.niddler.core.NiddlerRequest;
+import com.icapps.niddler.core.NiddlerResponse;
 import com.icapps.niddler.core.debug.NiddlerDebugger;
 
 import java.io.IOException;
@@ -76,13 +77,33 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 
 		final Response networkResponse = response.networkResponse();
 		final Request networkRequest = (networkResponse == null) ? null : networkResponse.request();
-		mNiddler.logResponse(new NiddlerOkHttpResponse(response,
-				uuid,
+
+		final NiddlerResponse niddlerResponse = new NiddlerOkHttpResponse(response, uuid,
 				(networkRequest == null) ? null : new NiddlerOkHttpRequest(networkRequest, uuid),
 				(networkResponse == null) ? null : new NiddlerOkHttpResponse(networkResponse, uuid, null, null, writeTime, readTime, wait),
-				writeTime, readTime, wait));
+				writeTime, readTime, wait);
 
-		return response;
+
+		NiddlerDebugger.DebugResponse debugFromResponse = null;
+		if (debugResponse == null) {
+			debugFromResponse = mDebugger.handleResponse(niddlerRequest, niddlerResponse);
+		}
+		if (debugFromResponse == null) {
+			mNiddler.logResponse(niddlerResponse);
+			return response;
+		} else {
+			final int newWait = (int) (System.currentTimeMillis() - sentAt);
+			final int newReadTime = (int) (System.currentTimeMillis() - sentAt);
+			final Response debugResp = makeResponse(debugFromResponse);
+
+			final NiddlerResponse debugNiddlerResponse = new NiddlerOkHttpResponse(debugResp, uuid,
+					null,
+					null,
+					writeTime, newReadTime, newWait);
+
+			mNiddler.logResponse(debugNiddlerResponse);
+			return debugResp;
+		}
 	}
 
 	private boolean isBlacklisted(@NonNull final CharSequence url) {
