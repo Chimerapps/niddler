@@ -16,7 +16,4 @@ final class MessageParser {
 		return new ServerAuth.AuthReply(jsonObject.optString("hashKey"));
 	}
 
-	static Configuration parseConfiguration(final JSONObject jsonObject) {
-		return Configuration.fromJson(jsonObject);
-	}
 }

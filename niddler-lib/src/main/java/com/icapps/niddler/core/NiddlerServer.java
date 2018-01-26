@@ -1,10 +1,10 @@
 package com.icapps.niddler.core;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.icapps.niddler.core.debug.NiddlerDebugger;
 import com.icapps.niddler.util.Logging;
 
 import org.java_websocket.WebSocket;
@@ -16,11 +16,9 @@ import org.json.JSONObject;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.channels.NotYetConnectedException;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author Maarten Van Giel
@@ -33,20 +31,16 @@ class NiddlerServer extends WebSocketServer {
 	private final WebSocketListener mListener;
 	private final List<ServerConnection> mConnections;
 	private final String mPassword;
-	private final Set<Niddler.ConfigurationAware> mConfigurationListeners;
-	@Nullable
-	private Configuration mConfiguration;
-	@Nullable
-	private ServerConnection mDebugClientConnection;
+	private final NiddlerDebuggerImpl mNiddlerDebugger;
 
 	private NiddlerServer(final String password, final InetSocketAddress address, final String packageName,
 			final WebSocketListener listener) {
 		super(address);
-		mConfigurationListeners = new HashSet<>();
 		mPackageName = packageName;
 		mListener = listener;
 		mPassword = password;
 		mConnections = new LinkedList<>();
+		mNiddlerDebugger = new NiddlerDebuggerImpl();
 	}
 
 	NiddlerServer(final String password, final int port, final String packageName,
@@ -112,10 +106,13 @@ class NiddlerServer extends WebSocketServer {
 					}
 					authSuccess(conn);
 					break;
-				case "configure":
+				case "startDebug":
 					if (connection.canReceiveData()) {
-						handleConfiguration(MessageParser.parseConfiguration(object), connection);
+						mNiddlerDebugger.onDebuggerAttached(connection);
 					}
+					break;
+				case "endDebug":
+					mNiddlerDebugger.onDebuggerConnectionClosed();
 					break;
 				default:
 					if (Logging.DO_LOG) {
@@ -143,16 +140,6 @@ class NiddlerServer extends WebSocketServer {
 	private void authSuccess(final WebSocket conn) {
 		if (mListener != null) {
 			mListener.onConnectionOpened(conn);
-		}
-	}
-
-	private void handleConfiguration(@NonNull final Configuration configuration, @NonNull final ServerConnection clientConnection) {
-		synchronized (mConfigurationListeners) {
-			mConfiguration = configuration;
-			for (final Niddler.ConfigurationAware mConfigurationListener : mConfigurationListeners) {
-				mConfigurationListener.onConfigurationChanged(configuration);
-			}
-			mDebugClientConnection = clientConnection;
 		}
 	}
 
@@ -189,22 +176,13 @@ class NiddlerServer extends WebSocketServer {
 		}
 	}
 
+	@NonNull
+	NiddlerDebugger debugger() {
+		return mNiddlerDebugger;
+	}
+
 	interface WebSocketListener {
 		void onConnectionOpened(final WebSocket conn);
 	}
 
-	void registerConfigurationListener(@NonNull final Niddler.ConfigurationAware configurationAware) {
-		synchronized (mConfigurationListeners) {
-			mConfigurationListeners.add(configurationAware);
-			if (mConfiguration != null) {
-				configurationAware.onConfigurationChanged(mConfiguration);
-			}
-		}
-	}
-
-	void unregisterConfigurationListener(@NonNull final Niddler.ConfigurationAware configurationAware) {
-		synchronized (mConfigurationListeners) {
-			mConfigurationListeners.remove(configurationAware);
-		}
-	}
 }

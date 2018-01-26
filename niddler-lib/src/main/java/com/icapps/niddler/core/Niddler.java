@@ -9,6 +9,7 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.icapps.niddler.core.debug.NiddlerDebugger;
 import com.icapps.niddler.service.NiddlerService;
 import com.icapps.niddler.util.Logging;
 
@@ -103,6 +104,17 @@ public final class Niddler implements NiddlerServer.WebSocketListener, Closeable
 		application.registerActivityLifecycleCallbacks(mLifeCycleWatcher);
 	}
 
+	/**
+	 * Niddler supports a single active debugger at any given time. This debugger has capabilities that add items to a blacklist, return default responses upon request, ...
+	 * Interceptors should implement as many of the integrations as they can. For an example take a look at {@link com.icapps.niddler.interceptor.okhttp.NiddlerOkHttpInterceptor}
+	 *
+	 * @return The debugger for niddler
+	 */
+	@NonNull
+	public NiddlerDebugger debugger() {
+		return mServer.debugger();
+	}
+
 	@Override
 	public void close() throws IOException {
 		if (mServer != null) {
@@ -166,24 +178,6 @@ public final class Niddler implements NiddlerServer.WebSocketListener, Closeable
 	 */
 	public int getPort() {
 		return mServer.getPort();
-	}
-
-	/**
-	 * Registers a system which receives configurations when they are sent by a connecting client
-	 *
-	 * @param configurationAware The interface to register
-	 */
-	public void registerConfigurationListener(@NonNull final ConfigurationAware configurationAware) {
-		mServer.registerConfigurationListener(configurationAware);
-	}
-
-	/**
-	 * Removes the given configuration listener. See {@link #registerConfigurationListener(ConfigurationAware)}
-	 *
-	 * @param configurationAware The listener to remove
-	 */
-	public void unregisterConfigurationListener(@NonNull final ConfigurationAware configurationAware) {
-		mServer.unregisterConfigurationListener(configurationAware);
 	}
 
 	@SuppressWarnings({"WeakerAccess", "unused", "PackageVisibleField", "StaticMethodOnlyUsedInOneClass"})
@@ -277,12 +271,6 @@ public final class Niddler implements NiddlerServer.WebSocketListener, Closeable
 		public Niddler build() {
 			return new Niddler(mPassword, mPort, mCacheSize, mNiddlerServerInfo);
 		}
-
-	}
-
-	public interface ConfigurationAware {
-
-		void onConfigurationChanged(@NonNull final Configuration configuration);
 
 	}
 

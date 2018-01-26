@@ -5,9 +5,9 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Base64;
 
-import com.icapps.niddler.core.Configuration;
 import com.icapps.niddler.core.Niddler;
 import com.icapps.niddler.core.NiddlerRequest;
+import com.icapps.niddler.core.debug.NiddlerDebugger;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,20 +27,25 @@ import static com.icapps.niddler.core.Niddler.NIDDLER_DEBUG_RESPONSE_HEADER;
 /**
  * @author Nicola Verbeeck
  */
-public class NiddlerOkHttpInterceptor implements Interceptor, Niddler.ConfigurationAware {
+public class NiddlerOkHttpInterceptor implements Interceptor {
 
 	private final Niddler mNiddler;
 	private final List<Pattern> mBlacklist;
-	@Nullable
-	private volatile Configuration mConfiguration;
+	@NonNull
+	private final NiddlerDebugger mDebugger;
 
 	public NiddlerOkHttpInterceptor(final Niddler niddler) {
 		mNiddler = niddler;
 		mBlacklist = new ArrayList<>();
-		mConfiguration = null;
-		niddler.registerConfigurationListener(this);
+		mDebugger = niddler.debugger();
 	}
 
+	/**
+	 * Adds a static blacklist on the given url pattern. The pattern is interpreted as a java regex ({@link Pattern}). Items matching the blacklist are not tracked by niddler
+	 *
+	 * @param urlPattern The pattern to add to the blacklist
+	 * @return This instance
+	 */
 	public NiddlerOkHttpInterceptor blacklist(@NonNull final String urlPattern) {
 		mBlacklist.add(Pattern.compile(urlPattern));
 		return this;
@@ -58,19 +63,7 @@ public class NiddlerOkHttpInterceptor implements Interceptor, Niddler.Configurat
 		final NiddlerRequest niddlerRequest = new NiddlerOkHttpRequest(request, uuid);
 		mNiddler.logRequest(niddlerRequest);
 
-		final Configuration config = mConfiguration;
-		Response debugResponse = null;
-		if (config != null && config.isActive()) {
-			for (final Configuration.DebugAction debugAction : config.debugConfiguration.debugActions) {
-				if (debugAction.handles(niddlerRequest)) {
-					final Configuration.DebugResponse response = debugAction.handle(niddlerRequest);
-					if (response != null) {
-						debugResponse = makeResponse(response);
-						break;
-					}
-				}
-			}
-		}
+		Response debugResponse = makeResponse(mDebugger.handleRequest(niddlerRequest));
 
 		final Response response = (debugResponse != null) ? debugResponse : chain.proceed(request);
 
@@ -98,23 +91,15 @@ public class NiddlerOkHttpInterceptor implements Interceptor, Niddler.Configurat
 				return true;
 			}
 		}
-		final Configuration config = mConfiguration;
-		if (config != null && config.isActive()) {
-			for (final Pattern regularExpression : config.blacklistConfiguration.regularExpressions) {
-				if (regularExpression.matcher(url).matches()) {
-					return true;
-				}
-			}
+		return mDebugger.isBlacklisted(url);
+	}
+
+	@Nullable
+	private static Response makeResponse(@Nullable final NiddlerDebugger.DebugResponse debugResponse) {
+		if (debugResponse == null) {
+			return null;
 		}
-		return false;
-	}
 
-	@Override
-	public void onConfigurationChanged(@NonNull final Configuration configuration) {
-		mConfiguration = configuration;
-	}
-
-	private static Response makeResponse(final Configuration.DebugResponse debugResponse) {
 		final Response.Builder builder = new Response.Builder()
 				.code(debugResponse.code)
 				.message(debugResponse.message);
