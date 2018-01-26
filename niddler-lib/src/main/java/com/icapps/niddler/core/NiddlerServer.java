@@ -82,6 +82,11 @@ class NiddlerServer extends WebSocketServer {
 		}
 	}
 
+	private static final String MESSAGE_AUTH = "authReply";
+	private static final String MESSAGE_START_DEBUG = "startDebug";
+	private static final String MESSAGE_END_DEBUG = "endDebug";
+	private static final String MESSAGE_DEBUG_CONTROL = "controlDebug";
+
 	@Override
 	public final void onMessage(final WebSocket conn, final String message) {
 		if (Logging.DO_LOG) {
@@ -97,7 +102,7 @@ class NiddlerServer extends WebSocketServer {
 			final JSONObject object = new JSONObject(message);
 			final String type = object.optString("type");
 			switch (type) {
-				case "authReply":
+				case MESSAGE_AUTH:
 					if (!connection.checkAuthReply(MessageParser.parseAuthReply(object), mPassword)) {
 						if (Logging.DO_LOG) {
 							Log.w(LOG_TAG, "Client sent wrong authentication code!");
@@ -106,13 +111,16 @@ class NiddlerServer extends WebSocketServer {
 					}
 					authSuccess(conn);
 					break;
-				case "startDebug":
+				case MESSAGE_START_DEBUG:
 					if (connection.canReceiveData()) {
 						mNiddlerDebugger.onDebuggerAttached(connection);
 					}
 					break;
-				case "endDebug":
+				case MESSAGE_END_DEBUG:
 					mNiddlerDebugger.onDebuggerConnectionClosed();
+					break;
+				case MESSAGE_DEBUG_CONTROL:
+					mNiddlerDebugger.onControlMessage(object, connection);
 					break;
 				default:
 					if (Logging.DO_LOG) {
