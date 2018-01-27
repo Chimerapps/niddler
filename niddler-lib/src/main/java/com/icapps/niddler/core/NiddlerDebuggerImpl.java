@@ -50,6 +50,8 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 	private static final String MESSAGE_REMOVE_REQUEST = "removeRequest";
 	private static final String MESSAGE_ADD_RESPONSE = "addResponse";
 	private static final String MESSAGE_REMOVE_RESPONSE = "removeResponse";
+	private static final String MESSAGE_ACTIVATE_ACTION = "activateAction";
+	private static final String MESSAGE_DEACTIVATE_ACTION = "deactivateAction";
 
 	@NonNull
 	private final DebuggerConfiguration mDebuggerConfiguration;
@@ -114,6 +116,12 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 					break;
 				case MESSAGE_REMOVE_RESPONSE:
 					mDebuggerConfiguration.removeResponseAction(extractId(body));
+					break;
+				case MESSAGE_ACTIVATE_ACTION:
+					mDebuggerConfiguration.setActionActive(extractId(body), true);
+					break;
+				case MESSAGE_DEACTIVATE_ACTION:
+					mDebuggerConfiguration.setActionActive(extractId(body), false);
 					break;
 			}
 		} catch (final JSONException e) {
@@ -310,6 +318,23 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 			mWriteLock.unlock();
 		}
 
+		void setActionActive(@NonNull final String actionId, final boolean isActive) {
+			mWriteLock.lock();
+
+			for (final ResponseAction responseAction : mResponseActions) {
+				if (responseAction.id.equals(actionId)) {
+					responseAction.active = isActive;
+				}
+			}
+			for (final RequestAction requestAction : mRequestActions) {
+				if (requestAction.id.equals(actionId)) {
+					requestAction.active = isActive;
+				}
+			}
+
+			mWriteLock.unlock();
+		}
+
 		@Nullable
 		CompletableFuture<DebugResponse> handleRequest(@NonNull final NiddlerRequest request, @NonNull final NiddlerDebuggerImpl debugger) throws IOException {
 			try {
@@ -379,6 +404,8 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		@NonNull
 		final String id;
 
+		transient boolean active = true;
+
 		DebugAction(@NonNull final String id) {
 			this.id = id;
 		}
@@ -444,7 +471,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		@Nullable
 		@Override
 		CompletableFuture<DebugResponse> handleRequest(@NonNull final NiddlerRequest request, @NonNull final NiddlerDebuggerImpl debugger) {
-			if (mRegex.matcher(request.getUrl()).matches()) {
+			if (active && mRegex.matcher(request.getUrl()).matches()) {
 				return new CompletableFuture<>(mDebugResponse);
 			}
 			return null;
@@ -464,7 +491,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		@Nullable
 		@Override
 		CompletableFuture<DebugResponse> handleRequest(@NonNull final NiddlerRequest request, @NonNull final NiddlerDebuggerImpl debugger) {
-			if (!mRegex.matcher(request.getUrl()).matches()) {
+			if (!active || !mRegex.matcher(request.getUrl()).matches()) {
 				return null;
 			}
 			return debugger.sendHandleRequest(request, null);
@@ -486,7 +513,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		CompletableFuture<DebugResponse> handleResponse(@NonNull final NiddlerRequest request,
 				@NonNull final NiddlerResponse response,
 				@NonNull final NiddlerDebuggerImpl debugger) {
-			if (!mRegex.matcher(request.getUrl()).matches()) {
+			if (!active || !mRegex.matcher(request.getUrl()).matches()) {
 				return null;
 			}
 			return debugger.sendHandleRequest(request, response);
