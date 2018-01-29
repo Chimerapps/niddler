@@ -52,6 +52,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 	private static final String MESSAGE_REMOVE_RESPONSE = "removeResponse";
 	private static final String MESSAGE_ACTIVATE_ACTION = "activateAction";
 	private static final String MESSAGE_DEACTIVATE_ACTION = "deactivateAction";
+	private static final String MESSAGE_DELAYS = "updateDelays";
 
 	@NonNull
 	private final DebuggerConfiguration mDebuggerConfiguration;
@@ -123,6 +124,9 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 				case MESSAGE_DEACTIVATE_ACTION:
 					mDebuggerConfiguration.setActionActive(extractId(body), false);
 					break;
+				case MESSAGE_DELAYS:
+					mDebuggerConfiguration.updateDelays(body.optLong("preBlacklist"), body.optLong("postBlacklist"));
+					break;
 			}
 		} catch (final JSONException e) {
 			if (Log.isLoggable(TAG, Log.WARN)) {
@@ -177,6 +181,32 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		}
 	}
 
+	@Override
+	public void applyDelayBeforeBlacklist() throws IOException {
+		final long timeout = mDebuggerConfiguration.preBlacklistTimeout();
+		if (timeout <= 0L) {
+			return;
+		}
+		try {
+			Thread.sleep(timeout);
+		} catch (final InterruptedException e) {
+			throw new IOException(e);
+		}
+	}
+
+	@Override
+	public void applyDelayAfterBlacklist() throws IOException {
+		final long timeout = mDebuggerConfiguration.postBlacklistTimeout();
+		if (timeout <= 0L) {
+			return;
+		}
+		try {
+			Thread.sleep(timeout);
+		} catch (final InterruptedException e) {
+			throw new IOException(e);
+		}
+	}
+
 	void onControlMessage(@NonNull final JSONObject object, final ServerConnection connection) throws JSONException {
 		if (mServerConnection != connection) {
 			return;
@@ -218,6 +248,8 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		private List<ResponseAction> mResponseActions = new ArrayList<>();
 		private boolean mIsActive = false;
 		private boolean mActionsMuted = false;
+		private long mPreBlacklistTimeout = 0L;
+		private long mPostBlacklistTimeout = 0L;
 
 		boolean active() {
 			mReadLock.lock();
@@ -398,6 +430,33 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 			return future;
 		}
 
+		long preBlacklistTimeout() {
+			try {
+				mReadLock.lock();
+				return mIsActive ? mPreBlacklistTimeout : 0L;
+			} finally {
+				mReadLock.unlock();
+			}
+		}
+
+		long postBlacklistTimeout() {
+			try {
+				mReadLock.lock();
+				return mIsActive ? mPostBlacklistTimeout : 0L;
+			} finally {
+				mReadLock.unlock();
+			}
+		}
+
+		void updateDelays(@Nullable final Long preBlacklist, @Nullable final Long postBlacklist) {
+			try {
+				mWriteLock.lock();
+				mPreBlacklistTimeout = preBlacklist == null ? 0L : preBlacklist;
+				mPostBlacklistTimeout = postBlacklist == null ? 0L : postBlacklist;
+			} finally {
+				mWriteLock.unlock();
+			}
+		}
 	}
 
 	static abstract class DebugAction {

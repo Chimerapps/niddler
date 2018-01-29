@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import com.icapps.niddler.core.NiddlerRequest;
 import com.icapps.niddler.core.NiddlerResponse;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -24,6 +25,10 @@ public interface NiddlerDebugger {
 
 	@Nullable
 	DebugResponse handleResponse(@NonNull final NiddlerRequest request, @NonNull final NiddlerResponse response);
+
+	void applyDelayBeforeBlacklist() throws IOException;
+
+	void applyDelayAfterBlacklist() throws IOException;
 
 	class DebugResponse {
 		public final int code;

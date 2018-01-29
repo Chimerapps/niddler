@@ -42,11 +42,13 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 	}
 
 	/**
-	 * Adds a static blacklist on the given url pattern. The pattern is interpreted as a java regex ({@link Pattern}). Items matching the blacklist are not tracked by niddler
+	 * Adds a static blacklist on the given url pattern. The pattern is interpreted as a java regex ({@link Pattern}). Items matching the blacklist are not tracked by niddler.
+	 * This blacklist is independent from any debugger blacklists
 	 *
 	 * @param urlPattern The pattern to add to the blacklist
 	 * @return This instance
 	 */
+	@SuppressWarnings("unused")
 	public NiddlerOkHttpInterceptor blacklist(@NonNull final String urlPattern) {
 		mBlacklist.add(Pattern.compile(urlPattern));
 		return this;
@@ -55,9 +57,11 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 	@Override
 	public Response intercept(final Chain chain) throws IOException {
 		final Request request = chain.request();
+		mDebugger.applyDelayBeforeBlacklist();
 		if (isBlacklisted(request.url().toString())) {
 			return chain.proceed(request);
 		}
+		mDebugger.applyDelayAfterBlacklist();
 
 		final String uuid = UUID.randomUUID().toString();
 
