@@ -44,7 +44,6 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 	private static final String MESSAGE_ADD_BLACKLIST = "addBlacklist";
 	private static final String MESSAGE_REMOVE_BLACKLIST = "removeBlacklist";
 	private static final String MESSAGE_ADD_DEFAULT_RESPONSE = "addDefaultResponse";
-	private static final String MESSAGE_REMOVE_REQUEST_ACTION = "removeRequestAction";
 	private static final String MESSAGE_DEBUG_REPLY = "debugReply";
 	private static final String MESSAGE_ADD_REQUEST = "addRequest";
 	private static final String MESSAGE_REMOVE_REQUEST = "removeRequest";
@@ -99,9 +98,6 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 					break;
 				case MESSAGE_ADD_DEFAULT_RESPONSE:
 					mDebuggerConfiguration.addRequestAction(new DefaultResponseAction(body));
-					break;
-				case MESSAGE_REMOVE_REQUEST_ACTION:
-					mDebuggerConfiguration.removeRequestAction(extractId(body));
 					break;
 				case MESSAGE_DEBUG_REPLY:
 					onDebugResponse(body.getString(KEY_MESSAGE_ID), parseResponse(body));
