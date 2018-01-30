@@ -23,7 +23,7 @@ public interface NiddlerDebugger {
 	boolean isActive();
 
 	/**
-	 * Checks if the given url has been added to the blacklist and thus does not need to be trakced
+	 * Checks if the given url has been added to the blacklist and thus does not need to be tracked
 	 *
 	 * @param url The url to check
 	 * @return True if the request should not be logged through niddler, false if there is no blacklist for the url

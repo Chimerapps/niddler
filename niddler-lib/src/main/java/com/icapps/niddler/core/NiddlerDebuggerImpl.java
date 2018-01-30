@@ -246,7 +246,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 	@Override
 	public boolean ensureCallTime(final long startTime) throws IOException {
 		final long totalTimeInFlight = (System.nanoTime() - startTime) / 1000L;
-		final long minDuration = mDebuggerConfiguration.mimimalCallDuration();
+		final long minDuration = mDebuggerConfiguration.minimalCallDuration();
 		final long diff = minDuration - totalTimeInFlight;
 		if (diff <= 0) {
 			return false;
@@ -575,7 +575,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 			}
 		}
 
-		long mimimalCallDuration() {
+		long minimalCallDuration() {
 			try {
 				mReadLock.lock();
 				return mIsActive ? mTimePerCall : 0L;
