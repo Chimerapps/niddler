@@ -12,7 +12,9 @@ import com.icapps.niddler.core.debug.NiddlerDebugger;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -20,15 +22,20 @@ import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 import static com.icapps.niddler.core.Niddler.NIDDLER_DEBUG_RESPONSE_HEADER;
+import static com.icapps.niddler.core.Niddler.NIDDLER_DEBUG_TIMING_RESPONSE_HEADER;
 
 /**
  * @author Nicola Verbeeck
  */
 public class NiddlerOkHttpInterceptor implements Interceptor {
+
+	private static final int FLAG_MODIFIED_RESPONSE = 1;
+	private static final int FLAG_TIME = 2;
 
 	private final Niddler mNiddler;
 	private final List<Pattern> mBlacklist;
@@ -56,21 +63,32 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 
 	@Override
 	public Response intercept(final Chain chain) throws IOException {
-		final Request request = chain.request();
-		mDebugger.applyDelayBeforeBlacklist();
-		if (isBlacklisted(request.url().toString())) {
-			return chain.proceed(request);
+		final long callStartTime = System.nanoTime();
+
+		final Request origRequest = chain.request();
+
+		boolean changedTime = mDebugger.applyDelayBeforeBlacklist();
+		if (isBlacklisted(origRequest.url().toString())) {
+			return chain.proceed(origRequest);
 		}
-		mDebugger.applyDelayAfterBlacklist();
+		changedTime |= mDebugger.applyDelayAfterBlacklist();
 
 		final String uuid = UUID.randomUUID().toString();
 
-		final NiddlerRequest niddlerRequest = new NiddlerOkHttpRequest(request, uuid);
+		final NiddlerRequest origNiddlerRequest = new NiddlerOkHttpRequest(origRequest, uuid, buildExtraNiddlerHeaders(changedTime ? FLAG_TIME : 0));
+		final NiddlerDebugger.DebugRequest overriddenRequest = mDebugger.overrideRequest(origNiddlerRequest);
+
+		final Request finalRequest = (overriddenRequest == null) ? origRequest : makeRequest(overriddenRequest);
+
+		final NiddlerRequest niddlerRequest = (overriddenRequest == null)
+				? origNiddlerRequest : new NiddlerOkHttpRequest(finalRequest, uuid, buildExtraNiddlerHeaders(changedTime ? FLAG_TIME : 0));
+
 		mNiddler.logRequest(niddlerRequest);
 
-		Response debugResponse = makeResponse(mDebugger.handleRequest(niddlerRequest));
+		final NiddlerDebugger.DebugResponse debuggerBeforeExecuteOverride = mDebugger.handleRequest(niddlerRequest);
+		Response debugResponse = makeResponse(debuggerBeforeExecuteOverride);
 
-		final Response response = (debugResponse != null) ? debugResponse : chain.proceed(request);
+		final Response response = (debugResponse != null) ? debugResponse : chain.proceed(finalRequest);
 
 		final long now = System.currentTimeMillis();
 		final long sentAt = response.sentRequestAtMillis();
@@ -82,11 +100,13 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 		final Response networkResponse = response.networkResponse();
 		final Request networkRequest = (networkResponse == null) ? null : networkResponse.request();
 
-		final NiddlerResponse niddlerResponse = new NiddlerOkHttpResponse(response, uuid,
-				(networkRequest == null) ? null : new NiddlerOkHttpRequest(networkRequest, uuid),
-				(networkResponse == null) ? null : new NiddlerOkHttpResponse(networkResponse, uuid, null, null, writeTime, readTime, wait),
-				writeTime, readTime, wait);
+		changedTime = mDebugger.ensureCallTime(callStartTime);
+		final Map<String, String> extraHeaders = buildExtraNiddlerHeaders((changedTime ? FLAG_TIME : 0) + (debuggerBeforeExecuteOverride != null ? FLAG_MODIFIED_RESPONSE : 0));
 
+		final NiddlerResponse niddlerResponse = new NiddlerOkHttpResponse(response, uuid,
+				(networkRequest == null) ? null : new NiddlerOkHttpRequest(networkRequest, uuid, null),
+				(networkResponse == null) ? null : new NiddlerOkHttpResponse(networkResponse, uuid, null, null, writeTime, readTime, wait, null),
+				writeTime, readTime, wait, extraHeaders);
 
 		NiddlerDebugger.DebugResponse debugFromResponse = null;
 		if (debugResponse == null) {
@@ -103,7 +123,7 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 			final NiddlerResponse debugNiddlerResponse = new NiddlerOkHttpResponse(debugResp, uuid,
 					null,
 					null,
-					writeTime, newReadTime, newWait);
+					writeTime, newReadTime, newWait, buildExtraNiddlerHeaders(FLAG_MODIFIED_RESPONSE + (changedTime ? FLAG_TIME : 0)));
 
 			mNiddler.logResponse(debugNiddlerResponse);
 			return debugResp;
@@ -132,7 +152,7 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 		if (debugResponse.headers != null) {
 			builder.headers(Headers.of(debugResponse.headers));
 		}
-		builder.header(NIDDLER_DEBUG_RESPONSE_HEADER, "true");
+
 		if (!TextUtils.isEmpty(debugResponse.encodedBody)) {
 			builder.body(ResponseBody.create(MediaType.parse(debugResponse.bodyMimeType), Base64.decode(debugResponse.encodedBody, Base64.DEFAULT)));
 		}
@@ -140,5 +160,40 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 		builder.receivedResponseAtMillis(System.currentTimeMillis());
 
 		return builder.build();
+	}
+
+	@NonNull
+	private static Request makeRequest(@NonNull final NiddlerDebugger.DebugRequest debugRequest) {
+		final RequestBody body;
+		if (!TextUtils.isEmpty(debugRequest.encodedBody)) {
+			body = RequestBody.create(MediaType.parse(debugRequest.bodyMimeType), Base64.decode(debugRequest.encodedBody, Base64.DEFAULT));
+		} else {
+			body = null;
+		}
+
+		final Request.Builder builder = new Request.Builder()
+				.url(debugRequest.url)
+				.method(debugRequest.method, body);
+		if (debugRequest.headers != null) {
+			builder.headers(Headers.of(debugRequest.headers));
+		}
+		return builder.build();
+	}
+
+	@Nullable
+	private static Map<String, String> buildExtraNiddlerHeaders(final int flags) {
+		if (flags == 0) {
+			return null;
+		}
+
+		final Map<String, String> extra = new HashMap<>();
+		if ((flags & FLAG_TIME) != 0) {
+			extra.put(NIDDLER_DEBUG_TIMING_RESPONSE_HEADER, "true");
+		}
+		if ((flags & FLAG_MODIFIED_RESPONSE) != 0) {
+			extra.put(NIDDLER_DEBUG_RESPONSE_HEADER, "true");
+		}
+
+		return extra;
 	}
 }

@@ -1,6 +1,6 @@
 package com.icapps.niddler.interceptor.okhttp;
 
-import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.icapps.niddler.core.NiddlerRequest;
 
@@ -26,12 +26,15 @@ final class NiddlerOkHttpRequest implements NiddlerRequest {
 	private final String mRequestId;
 	private final String mMessageId;
 	private final long mTimestamp;
+	@Nullable
+	private final Map<String, String> mExtraHeaders;
 
-	NiddlerOkHttpRequest(final Request request, final String requestId) {
+	NiddlerOkHttpRequest(final Request request, final String requestId, @Nullable final Map<String, String> extraHeaders) {
 		mRequest = request;
 		mRequestId = requestId;
 		mMessageId = UUID.randomUUID().toString();
 		mTimestamp = System.currentTimeMillis();
+		mExtraHeaders = extraHeaders;
 	}
 
 	@Override
@@ -59,6 +62,13 @@ final class NiddlerOkHttpRequest implements NiddlerRequest {
 		final Map<String, List<String>> headers = mRequest.headers().toMultimap();
 		if (!headers.containsKey("Content-Type") && (mRequest.body() != null) && (mRequest.body().contentType() != null)) {
 			headers.put("Content-Type", Collections.singletonList(mRequest.body().contentType().toString()));
+		}
+		if (mExtraHeaders != null) {
+			for (final Map.Entry<String, String> keyValueEntry : mExtraHeaders.entrySet()) {
+				if (!headers.containsKey(keyValueEntry.getKey())) {
+					headers.put(keyValueEntry.getKey(), Collections.singletonList(keyValueEntry.getValue()));
+				}
+			}
 		}
 		return headers;
 	}

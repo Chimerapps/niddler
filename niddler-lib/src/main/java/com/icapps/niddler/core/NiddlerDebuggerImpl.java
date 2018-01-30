@@ -59,10 +59,13 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 	private transient ServerConnection mServerConnection;
 	@NonNull
 	private final Map<String, CompletableFuture<DebugResponse>> mWaitingResponses;
+	@NonNull
+	private final Map<String, CompletableFuture<DebugRequest>> mWaitingRequests;
 
 	NiddlerDebuggerImpl() {
 		mDebuggerConfiguration = new DebuggerConfiguration();
 		mWaitingResponses = new HashMap<>();
+		mWaitingRequests = new HashMap<>();
 	}
 
 	void onDebuggerAttached(@NonNull final ServerConnection connection) {
@@ -78,6 +81,12 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 				entry.getValue().offer(null);
 			}
 			mWaitingResponses.clear();
+		}
+		synchronized (mWaitingRequests) {
+			for (final Map.Entry<String, CompletableFuture<DebugRequest>> entry : mWaitingRequests.entrySet()) {
+				entry.getValue().offer(null);
+			}
+			mWaitingRequests.clear();
 		}
 	}
 
@@ -121,7 +130,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 					mDebuggerConfiguration.setActionActive(extractId(body), false);
 					break;
 				case MESSAGE_DELAYS:
-					mDebuggerConfiguration.updateDelays(body.optLong("preBlacklist"), body.optLong("postBlacklist"));
+					mDebuggerConfiguration.updateDelays(body.optLong("preBlacklist"), body.optLong("postBlacklist"), body.optLong("timePerCall"));
 					break;
 			}
 		} catch (final JSONException e) {
@@ -139,6 +148,24 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 	@Override
 	public boolean isBlacklisted(@NonNull final CharSequence url) {
 		return mDebuggerConfiguration.inBlacklisted(url);
+	}
+
+	@Nullable
+	@Override
+	public DebugRequest overrideRequest(@NonNull final NiddlerRequest request) {
+		final ServerConnection conn = mServerConnection;
+		if (conn == null) {
+			return null;
+		}
+		try {
+			final CompletableFuture<DebugRequest> future = mDebuggerConfiguration.handleRequestOverride(request, this);
+			if (future == null) {
+				return null;
+			}
+			return future.get();
+		} catch (final Throwable ignored) {
+			return null;
+		}
 	}
 
 	@Nullable
@@ -178,26 +205,45 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 	}
 
 	@Override
-	public void applyDelayBeforeBlacklist() throws IOException {
+	public boolean applyDelayBeforeBlacklist() throws IOException {
 		final long timeout = mDebuggerConfiguration.preBlacklistTimeout();
 		if (timeout <= 0L) {
-			return;
+			return false;
 		}
 		try {
 			Thread.sleep(timeout);
+			return true;
 		} catch (final InterruptedException e) {
 			throw new IOException(e);
 		}
 	}
 
 	@Override
-	public void applyDelayAfterBlacklist() throws IOException {
+	public boolean applyDelayAfterBlacklist() throws IOException {
 		final long timeout = mDebuggerConfiguration.postBlacklistTimeout();
 		if (timeout <= 0L) {
-			return;
+			return false;
 		}
 		try {
 			Thread.sleep(timeout);
+			return true;
+		} catch (final InterruptedException e) {
+			throw new IOException(e);
+		}
+	}
+
+	@Override
+	public boolean ensureCallTime(final long startTime) throws IOException {
+		final long totalTimeInFlight = (System.nanoTime() - startTime) / 1000L;
+		final long minDuration = mDebuggerConfiguration.mimimalCallDuration();
+		final long diff = minDuration - totalTimeInFlight;
+		if (diff <= 0) {
+			return false;
+		}
+
+		try {
+			Thread.sleep(diff);
+			return true;
 		} catch (final InterruptedException e) {
 			throw new IOException(e);
 		}
@@ -240,18 +286,22 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		private final Lock mReadLock = mReadWriteLock.readLock();
 
 		private List<Pattern> mBlacklist = new ArrayList<>();
+		private List<RequestOverrideAction> mRequestOverrideActions = new ArrayList<>();
 		private List<RequestAction> mRequestActions = new ArrayList<>();
 		private List<ResponseAction> mResponseActions = new ArrayList<>();
 		private boolean mIsActive = false;
 		private boolean mActionsMuted = false;
 		private long mPreBlacklistTimeout = 0L;
 		private long mPostBlacklistTimeout = 0L;
+		private long mTimePerCall = 0L;
 
 		boolean active() {
-			mReadLock.lock();
-			boolean isActive = mIsActive;
-			mReadLock.unlock();
-			return isActive;
+			try {
+				mReadLock.lock();
+				return mIsActive;
+			} finally {
+				mReadLock.unlock();
+			}
 		}
 
 		void muteActions(final boolean muted) {
@@ -261,12 +311,17 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		}
 
 		void connectionLost() {
-			mWriteLock.lock();
-			mBlacklist.clear();
-			mRequestActions.clear();
-			mResponseActions.clear();
-			mIsActive = false;
-			mWriteLock.unlock();
+			try {
+				mWriteLock.lock();
+
+				mBlacklist.clear();
+				mRequestActions.clear();
+				mResponseActions.clear();
+				mRequestOverrideActions.clear();
+				mIsActive = false;
+			} finally {
+				mWriteLock.unlock();
+			}
 		}
 
 		void addBlacklist(@NonNull final String regex) {
@@ -289,19 +344,20 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		}
 
 		boolean inBlacklisted(@NonNull final CharSequence url) {
-			mReadLock.lock();
+			try {
+				mReadLock.lock();
 
-			if (mIsActive) {
-				for (final Pattern pattern : mBlacklist) {
-					if (pattern.matcher(url).matches()) {
-						mReadLock.unlock();
-						return true;
+				if (mIsActive) {
+					for (final Pattern pattern : mBlacklist) {
+						if (pattern.matcher(url).matches()) {
+							return true;
+						}
 					}
 				}
+				return false;
+			} finally {
+				mReadLock.unlock();
 			}
-
-			mReadLock.unlock();
-			return false;
 		}
 
 		void addRequestAction(@NonNull final RequestAction action) {
@@ -361,6 +417,26 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 			}
 
 			mWriteLock.unlock();
+		}
+
+		@Nullable
+		CompletableFuture<DebugRequest> handleRequestOverride(@NonNull final NiddlerRequest request, @NonNull final NiddlerDebuggerImpl debugger) throws IOException {
+			try {
+				mReadLock.lock();
+
+				if (mIsActive && !mActionsMuted) {
+					for (final RequestOverrideAction requestOverrideAction : mRequestOverrideActions) {
+						final CompletableFuture<DebugRequest> response = requestOverrideAction.handleRequestOverride(request, debugger);
+						if (response != null) {
+							return response;
+						}
+					}
+				}
+
+				return null;
+			} finally {
+				mReadLock.unlock();
+			}
 		}
 
 		@Nullable
@@ -444,11 +520,21 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 			}
 		}
 
-		void updateDelays(@Nullable final Long preBlacklist, @Nullable final Long postBlacklist) {
+		long mimimalCallDuration() {
+			try {
+				mReadLock.lock();
+				return mIsActive ? mTimePerCall : 0L;
+			} finally {
+				mReadLock.unlock();
+			}
+		}
+
+		void updateDelays(@Nullable final Long preBlacklist, @Nullable final Long postBlacklist, @Nullable final Long timePerCall) {
 			try {
 				mWriteLock.lock();
 				mPreBlacklistTimeout = preBlacklist == null ? 0L : preBlacklist;
 				mPostBlacklistTimeout = postBlacklist == null ? 0L : postBlacklist;
+				mTimePerCall = timePerCall == null ? 0L : timePerCall;
 			} finally {
 				mWriteLock.unlock();
 			}
@@ -483,6 +569,16 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 			return data;
 		}
 
+	}
+
+	static abstract class RequestOverrideAction extends DebugAction {
+
+		RequestOverrideAction(@NonNull final String id) {
+			super(id);
+		}
+
+		@Nullable
+		abstract CompletableFuture<DebugRequest> handleRequestOverride(@NonNull final NiddlerRequest request, @NonNull final NiddlerDebuggerImpl debugger) throws IOException;
 	}
 
 	static abstract class RequestAction extends DebugAction {

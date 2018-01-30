@@ -8,6 +8,7 @@ import com.icapps.niddler.core.NiddlerResponse;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -33,6 +34,8 @@ final class NiddlerOkHttpResponse implements NiddlerResponse {
 	private final int mWriteTime;
 	private final int mReadTime;
 	private final int mWaitTime;
+	@Nullable
+	private final Map<String, String> mExtraHeaders;
 
 	NiddlerOkHttpResponse(final Response response,
 			final String requestId,
@@ -40,7 +43,8 @@ final class NiddlerOkHttpResponse implements NiddlerResponse {
 			@Nullable final NiddlerResponse actualNetworkReply,
 			final int writeTime,
 			final int readTime,
-			final int waitTime) {
+			final int waitTime,
+			@Nullable final Map<String, String> extraHeaders) {
 		mResponse = response;
 		mRequestId = requestId;
 		mActualNetworkRequest = actualNetworkRequest;
@@ -50,6 +54,7 @@ final class NiddlerOkHttpResponse implements NiddlerResponse {
 		mWaitTime = waitTime;
 		mMessageId = UUID.randomUUID().toString();
 		mTimestamp = System.currentTimeMillis();
+		mExtraHeaders = extraHeaders;
 	}
 
 	@Override
@@ -69,7 +74,15 @@ final class NiddlerOkHttpResponse implements NiddlerResponse {
 
 	@Override
 	public Map<String, List<String>> getHeaders() {
-		return mResponse.headers().toMultimap();
+		final Map<String, List<String>> finalHeaders = mResponse.headers().toMultimap();
+		if (mExtraHeaders != null) {
+			for (final Map.Entry<String, String> keyValueEntry : mExtraHeaders.entrySet()) {
+				if (!finalHeaders.containsKey(keyValueEntry.getKey())) {
+					finalHeaders.put(keyValueEntry.getKey(), Collections.singletonList(keyValueEntry.getValue()));
+				}
+			}
+		}
+		return finalHeaders;
 	}
 
 	@Override

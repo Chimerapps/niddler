@@ -28,6 +28,7 @@ import java.net.UnknownHostException;
 public final class Niddler implements NiddlerServer.WebSocketListener, Closeable {
 
 	public static final String NIDDLER_DEBUG_RESPONSE_HEADER = "X-Niddler-Debug";
+	public static final String NIDDLER_DEBUG_TIMING_RESPONSE_HEADER = "X-Niddler-Debug-Timing";
 
 	private static final String LOG_TAG = Niddler.class.getSimpleName();
 
