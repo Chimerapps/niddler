@@ -25,7 +25,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 
 import static com.icapps.niddler.core.NiddlerDebuggerImpl.DebugAction.extractId;
-import static com.icapps.niddler.core.NiddlerDebuggerImpl.DebuggerConfiguration.sendHandleResponse;
 
 /**
  * @author Nicola Verbeeck
@@ -52,6 +51,9 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 	private static final String MESSAGE_ACTIVATE_ACTION = "activateAction";
 	private static final String MESSAGE_DEACTIVATE_ACTION = "deactivateAction";
 	private static final String MESSAGE_DELAYS = "updateDelays";
+	private static final String MESSAGE_ADD_DEFAULT_REQUEST_OVERRIDE = "addDefaultRequestOverride";
+	private static final String MESSAGE_ADD_REQUEST_OVERRIDE = "addRequestOverride";
+	private static final String MESSAGE_REMOVE_REQUEST_OVERRIDE = "removeRequestOverride";
 
 	@NonNull
 	private final DebuggerConfiguration mDebuggerConfiguration;
@@ -131,6 +133,15 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 					break;
 				case MESSAGE_DELAYS:
 					mDebuggerConfiguration.updateDelays(body.optLong("preBlacklist"), body.optLong("postBlacklist"), body.optLong("timePerCall"));
+					break;
+				case MESSAGE_ADD_DEFAULT_REQUEST_OVERRIDE:
+					mDebuggerConfiguration.addRequestOverrideAction(new DefaultRequestOverrideAction(body));
+					break;
+				case MESSAGE_REMOVE_REQUEST_OVERRIDE:
+					mDebuggerConfiguration.removeRequestOverrideAction(extractId(body));
+					break;
+				case MESSAGE_ADD_REQUEST_OVERRIDE:
+					mDebuggerConfiguration.addRequestOverrideAction(new DebugRequestOverrideAction(body));
 					break;
 			}
 		} catch (final JSONException e) {
@@ -263,7 +274,16 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		if (connection == null) {
 			return null;
 		}
-		return sendHandleResponse(request, response, connection, mWaitingResponses);
+		return DebuggerConfiguration.sendHandleResponse(request, response, connection, mWaitingResponses);
+	}
+
+	@Nullable
+	CompletableFuture<DebugRequest> sendHandleRequestOverride(@NonNull final NiddlerRequest request) {
+		final ServerConnection connection = mServerConnection;
+		if (connection == null) {
+			return null;
+		}
+		return DebuggerConfiguration.sendHandleRequestOverride(request, connection, mWaitingRequests);
 	}
 
 	private void onDebugResponse(@NonNull final String messageId, @NonNull final DebugResponse response) {
@@ -362,9 +382,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 
 		void addRequestAction(@NonNull final RequestAction action) {
 			mWriteLock.lock();
-			if (mIsActive) {
-				mRequestActions.add(action);
-			}
+			mRequestActions.add(action);
 			mWriteLock.unlock();
 		}
 
@@ -383,9 +401,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 
 		void addResponseAction(@NonNull final ResponseAction action) {
 			mWriteLock.lock();
-			if (mIsActive) {
-				mResponseActions.add(action);
-			}
+			mResponseActions.add(action);
 			mWriteLock.unlock();
 		}
 
@@ -393,6 +409,25 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 			mWriteLock.lock();
 
 			final Iterator<ResponseAction> it = mResponseActions.iterator();
+			while (it.hasNext()) {
+				if (it.next().id.equals(actionId)) {
+					it.remove();
+				}
+			}
+
+			mWriteLock.unlock();
+		}
+
+		void addRequestOverrideAction(@NonNull final RequestOverrideAction action) {
+			mWriteLock.lock();
+			mRequestOverrideActions.add(action);
+			mWriteLock.unlock();
+		}
+
+		void removeRequestOverrideAction(@NonNull final String actionId) {
+			mWriteLock.lock();
+
+			final Iterator<RequestOverrideAction> it = mRequestOverrideActions.iterator();
 			while (it.hasNext()) {
 				if (it.next().id.equals(actionId)) {
 					it.remove();
@@ -493,6 +528,26 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 			}
 			try {
 				connection.send(makeDebugRequestMessage(request, response));
+			} catch (final JSONException e) {
+				future.offer(null);
+				if (Log.isLoggable(TAG, Log.WARN)) {
+					Log.w(TAG, "Failed to offer:", e);
+				}
+			}
+			return future;
+		}
+
+		@SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+		static CompletableFuture<DebugRequest> sendHandleRequestOverride(@NonNull final NiddlerRequest request,
+				@NonNull final ServerConnection connection,
+				@NonNull final Map<String, CompletableFuture<DebugRequest>> waitingRequests) {
+			final CompletableFuture<DebugRequest> future = new CompletableFuture<>();
+
+			synchronized (waitingRequests) {
+				waitingRequests.put(request.getMessageId(), future);
+			}
+			try {
+				connection.send(makeDebugRequestOverrideMessage(request));
 			} catch (final JSONException e) {
 				future.offer(null);
 				if (Log.isLoggable(TAG, Log.WARN)) {
@@ -671,10 +726,62 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		}
 	}
 
+	static final class DefaultRequestOverrideAction extends RequestOverrideAction {
+		@NonNull
+		private final Pattern mRegex;
+		@NonNull
+		private final DebugRequest mDebugRequest;
+
+		DefaultRequestOverrideAction(final JSONObject object) throws JSONException {
+			super(extractId(object));
+
+			mRegex = Pattern.compile(notNull(extractMatchingRegex(object)));
+			mDebugRequest = parseResponseOverride(object);
+		}
+
+		@Nullable
+		@Override
+		CompletableFuture<DebugRequest> handleRequestOverride(@NonNull final NiddlerRequest request, @NonNull final NiddlerDebuggerImpl debugger) {
+			if (active && mRegex.matcher(request.getUrl()).matches()) {
+				return new CompletableFuture<>(mDebugRequest);
+			}
+			return null;
+		}
+	}
+
+	static final class DebugRequestOverrideAction extends RequestOverrideAction {
+		@NonNull
+		private final Pattern mRegex;
+
+		DebugRequestOverrideAction(final JSONObject object) throws JSONException {
+			super(extractId(object));
+
+			mRegex = Pattern.compile(notNull(extractMatchingRegex(object)));
+		}
+
+		@Nullable
+		@Override
+		CompletableFuture<DebugRequest> handleRequestOverride(@NonNull final NiddlerRequest request, @NonNull final NiddlerDebuggerImpl debugger) {
+			if (!active || !mRegex.matcher(request.getUrl()).matches()) {
+				return null;
+			}
+			return debugger.sendHandleRequestOverride(request);
+		}
+	}
+
 	@NonNull
 	static DebugResponse parseResponse(@NonNull final JSONObject config) throws JSONException {
 		return new DebugResponse(config.getInt("code"),
 				config.getString("message"),
+				parseHeaders(config.optJSONObject("headers")),
+				config.optString("encodedBody"),
+				config.optString("bodyMimeType"));
+	}
+
+	@NonNull
+	static DebugRequest parseResponseOverride(@NonNull final JSONObject config) throws JSONException {
+		return new DebugRequest(config.getString("url"),
+				config.getString("method"),
 				parseHeaders(config.optJSONObject("headers")),
 				config.optString("encodedBody"),
 				config.optString("bodyMimeType"));
@@ -706,6 +813,17 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		if (response != null) {
 			object.put("response", MessageBuilder.buildMessage(response));
 		}
+		return object.toString();
+	}
+
+	@NonNull
+	static String makeDebugRequestOverrideMessage(@NonNull final NiddlerRequest request) throws JSONException {
+		final JSONObject requestObj = MessageBuilder.buildMessageJson(request);
+
+		final JSONObject object = new JSONObject();
+		object.put("type", "debugRequest");
+		object.put("request", requestObj);
+
 		return object.toString();
 	}
 

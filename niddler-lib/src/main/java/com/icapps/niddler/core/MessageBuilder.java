@@ -35,8 +35,7 @@ final class MessageBuilder {
 		return object.toString();
 	}
 
-	@Nullable
-	private static JSONObject buildMessageJson(final NiddlerRequest request) {
+	static JSONObject buildMessageJson(final NiddlerRequest request) {
 		if (request == null) {
 			return null;
 		}
