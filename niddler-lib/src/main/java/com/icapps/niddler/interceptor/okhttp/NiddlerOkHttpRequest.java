@@ -93,6 +93,7 @@ final class NiddlerOkHttpRequest implements NiddlerRequest {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	static String httpVersion(final Protocol protocol) {
 		switch (protocol) {
 			case HTTP_1_0:

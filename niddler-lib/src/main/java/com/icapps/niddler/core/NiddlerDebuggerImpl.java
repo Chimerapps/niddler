@@ -305,10 +305,10 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		private final Lock mWriteLock = mReadWriteLock.writeLock();
 		private final Lock mReadLock = mReadWriteLock.readLock();
 
-		private List<Pattern> mBlacklist = new ArrayList<>();
-		private List<RequestOverrideAction> mRequestOverrideActions = new ArrayList<>();
-		private List<RequestAction> mRequestActions = new ArrayList<>();
-		private List<ResponseAction> mResponseActions = new ArrayList<>();
+		private final List<Pattern> mBlacklist = new ArrayList<>();
+		private final List<RequestOverrideAction> mRequestOverrideActions = new ArrayList<>();
+		private final List<RequestAction> mRequestActions = new ArrayList<>();
+		private final List<ResponseAction> mResponseActions = new ArrayList<>();
 		private boolean mIsActive = false;
 		private boolean mActionsMuted = false;
 		private long mPreBlacklistTimeout = 0L;
@@ -844,6 +844,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 
 		void offer(final T value) {
 			try {
+				done = true;
 				reply.put(value);
 			} catch (final InterruptedException ignored) {
 				if (Log.isLoggable(TAG, Log.WARN)) {
