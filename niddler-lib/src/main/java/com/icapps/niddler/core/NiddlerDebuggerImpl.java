@@ -600,15 +600,20 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		@NonNull
 		final String id;
 
-		transient boolean active = true;
+		transient boolean active;
 
-		DebugAction(@NonNull final String id) {
+		DebugAction(@NonNull final String id, final boolean active) {
 			this.id = id;
+			this.active = active;
 		}
 
 		@NonNull
-		static String extractId(final JSONObject object) throws JSONException {
+		static String extractId(@NonNull final JSONObject object) throws JSONException {
 			return object.getString("id");
+		}
+
+		static boolean extractActiveState(@NonNull final JSONObject object) {
+			return object.optBoolean("active", true);
 		}
 
 		@Nullable
@@ -628,8 +633,8 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 
 	static abstract class RequestOverrideAction extends DebugAction {
 
-		RequestOverrideAction(@NonNull final String id) {
-			super(id);
+		RequestOverrideAction(@NonNull final String id, final boolean active) {
+			super(id, active);
 		}
 
 		@Nullable
@@ -638,8 +643,8 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 
 	static abstract class RequestAction extends DebugAction {
 
-		RequestAction(@NonNull final String id) {
-			super(id);
+		RequestAction(@NonNull final String id, final boolean active) {
+			super(id, active);
 		}
 
 		@Nullable
@@ -649,8 +654,8 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 
 	static abstract class ResponseAction extends DebugAction {
 
-		ResponseAction(@NonNull final String id) {
-			super(id);
+		ResponseAction(@NonNull final String id, final boolean active) {
+			super(id, active);
 		}
 
 		@Nullable
@@ -668,7 +673,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		private final DebugResponse mDebugResponse;
 
 		DefaultResponseAction(final JSONObject object) throws JSONException {
-			super(extractId(object));
+			super(extractId(object), extractActiveState(object));
 
 			mRegex = Pattern.compile(notNull(extractMatchingRegex(object)));
 			mDebugResponse = parseResponse(object);
@@ -689,7 +694,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		private final Pattern mRegex;
 
 		DebugRequestAction(final JSONObject object) throws JSONException {
-			super(extractId(object));
+			super(extractId(object), extractActiveState(object));
 
 			mRegex = Pattern.compile(notNull(extractMatchingRegex(object)));
 		}
@@ -709,7 +714,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		private final Pattern mRegex;
 
 		DebugRequestResponseAction(final JSONObject object) throws JSONException {
-			super(extractId(object));
+			super(extractId(object), extractActiveState(object));
 
 			mRegex = Pattern.compile(notNull(extractMatchingRegex(object)));
 		}
@@ -733,7 +738,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		private final DebugRequest mDebugRequest;
 
 		DefaultRequestOverrideAction(final JSONObject object) throws JSONException {
-			super(extractId(object));
+			super(extractId(object), extractActiveState(object));
 
 			mRegex = Pattern.compile(notNull(extractMatchingRegex(object)));
 			mDebugRequest = parseResponseOverride(object);
@@ -754,7 +759,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		private final Pattern mRegex;
 
 		DebugRequestOverrideAction(final JSONObject object) throws JSONException {
-			super(extractId(object));
+			super(extractId(object), extractActiveState(object));
 
 			mRegex = Pattern.compile(notNull(extractMatchingRegex(object)));
 		}
