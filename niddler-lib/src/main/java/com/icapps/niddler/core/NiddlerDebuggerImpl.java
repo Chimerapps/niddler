@@ -621,14 +621,6 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 			return object.optString("regex");
 		}
 
-		@NonNull
-		static <T> T notNull(final T data) throws JSONException {
-			if (data == null) {
-				throw new JSONException("Item was expected to be non-null");
-			}
-			return data;
-		}
-
 	}
 
 	static abstract class RequestOverrideAction extends DebugAction {
@@ -667,109 +659,185 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 
 	static final class DefaultResponseAction extends RequestAction {
 
-		@NonNull
+		@Nullable
 		private final Pattern mRegex;
+		@Nullable
+		private final String mMethod;
+
 		@NonNull
 		private final DebugResponse mDebugResponse;
 
 		DefaultResponseAction(final JSONObject object) throws JSONException {
 			super(extractId(object), extractActiveState(object));
 
-			mRegex = Pattern.compile(notNull(extractMatchingRegex(object)));
+			final String regexString = extractMatchingRegex(object);
+
+			mRegex = regexString == null ? null : Pattern.compile(regexString);
+			mMethod = object.optString("method");
 			mDebugResponse = parseResponse(object);
 		}
 
 		@Nullable
 		@Override
 		CompletableFuture<DebugResponse> handleRequest(@NonNull final NiddlerRequest request, @NonNull final NiddlerDebuggerImpl debugger) {
-			if (active && mRegex.matcher(request.getUrl()).matches()) {
-				return new CompletableFuture<>(mDebugResponse);
+			if (!active) {
+				return null;
 			}
-			return null;
+
+			if (mRegex != null && !mRegex.matcher(request.getUrl()).matches()) {
+				return null;
+			}
+			if (mMethod != null && !mMethod.equalsIgnoreCase(request.getMethod())) {
+				return null;
+			}
+
+			return new CompletableFuture<>(mDebugResponse);
 		}
 	}
 
 	static final class DebugRequestAction extends RequestAction {
-		@NonNull
+		@Nullable
 		private final Pattern mRegex;
+		@Nullable
+		private final String mMethod;
 
 		DebugRequestAction(final JSONObject object) throws JSONException {
 			super(extractId(object), extractActiveState(object));
 
-			mRegex = Pattern.compile(notNull(extractMatchingRegex(object)));
+			final String regexString = extractMatchingRegex(object);
+
+			mRegex = regexString == null ? null : Pattern.compile(regexString);
+			mMethod = object.optString("method");
 		}
 
 		@Nullable
 		@Override
 		CompletableFuture<DebugResponse> handleRequest(@NonNull final NiddlerRequest request, @NonNull final NiddlerDebuggerImpl debugger) {
-			if (!active || !mRegex.matcher(request.getUrl()).matches()) {
+			if (!active) {
 				return null;
 			}
+
+			if (mRegex != null && !mRegex.matcher(request.getUrl()).matches()) {
+				return null;
+			}
+			if (mMethod != null && !mMethod.equalsIgnoreCase(request.getMethod())) {
+				return null;
+			}
+
 			return debugger.sendHandleRequest(request, null);
 		}
 	}
 
 	static final class DebugRequestResponseAction extends ResponseAction {
-		@NonNull
+		@Nullable
 		private final Pattern mRegex;
+		@Nullable
+		private final String mMethod;
+		@Nullable
+		private final Integer mResponseCode;
 
 		DebugRequestResponseAction(final JSONObject object) throws JSONException {
 			super(extractId(object), extractActiveState(object));
 
-			mRegex = Pattern.compile(notNull(extractMatchingRegex(object)));
+			final String regexString = extractMatchingRegex(object);
+
+			mRegex = regexString == null ? null : Pattern.compile(regexString);
+			mMethod = object.optString("method");
+			mResponseCode = object.has("mResponseCode") ? object.optInt("responseCode") : null;
 		}
 
+		@SuppressWarnings("NumberEquality")
 		@Nullable
 		@Override
 		CompletableFuture<DebugResponse> handleResponse(@NonNull final NiddlerRequest request,
 				@NonNull final NiddlerResponse response,
 				@NonNull final NiddlerDebuggerImpl debugger) {
-			if (!active || !mRegex.matcher(request.getUrl()).matches()) {
+			if (!active) {
 				return null;
 			}
+
+			if (mRegex != null && !mRegex.matcher(request.getUrl()).matches()) {
+				return null;
+			}
+			if (mMethod != null && !mMethod.equalsIgnoreCase(request.getMethod())) {
+				return null;
+			}
+			if (mResponseCode != null) {
+				final Integer code = response.getStatusCode();
+				if (code != null && mResponseCode != code) {
+					return null;
+				}
+			}
+
 			return debugger.sendHandleRequest(request, response);
 		}
 	}
 
 	static final class DefaultRequestOverrideAction extends RequestOverrideAction {
-		@NonNull
+		@Nullable
 		private final Pattern mRegex;
+		@Nullable
+		private final String mMethod;
 		@NonNull
 		private final DebugRequest mDebugRequest;
 
 		DefaultRequestOverrideAction(final JSONObject object) throws JSONException {
 			super(extractId(object), extractActiveState(object));
 
-			mRegex = Pattern.compile(notNull(extractMatchingRegex(object)));
+			final String regexString = extractMatchingRegex(object);
+
+			mRegex = regexString == null ? null : Pattern.compile(regexString);
+			mMethod = object.optString("method");
 			mDebugRequest = parseResponseOverride(object);
 		}
 
 		@Nullable
 		@Override
 		CompletableFuture<DebugRequest> handleRequestOverride(@NonNull final NiddlerRequest request, @NonNull final NiddlerDebuggerImpl debugger) {
-			if (active && mRegex.matcher(request.getUrl()).matches()) {
-				return new CompletableFuture<>(mDebugRequest);
+			if (!active) {
+				return null;
 			}
-			return null;
+
+			if (mRegex != null && !mRegex.matcher(request.getUrl()).matches()) {
+				return null;
+			}
+			if (mMethod != null && !mMethod.equalsIgnoreCase(request.getMethod())) {
+				return null;
+			}
+
+			return new CompletableFuture<>(mDebugRequest);
 		}
 	}
 
 	static final class DebugRequestOverrideAction extends RequestOverrideAction {
-		@NonNull
+		@Nullable
 		private final Pattern mRegex;
+		@Nullable
+		private final String mMethod;
 
 		DebugRequestOverrideAction(final JSONObject object) throws JSONException {
 			super(extractId(object), extractActiveState(object));
 
-			mRegex = Pattern.compile(notNull(extractMatchingRegex(object)));
+			final String regexString = extractMatchingRegex(object);
+
+			mRegex = regexString == null ? null : Pattern.compile(regexString);
+			mMethod = object.optString("method");
 		}
 
 		@Nullable
 		@Override
 		CompletableFuture<DebugRequest> handleRequestOverride(@NonNull final NiddlerRequest request, @NonNull final NiddlerDebuggerImpl debugger) {
-			if (!active || !mRegex.matcher(request.getUrl()).matches()) {
+			if (!active) {
 				return null;
 			}
+
+			if (mRegex != null && !mRegex.matcher(request.getUrl()).matches()) {
+				return null;
+			}
+			if (mMethod != null && !mMethod.equalsIgnoreCase(request.getMethod())) {
+				return null;
+			}
+
 			return debugger.sendHandleRequestOverride(request);
 		}
 	}
