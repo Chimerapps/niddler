@@ -743,7 +743,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 
 			mRegex = regexString == null ? null : Pattern.compile(regexString);
 			mMethod = object.optString("method");
-			mResponseCode = object.has("mResponseCode") ? object.optInt("responseCode") : null;
+			mResponseCode = object.has("responseCode") ? object.optInt("responseCode") : null;
 		}
 
 		@SuppressWarnings("NumberEquality")
