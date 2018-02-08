@@ -746,7 +746,6 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 			mResponseCode = object.has("responseCode") ? object.optInt("responseCode") : null;
 		}
 
-		@SuppressWarnings("NumberEquality")
 		@Nullable
 		@Override
 		CompletableFuture<DebugResponse> handleResponse(@NonNull final NiddlerRequest request,
@@ -764,7 +763,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 			}
 			if (mResponseCode != null) {
 				final Integer code = response.getStatusCode();
-				if (code != null && mResponseCode != code) {
+				if (code != null && ((int) mResponseCode) != code) {
 					return null;
 				}
 			}
