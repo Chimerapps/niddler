@@ -11,12 +11,11 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.icapps.niddler.R;
 import com.icapps.niddler.core.Niddler;
 import com.icapps.niddler.util.Logging;
-import com.icapps.niddler.util.OreoCompatHelper;
 
 import java.io.IOException;
 
@@ -24,7 +23,6 @@ import java.io.IOException;
  * @author Maarten Van Giel
  * @author Nicola Verbeeck
  */
-@SuppressWarnings("DesignForExtension")
 public class NiddlerService extends Service {
 
 	private static final String LOG_TAG = NiddlerService.class.getSimpleName();
@@ -128,27 +126,34 @@ public class NiddlerService extends Service {
 	}
 
 	private void createNotification() {
-		final String channelId;
+		final Notification.Builder notificationBuilder;
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			channelId = OreoCompatHelper.createNotificationChannel(this);
+			notificationBuilder = OreoCompatHelper.createNotificationBuilder(this);
 		} else {
-			channelId = "";
+			notificationBuilder = new Notification.Builder(this);
 		}
 
 		final Intent intent = new Intent(this, NiddlerService.class);
 		intent.setAction("STOP");
 		final PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-		final Notification notification = new NotificationCompat.Builder(this, channelId)
-				.setContentTitle("Niddler")
-				.setContentText("Niddler is running. Touch to stop.")
-				.setStyle(new NotificationCompat.BigTextStyle().bigText("Niddler is running for '" + getPackageName() + "' on port '" + mNiddler.getPort() + "'. Touch to stop"))
-				.setContentIntent(pendingIntent)
-				.setSmallIcon(android.R.drawable.ic_menu_preferences)
-				.setLocalOnly(true)
-				.build();
+		notificationBuilder.setContentTitle("Niddler")
+				.setContentText(getString(R.string.niddler_running_notification));
 
-		notification.flags |= NotificationCompat.FLAG_NO_CLEAR | NotificationCompat.FLAG_ONGOING_EVENT;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+			JellyBeanCompatHelper.addBigText(notificationBuilder, getString(R.string.niddler_running_notification_big, getPackageName(), mNiddler.getPort()));
+		}
+
+		notificationBuilder.setContentIntent(pendingIntent)
+				.setSmallIcon(android.R.drawable.ic_menu_preferences);
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
+			KitkatCompatHelper.setLocalOnly(notificationBuilder, true);
+		}
+
+		final Notification notification = JellyBeanCompatHelper.build(notificationBuilder);
+
+		notification.flags |= Notification.FLAG_NO_CLEAR | Notification.FLAG_ONGOING_EVENT;
 		mNotificationManager.notify(NOTIFICATION_ID, notification);
 	}
 

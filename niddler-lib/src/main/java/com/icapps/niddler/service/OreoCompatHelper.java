@@ -1,4 +1,4 @@
-package com.icapps.niddler.util;
+package com.icapps.niddler.service;
 
 import android.annotation.TargetApi;
 import android.app.Notification;
@@ -13,13 +13,14 @@ import android.support.annotation.NonNull;
  * @version 1
  */
 @TargetApi(Build.VERSION_CODES.O)
-public class OreoCompatHelper {
+final class OreoCompatHelper {
 
 	private static final String CHANNEL_ID = "Niddler-Channel-Id";
 	private static final String CHANNEL_NAME = "Niddler Channel";
 	private static final String CHANNEL_DESCRIPTION = "Channel for Niddler. Niddler uses a notification to keep it running and to notify the user that niddler is running";
 
-	public static String createNotificationChannel(@NonNull final Context context) {
+	@NonNull
+	private static String createNotificationChannel(@NonNull final Context context) {
 		final NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
 		if (notificationManager == null) {
 			return "";
@@ -37,4 +38,8 @@ public class OreoCompatHelper {
 		return CHANNEL_ID;
 	}
 
+	@NonNull
+	static Notification.Builder createNotificationBuilder(@NonNull final Context context) {
+		return new Notification.Builder(context, createNotificationChannel(context));
+	}
 }
