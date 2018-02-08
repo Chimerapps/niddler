@@ -20,6 +20,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
@@ -599,12 +600,16 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 	static abstract class DebugAction {
 		@NonNull
 		final String id;
+		final int repeatCount;
+		final AtomicInteger callCount;
 
 		transient boolean active;
 
-		DebugAction(@NonNull final String id, final boolean active) {
+		DebugAction(@NonNull final String id, final boolean active, final int repeatCount) {
 			this.id = id;
 			this.active = active;
+			this.repeatCount = repeatCount;
+			callCount = new AtomicInteger(0);
 		}
 
 		@NonNull
@@ -616,6 +621,10 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 			return object.optBoolean("active", true);
 		}
 
+		static int extractRepeatCount(@NonNull final JSONObject object) {
+			return object.optInt("repeatCount", -1);
+		}
+
 		@Nullable
 		static String extractMatchingRegex(final JSONObject object) {
 			return object.optString("regex");
@@ -625,8 +634,8 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 
 	static abstract class RequestOverrideAction extends DebugAction {
 
-		RequestOverrideAction(@NonNull final String id, final boolean active) {
-			super(id, active);
+		RequestOverrideAction(@NonNull final String id, final boolean active, final int repeatCount) {
+			super(id, active, repeatCount);
 		}
 
 		@Nullable
@@ -635,8 +644,8 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 
 	static abstract class RequestAction extends DebugAction {
 
-		RequestAction(@NonNull final String id, final boolean active) {
-			super(id, active);
+		RequestAction(@NonNull final String id, final boolean active, final int repeatCount) {
+			super(id, active, repeatCount);
 		}
 
 		@Nullable
@@ -646,8 +655,8 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 
 	static abstract class ResponseAction extends DebugAction {
 
-		ResponseAction(@NonNull final String id, final boolean active) {
-			super(id, active);
+		ResponseAction(@NonNull final String id, final boolean active, final int repeatCount) {
+			super(id, active, repeatCount);
 		}
 
 		@Nullable
@@ -668,12 +677,12 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		private final DebugResponse mDebugResponse;
 
 		DefaultResponseAction(final JSONObject object) throws JSONException {
-			super(extractId(object), extractActiveState(object));
+			super(extractId(object), extractActiveState(object), extractRepeatCount(object));
 
 			final String regexString = extractMatchingRegex(object);
 
 			mRegex = regexString == null ? null : Pattern.compile(regexString);
-			mMethod = object.optString("method");
+			mMethod = object.optString("matchMethod");
 			mDebugResponse = parseResponse(object);
 		}
 
@@ -690,6 +699,9 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 			if (mMethod != null && !mMethod.equalsIgnoreCase(request.getMethod())) {
 				return null;
 			}
+			if (repeatCount > 0 && callCount.incrementAndGet() >= repeatCount) {
+				return null;
+			}
 
 			return new CompletableFuture<>(mDebugResponse);
 		}
@@ -702,12 +714,12 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		private final String mMethod;
 
 		DebugRequestAction(final JSONObject object) throws JSONException {
-			super(extractId(object), extractActiveState(object));
+			super(extractId(object), extractActiveState(object), extractRepeatCount(object));
 
 			final String regexString = extractMatchingRegex(object);
 
 			mRegex = regexString == null ? null : Pattern.compile(regexString);
-			mMethod = object.optString("method");
+			mMethod = object.optString("matchMethod");
 		}
 
 		@Nullable
@@ -721,6 +733,9 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 				return null;
 			}
 			if (mMethod != null && !mMethod.equalsIgnoreCase(request.getMethod())) {
+				return null;
+			}
+			if (repeatCount > 0 && callCount.incrementAndGet() >= repeatCount) {
 				return null;
 			}
 
@@ -737,12 +752,12 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		private final Integer mResponseCode;
 
 		DebugRequestResponseAction(final JSONObject object) throws JSONException {
-			super(extractId(object), extractActiveState(object));
+			super(extractId(object), extractActiveState(object), extractRepeatCount(object));
 
 			final String regexString = extractMatchingRegex(object);
 
 			mRegex = regexString == null ? null : Pattern.compile(regexString);
-			mMethod = object.optString("method");
+			mMethod = object.optString("matchMethod");
 			mResponseCode = object.has("responseCode") ? object.optInt("responseCode") : null;
 		}
 
@@ -767,6 +782,9 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 					return null;
 				}
 			}
+			if (repeatCount > 0 && callCount.incrementAndGet() >= repeatCount) {
+				return null;
+			}
 
 			return debugger.sendHandleRequest(request, response);
 		}
@@ -781,12 +799,12 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		private final DebugRequest mDebugRequest;
 
 		DefaultRequestOverrideAction(final JSONObject object) throws JSONException {
-			super(extractId(object), extractActiveState(object));
+			super(extractId(object), extractActiveState(object), extractRepeatCount(object));
 
 			final String regexString = extractMatchingRegex(object);
 
 			mRegex = regexString == null ? null : Pattern.compile(regexString);
-			mMethod = object.optString("method");
+			mMethod = object.optString("matchMethod");
 			mDebugRequest = parseResponseOverride(object);
 		}
 
@@ -803,6 +821,9 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 			if (mMethod != null && !mMethod.equalsIgnoreCase(request.getMethod())) {
 				return null;
 			}
+			if (repeatCount > 0 && callCount.incrementAndGet() >= repeatCount) {
+				return null;
+			}
 
 			return new CompletableFuture<>(mDebugRequest);
 		}
@@ -815,12 +836,12 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		private final String mMethod;
 
 		DebugRequestOverrideAction(final JSONObject object) throws JSONException {
-			super(extractId(object), extractActiveState(object));
+			super(extractId(object), extractActiveState(object), extractRepeatCount(object));
 
 			final String regexString = extractMatchingRegex(object);
 
 			mRegex = regexString == null ? null : Pattern.compile(regexString);
-			mMethod = object.optString("method");
+			mMethod = object.optString("matchMethod");
 		}
 
 		@Nullable
@@ -834,6 +855,9 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 				return null;
 			}
 			if (mMethod != null && !mMethod.equalsIgnoreCase(request.getMethod())) {
+				return null;
+			}
+			if (repeatCount > 0 && callCount.incrementAndGet() >= repeatCount) {
 				return null;
 			}
 
