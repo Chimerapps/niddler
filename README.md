@@ -11,9 +11,9 @@ Niddler is a collaboration of [iCapps](http://www.icapps.com) and [Chimerapps](h
 ## Example use
 build.gradle:
 ```
-//Ensure jcenter is in the repo list
-debugCompile 'com.icapps.niddler:niddler:0.10.1'
-releaseCompile 'com.icapps.niddler:niddler-noop:0.10.1'
+//Ensure jcenter is in the repo list (0.10.2 is the latest stable version)
+debugCompile 'com.icapps.niddler:niddler:0.10.2'
+releaseCompile 'com.icapps.niddler:niddler-noop:0.10.2'
 ```
 
 Use with Android Application:
