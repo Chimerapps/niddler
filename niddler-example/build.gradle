@@ -4,7 +4,7 @@ android {
     signingConfigs {
         config {
             keyAlias 'exampleKey'
-            storeFile file('/Users/maartenvangiel/Projecten/niddler/examplekeystore.keystore')
+            storeFile file('../examplekeystore.keystore')
             storePassword 'keystore'
             keyPassword 'exampleKey'
         }
