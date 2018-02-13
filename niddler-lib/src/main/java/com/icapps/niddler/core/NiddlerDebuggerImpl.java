@@ -10,6 +10,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.nio.file.attribute.AclEntryPermission;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -39,6 +40,8 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 	private static final String DEBUG_PAYLOAD = "payload";
 	private static final String KEY_MESSAGE_ID = "messageId";
 
+	private static final String MESSAGE_ACTIVATE = "activate";
+	private static final String MESSAGE_DEACTIVATE = "deactivate";
 	private static final String MESSAGE_MUTE_ACTIONS = "muteActions";
 	private static final String MESSAGE_UNMUTE_ACTIONS = "unmuteActions";
 	private static final String MESSAGE_ADD_BLACKLIST = "addBlacklist";
@@ -96,6 +99,12 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 	private void onDebuggerConfigurationMessage(@NonNull final String messageType, final JSONObject body) {
 		try {
 			switch (messageType) {
+				case MESSAGE_ACTIVATE:
+					mDebuggerConfiguration.setActive(true);
+					break;
+				case MESSAGE_DEACTIVATE:
+					mDebuggerConfiguration.setActive(false);
+					break;
 				case MESSAGE_MUTE_ACTIONS:
 					mDebuggerConfiguration.muteActions(true);
 					break;
@@ -592,6 +601,15 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 				mPostBlacklistTimeout = postBlacklist == null ? 0L : postBlacklist;
 				mTimePerCall = timePerCall == null ? 0L : timePerCall;
 			} finally {
+				mWriteLock.unlock();
+			}
+		}
+
+		void setActive(final boolean active) {
+			try{
+				mWriteLock.lock();
+				mIsActive = active;
+			}finally {
 				mWriteLock.unlock();
 			}
 		}
