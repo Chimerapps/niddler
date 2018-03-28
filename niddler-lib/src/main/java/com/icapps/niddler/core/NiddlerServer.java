@@ -1,6 +1,7 @@
 package com.icapps.niddler.core;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -13,6 +14,8 @@ import org.java_websocket.server.WebSocketServer;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.channels.NotYetConnectedException;
@@ -27,11 +30,15 @@ import java.util.List;
 class NiddlerServer extends WebSocketServer {
 
 	private static final String LOG_TAG = NiddlerServer.class.getSimpleName();
+	private static final int ANNOUNCEMENT_SOCKET_PORT = 6394;
+
 	private final String mPackageName;
 	private final WebSocketListener mListener;
 	private final List<ServerConnection> mConnections;
 	private final String mPassword;
 	private final NiddlerDebuggerImpl mNiddlerDebugger;
+	@Nullable
+	private DatagramSocket mAnnouncementSocket;
 
 	private NiddlerServer(final String password, final InetSocketAddress address, final String packageName,
 			final WebSocketListener listener) {
@@ -46,6 +53,27 @@ class NiddlerServer extends WebSocketServer {
 	NiddlerServer(final String password, final int port, final String packageName,
 			final WebSocketListener listener) throws UnknownHostException {
 		this(password, new InetSocketAddress(port), packageName, listener);
+	}
+
+	@Override
+	public void start() {
+		final DatagramSocket oldSocket = mAnnouncementSocket;
+		if (oldSocket != null) {
+			oldSocket.close();
+			mAnnouncementSocket = null;
+		}
+
+		super.start();
+	}
+
+	@Override
+	public void stop() throws IOException, InterruptedException {
+		final DatagramSocket socket = mAnnouncementSocket;
+		if (socket != null) {
+			socket.close();
+			mAnnouncementSocket = null;
+		}
+		super.stop();
 	}
 
 	@Override
@@ -79,6 +107,20 @@ class NiddlerServer extends WebSocketServer {
 					iterator.remove();
 				}
 			}
+		}
+	}
+
+	@Override
+	public void onStart() {
+		try {
+			final DatagramSocket socket = new DatagramSocket(null);
+			socket.setReuseAddress(true);
+			socket.bind(new InetSocketAddress(ANNOUNCEMENT_SOCKET_PORT));
+			mAnnouncementSocket = socket;
+			new Thread(new ServerAnnouncementRunner(mAnnouncementSocket, mPackageName, this),
+					"Niddler-Announcement").start();
+		} catch (final IOException e) {
+			Log.d(LOG_TAG, "Failed to bind announcement socket", e);
 		}
 	}
 
