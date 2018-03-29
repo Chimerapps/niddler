@@ -27,6 +27,7 @@ public class NiddlerService extends Service {
 
 	private static final String LOG_TAG = NiddlerService.class.getSimpleName();
 	private static final int NOTIFICATION_ID = 147;
+	private static final long PORT_WAIT_DELAY = 500L;
 
 	private final IBinder mBinder = new NiddlerBinder();
 	private NotificationManager mNotificationManager;
@@ -34,6 +35,7 @@ public class NiddlerService extends Service {
 	private int mBindCount;
 	private long mAutoStopAfter;
 	private Handler mHandler;
+	private final Handler mNotificationPrepareHandler = new Handler(Looper.getMainLooper());
 
 	@Override
 	public IBinder onBind(final Intent intent) {
@@ -126,6 +128,17 @@ public class NiddlerService extends Service {
 	}
 
 	private void createNotification() {
+		mNotificationPrepareHandler.removeCallbacksAndMessages(null);
+		if (mNiddler.getPort() == 0) {
+			mNotificationPrepareHandler.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					createNotification();
+				}
+			}, PORT_WAIT_DELAY);
+			return;
+		}
+
 		final Notification.Builder notificationBuilder;
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			notificationBuilder = OreoCompatHelper.createNotificationBuilder(this);
@@ -158,6 +171,7 @@ public class NiddlerService extends Service {
 	}
 
 	private void removeNotification() {
+		mNotificationPrepareHandler.removeCallbacksAndMessages(null);
 		mNotificationManager.cancel(NOTIFICATION_ID);
 	}
 }

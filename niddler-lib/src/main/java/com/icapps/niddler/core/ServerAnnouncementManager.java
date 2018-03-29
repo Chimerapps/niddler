@@ -31,6 +31,7 @@ class ServerAnnouncementManager implements Runnable {
 	private static final int ANNOUNCEMENT_SOCKET_PORT = 6394;
 	private static final int REQUEST_QUERY = 0x01;
 	private static final int REQUEST_ANNOUNCE = 0x02;
+	private static final int ANNOUNCEMENT_VERSION = 1;
 
 	private static final String LOG_TAG = ServerAnnouncementManager.class.getSimpleName();
 	private static final long MAX_JOIN_WAIT = 60L;
@@ -197,20 +198,36 @@ class ServerAnnouncementManager implements Runnable {
 
 	private void handleAnnounce(@NonNull final Socket child, @NonNull final InputStream childInput) throws IOException {
 		final DataInputStream dataInput = new DataInputStream(childInput);
+
+		final int version = dataInput.readInt();
+
 		final int packageNameLength = dataInput.readInt();
 		final byte[] name = new byte[packageNameLength];
 		dataInput.readFully(name);
 		final int port = dataInput.readInt();
 		final int pid = dataInput.readInt();
 
-		registerChild(child, dataInput, new String(name, "UTF-8"), port, pid);
-	}
-
-	private void registerChild(@NonNull final Socket child, @NonNull final InputStream in, @NonNull final String packageName, final int port, final int pid) {
 		try {
 			child.setSoTimeout(SLAVE_READ_TIMEOUT);
 		} catch (final IOException ignored) {
 		}
+
+		if (version > ANNOUNCEMENT_VERSION) {
+			Log.i(LOG_TAG, "Got announcement of newer version, consume all");
+			int res = dataInput.read();
+			while (res != -1) {
+				try {
+					res = dataInput.read();
+				} catch (final IOException ignored) {
+					break;
+				}
+			}
+		}
+
+		registerChild(child, dataInput, new String(name, "UTF-8"), port, pid);
+	}
+
+	private void registerChild(@NonNull final Socket child, @NonNull final InputStream in, @NonNull final String packageName, final int port, final int pid) {
 		Log.d(LOG_TAG, "Got announcement for " + packageName);
 		synchronized (mSlaves) {
 			mSlaves.add(new Slave(child, in, packageName, port, pid));
@@ -248,6 +265,7 @@ class ServerAnnouncementManager implements Runnable {
 			final DataOutputStream out = new DataOutputStream(slaveSocket.getOutputStream());
 			out.write(REQUEST_ANNOUNCE);
 			final byte[] packageBytes = mPackageName.getBytes("UTF-8");
+			out.writeInt(ANNOUNCEMENT_VERSION);
 			out.writeInt(packageBytes.length);
 			out.write(packageBytes);
 			out.writeInt(mServer.getPort());
