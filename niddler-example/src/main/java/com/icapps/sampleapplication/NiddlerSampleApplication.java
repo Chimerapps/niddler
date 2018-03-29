@@ -1,10 +1,12 @@
 package com.icapps.sampleapplication;
 
 import android.app.Application;
+
 import com.icapps.niddler.core.Niddler;
 import com.icapps.niddler.interceptor.okhttp.NiddlerOkHttpInterceptor;
 import com.icapps.sampleapplication.api.ExampleJsonApi;
 import com.icapps.sampleapplication.api.ExampleXMLApi;
+
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -21,8 +23,8 @@ public class NiddlerSampleApplication extends Application {
 	public void onCreate() {
 		super.onCreate();
 
-		final Niddler niddler = new Niddler.Builder("superSecretPassword")
-				.setPort(6555)
+		final Niddler niddler = new Niddler.Builder()
+				.setPort(0)
 				.setNiddlerInformation(Niddler.NiddlerServerInfo.fromApplication(this))
 				.build();
 

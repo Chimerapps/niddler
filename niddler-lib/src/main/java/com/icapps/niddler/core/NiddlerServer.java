@@ -13,6 +13,7 @@ import org.java_websocket.server.WebSocketServer;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.channels.NotYetConnectedException;
@@ -27,11 +28,13 @@ import java.util.List;
 class NiddlerServer extends WebSocketServer {
 
 	private static final String LOG_TAG = NiddlerServer.class.getSimpleName();
+
 	private final String mPackageName;
 	private final WebSocketListener mListener;
 	private final List<ServerConnection> mConnections;
 	private final String mPassword;
 	private final NiddlerDebuggerImpl mNiddlerDebugger;
+	private final ServerAnnouncementManager mServerAnnouncementManager;
 
 	private NiddlerServer(final String password, final InetSocketAddress address, final String packageName,
 			final WebSocketListener listener) {
@@ -41,11 +44,24 @@ class NiddlerServer extends WebSocketServer {
 		mPassword = password;
 		mConnections = new LinkedList<>();
 		mNiddlerDebugger = new NiddlerDebuggerImpl();
+		mServerAnnouncementManager = new ServerAnnouncementManager(packageName, this);
 	}
 
 	NiddlerServer(final String password, final int port, final String packageName,
 			final WebSocketListener listener) throws UnknownHostException {
 		this(password, new InetSocketAddress(port), packageName, listener);
+	}
+
+	@Override
+	public void start() {
+		mServerAnnouncementManager.stop();
+		super.start();
+	}
+
+	@Override
+	public void stop() throws IOException, InterruptedException {
+		mServerAnnouncementManager.stop();
+		super.stop();
 	}
 
 	@Override
@@ -80,6 +96,12 @@ class NiddlerServer extends WebSocketServer {
 				}
 			}
 		}
+	}
+
+	@Override
+	public void onStart() {
+		mServerAnnouncementManager.stop();
+		mServerAnnouncementManager.start();
 	}
 
 	private static final String MESSAGE_AUTH = "authReply";
