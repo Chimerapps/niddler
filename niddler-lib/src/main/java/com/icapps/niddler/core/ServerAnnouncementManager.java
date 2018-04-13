@@ -171,6 +171,7 @@ class ServerAnnouncementManager implements Runnable {
 			selfDescriptor.put("packageName", mPackageName);
 			selfDescriptor.put("port", mServer.getPort());
 			selfDescriptor.put("pid", android.os.Process.myPid());
+			selfDescriptor.put("protocol", Niddler.NiddlerServerInfo.PROTOCOL_VERSION);
 		} catch (final JSONException ignored) {
 		}
 		responseArray.put(selfDescriptor);
@@ -182,6 +183,7 @@ class ServerAnnouncementManager implements Runnable {
 					slaveDescriptor.put("packageName", slave.mPackageName);
 					slaveDescriptor.put("port", slave.mPort);
 					slaveDescriptor.put("pid", slave.mPid);
+					slaveDescriptor.put("protocol", slave.mNiddlerProtocolVersion);
 				} catch (final JSONException ignored) {
 				}
 				responseArray.put(slaveDescriptor);
@@ -206,6 +208,7 @@ class ServerAnnouncementManager implements Runnable {
 		dataInput.readFully(name);
 		final int port = dataInput.readInt();
 		final int pid = dataInput.readInt();
+		final int niddlerProtoVersion = dataInput.readInt();
 
 		try {
 			child.setSoTimeout(SLAVE_READ_TIMEOUT);
@@ -224,13 +227,18 @@ class ServerAnnouncementManager implements Runnable {
 			}
 		}
 
-		registerChild(child, dataInput, new String(name, "UTF-8"), port, pid);
+		registerChild(child, dataInput, new String(name, "UTF-8"), port, pid, niddlerProtoVersion);
 	}
 
-	private void registerChild(@NonNull final Socket child, @NonNull final InputStream in, @NonNull final String packageName, final int port, final int pid) {
+	private void registerChild(@NonNull final Socket child,
+			@NonNull final InputStream in,
+			@NonNull final String packageName,
+			final int port,
+			final int pid,
+			final int niddlerProtocolVersion) {
 		Log.d(LOG_TAG, "Got announcement for " + packageName);
 		synchronized (mSlaves) {
-			mSlaves.add(new Slave(child, in, packageName, port, pid));
+			mSlaves.add(new Slave(child, in, packageName, port, pid, niddlerProtocolVersion));
 		}
 	}
 
@@ -270,6 +278,7 @@ class ServerAnnouncementManager implements Runnable {
 			out.write(packageBytes);
 			out.writeInt(mServer.getPort());
 			out.writeInt(android.os.Process.myPid());
+			out.writeInt(Niddler.NiddlerServerInfo.PROTOCOL_VERSION);
 			out.flush();
 
 			//noinspection ResultOfMethodCallIgnored
@@ -315,13 +324,15 @@ class ServerAnnouncementManager implements Runnable {
 		final String mPackageName;
 		final int mPort;
 		final int mPid;
+		final int mNiddlerProtocolVersion;
 
-		Slave(@NonNull final Socket child, @NonNull final InputStream in, final @NonNull String packageName, final int port, final int pid) {
+		Slave(@NonNull final Socket child, @NonNull final InputStream in, final @NonNull String packageName, final int port, final int pid, final int niddlerProtocolVersion) {
 			mChild = child;
 			mIn = in;
 			mPackageName = packageName;
 			mPort = port;
 			mPid = pid;
+			mNiddlerProtocolVersion = niddlerProtocolVersion;
 		}
 	}
 }
