@@ -26,14 +26,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author Nicola Verbeeck
  * @version 1
  */
-class ServerAnnouncementManager implements Runnable {
+class NiddlerServerAnnouncementManager implements Runnable {
+
+	private static final String LOG_TAG = NiddlerServerAnnouncementManager.class.getSimpleName();
 
 	private static final int ANNOUNCEMENT_SOCKET_PORT = 6394;
 	private static final int REQUEST_QUERY = 0x01;
 	private static final int REQUEST_ANNOUNCE = 0x02;
 	private static final int ANNOUNCEMENT_VERSION = 1;
 
-	private static final String LOG_TAG = ServerAnnouncementManager.class.getSimpleName();
 	private static final long MAX_JOIN_WAIT = 60L;
 	private static final int SLAVE_READ_TIMEOUT = 10;
 	private static final int MASTER_ACCEPT_TIMEOUT = 1000;
@@ -53,7 +54,7 @@ class ServerAnnouncementManager implements Runnable {
 	@NonNull
 	private final List<Slave> mSlaves;
 
-	ServerAnnouncementManager(@NonNull final String packageName, @NonNull final NiddlerServer server) {
+	NiddlerServerAnnouncementManager(@NonNull final String packageName, @NonNull final NiddlerServer server) {
 		mPackageName = packageName;
 		mServer = server;
 		mSlaves = new ArrayList<>();

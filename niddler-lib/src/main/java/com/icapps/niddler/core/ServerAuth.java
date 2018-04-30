@@ -3,7 +3,6 @@ package com.icapps.niddler.core;
 import android.support.annotation.Nullable;
 import android.util.Base64;
 import android.util.Log;
-import com.icapps.niddler.util.Logging;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -42,12 +41,12 @@ final class ServerAuth {
 			return false;
 		}
 		try {
-			final String mustBe = Base64.encodeToString(MessageDigest.getInstance("SHA-512").digest((request.hashKey + password).getBytes("UTF-8")), Base64.URL_SAFE | Base64.NO_PADDING | Base64.NO_WRAP);
+			final String mustBe = Base64.encodeToString(MessageDigest.getInstance("SHA-512").digest((request.hashKey + password).getBytes("UTF-8")),
+					Base64.URL_SAFE | Base64.NO_PADDING | Base64.NO_WRAP);
 			return reply.hashKey.equals(mustBe);
 		} catch (final NoSuchAlgorithmException e) {
-			if (Logging.DO_LOG) {
-				Log.e("ServerAuth", "SHA-512 not found", e);
-			}
+			Log.e("ServerAuth", "SHA-512 not found", e);
+
 			return false;
 		} catch (final UnsupportedEncodingException e) {
 			throw new IllegalStateException("UTF-8 not found, BAIL", e);

@@ -15,7 +15,6 @@ import android.util.Log;
 
 import com.icapps.niddler.R;
 import com.icapps.niddler.core.Niddler;
-import com.icapps.niddler.util.Logging;
 
 import java.io.IOException;
 
@@ -102,18 +101,14 @@ public class NiddlerService extends Service {
 		super.onCreate();
 		mHandler = new Handler(Looper.getMainLooper());
 		mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		if (Logging.DO_LOG) {
-			Log.d(LOG_TAG, "NiddlerService created!");
-		}
+		Log.d(LOG_TAG, "NiddlerService created!");
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
 		removeNotification();
-		if (Logging.DO_LOG) {
-			Log.d(LOG_TAG, "NiddlerService destroyed!");
-		}
+		Log.d(LOG_TAG, "NiddlerService destroyed!");
 	}
 
 	private void closeNiddler() {

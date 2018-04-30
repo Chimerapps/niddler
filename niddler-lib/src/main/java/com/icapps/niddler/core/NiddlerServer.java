@@ -5,7 +5,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.icapps.niddler.core.debug.NiddlerDebugger;
-import com.icapps.niddler.util.Logging;
 
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
@@ -34,7 +33,7 @@ class NiddlerServer extends WebSocketServer {
 	private final List<ServerConnection> mConnections;
 	private final String mPassword;
 	private final NiddlerDebuggerImpl mNiddlerDebugger;
-	private final ServerAnnouncementManager mServerAnnouncementManager;
+	private final NiddlerServerAnnouncementManager mServerAnnouncementManager;
 
 	private NiddlerServer(final String password, final InetSocketAddress address, final String packageName,
 			final WebSocketListener listener) {
@@ -44,7 +43,7 @@ class NiddlerServer extends WebSocketServer {
 		mPassword = password;
 		mConnections = new LinkedList<>();
 		mNiddlerDebugger = new NiddlerDebuggerImpl();
-		mServerAnnouncementManager = new ServerAnnouncementManager(packageName, this);
+		mServerAnnouncementManager = new NiddlerServerAnnouncementManager(packageName, this);
 	}
 
 	NiddlerServer(final String password, final int port, final String packageName,
@@ -66,9 +65,8 @@ class NiddlerServer extends WebSocketServer {
 
 	@Override
 	public final void onOpen(final WebSocket conn, final ClientHandshake handshake) {
-		if (Logging.DO_LOG) {
-			Log.d(LOG_TAG, "New socket connection: " + handshake.getResourceDescriptor());
-		}
+		Log.d(LOG_TAG, "New socket connection: " + handshake.getResourceDescriptor());
+
 		final ServerConnection connection = new ServerConnection(conn);
 		synchronized (mConnections) {
 			mConnections.add(connection);
@@ -83,9 +81,8 @@ class NiddlerServer extends WebSocketServer {
 
 	@Override
 	public final void onClose(final WebSocket conn, final int code, final String reason, final boolean remote) {
-		if (Logging.DO_LOG) {
-			Log.d(LOG_TAG, "Connection closed: " + conn);
-		}
+		Log.d(LOG_TAG, "Connection closed: " + conn);
+
 		synchronized (mConnections) {
 			final Iterator<ServerConnection> iterator = mConnections.iterator();
 			while (iterator.hasNext()) {
@@ -111,9 +108,6 @@ class NiddlerServer extends WebSocketServer {
 
 	@Override
 	public final void onMessage(final WebSocket conn, final String message) {
-		if (Logging.DO_LOG) {
-			Log.d(LOG_TAG, conn + ": " + message);
-		}
 		final ServerConnection connection = getConnection(conn);
 		if (connection == null) {
 			conn.close();
@@ -126,9 +120,7 @@ class NiddlerServer extends WebSocketServer {
 			switch (type) {
 				case MESSAGE_AUTH:
 					if (!connection.checkAuthReply(MessageParser.parseAuthReply(object), mPassword)) {
-						if (Logging.DO_LOG) {
-							Log.w(LOG_TAG, "Client sent wrong authentication code!");
-						}
+						Log.w(LOG_TAG, "Client sent wrong authentication code!");
 						return;
 					}
 					authSuccess(conn);
@@ -145,14 +137,10 @@ class NiddlerServer extends WebSocketServer {
 					mNiddlerDebugger.onControlMessage(object, connection);
 					break;
 				default:
-					if (Logging.DO_LOG) {
-						Log.w(LOG_TAG, "Received unsolicited message from client: " + message);
-					}
+					Log.w(LOG_TAG, "Received unsolicited message from client: " + message);
 			}
 		} catch (final JSONException e) {
-			if (Logging.DO_LOG) {
-				Log.w(LOG_TAG, "Received non-json message from server: " + message, e);
-			}
+			Log.w(LOG_TAG, "Received non-json message from server: " + message, e);
 		}
 	}
 
@@ -175,9 +163,7 @@ class NiddlerServer extends WebSocketServer {
 
 	@Override
 	public final void onError(final WebSocket conn, final Exception ex) {
-		if (Logging.DO_LOG) {
-			Log.e(LOG_TAG, "WebSocket error", ex);
-		}
+		Log.e(LOG_TAG, "WebSocket error", ex);
 
 		final ServerConnection connection = getConnection(conn);
 		if (connection != null) {

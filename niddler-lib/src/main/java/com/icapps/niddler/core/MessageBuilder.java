@@ -5,8 +5,6 @@ import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 
-import com.icapps.niddler.util.Logging;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,7 +17,7 @@ import java.util.Map;
 
 /**
  * @author Nicola Verbeeck
- *         Date 22/11/16.
+ * Date 22/11/16.
  */
 final class MessageBuilder {
 
@@ -46,9 +44,8 @@ final class MessageBuilder {
 			object.put("method", request.getMethod());
 			object.put("url", request.getUrl());
 		} catch (final JSONException e) {
-			if (Logging.DO_LOG) {
-				Log.e("MessageBuilder", "Failed to create json: ", e);
-			}
+			Log.e("MessageBuilder", "Failed to create json: ", e);
+
 			return null;
 		}
 		return object;
@@ -80,9 +77,8 @@ final class MessageBuilder {
 			object.put("httpVersion", response.getHttpVersion());
 			object.put("statusLine", response.getStatusLine());
 		} catch (final JSONException e) {
-			if (Logging.DO_LOG) {
-				Log.e("MessageBuilder", "Failed to create json: ", e);
-			}
+			Log.e("MessageBuilder", "Failed to create json: ", e);
+
 			return null;
 		}
 		return object;
@@ -95,9 +91,8 @@ final class MessageBuilder {
 			object.put("serverName", serverInfo.name);
 			object.put("serverDescription", serverInfo.description);
 		} catch (final JSONException e) {
-			if (Logging.DO_LOG) {
-				Log.e("MessageBuilder", "Failed to create json: ", e);
-			}
+			Log.e("MessageBuilder", "Failed to create json: ", e);
+
 			return "";
 		}
 		return object.toString();
@@ -112,9 +107,8 @@ final class MessageBuilder {
 				object.put("package", request.packageName);
 			}
 		} catch (final JSONException e) {
-			if (Logging.DO_LOG) {
-				Log.e("MessageBuilder", "Failed to create json: ", e);
-			}
+			Log.e("MessageBuilder", "Failed to create json: ", e);
+
 			return "";
 		}
 		return object.toString();
@@ -137,9 +131,8 @@ final class MessageBuilder {
 		try {
 			base.writeBody(out);
 		} catch (final IOException e) {
-			if (Logging.DO_LOG) {
-				Log.i("MessageBuilder", "Failed to write body", e);
-			}
+			Log.e("MessageBuilder", "Failed to write body", e);
+
 			return null;
 		}
 		final byte[] bytes = out.toByteArray();

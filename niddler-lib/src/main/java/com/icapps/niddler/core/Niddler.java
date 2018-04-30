@@ -11,7 +11,6 @@ import android.util.Log;
 
 import com.icapps.niddler.core.debug.NiddlerDebugger;
 import com.icapps.niddler.service.NiddlerService;
-import com.icapps.niddler.util.Logging;
 
 import org.java_websocket.WebSocket;
 
@@ -34,7 +33,7 @@ public final class Niddler implements NiddlerServer.WebSocketListener, Closeable
 
 	private final NiddlerServerInfo mNiddlerServerInfo;
 	private final MessagesCache mMessageCache;
-	private final NiddlerServiceLifeCycleWatcher mLifeCycleWatcher;
+	private NiddlerServiceLifeCycleWatcher mLifeCycleWatcher = null;
 	private NiddlerService mNiddlerService;
 	private NiddlerServer mServer;
 	private boolean mIsStarted = false;
@@ -49,19 +48,6 @@ public final class Niddler implements NiddlerServer.WebSocketListener, Closeable
 		}
 		mMessageCache = new MessagesCache(cacheSize);
 		mNiddlerServerInfo = niddlerServerInfo;
-
-		mLifeCycleWatcher = new NiddlerServiceLifeCycleWatcher(new ServiceConnection() {
-			@Override
-			public void onServiceConnected(final ComponentName name, final IBinder service) {
-				mNiddlerService = ((NiddlerService.NiddlerBinder) service).getService();
-				mNiddlerService.initialize(Niddler.this, mAutoStopAfter);
-			}
-
-			@Override
-			public void onServiceDisconnected(final ComponentName name) {
-				mNiddlerService = null;
-			}
-		});
 	}
 
 	public void logRequest(final NiddlerRequest request) {
@@ -76,9 +62,7 @@ public final class Niddler implements NiddlerServer.WebSocketListener, Closeable
 		if ((mServer != null) && !mIsStarted) {
 			mServer.start();
 			mIsStarted = true;
-			if (Logging.DO_LOG) {
-				Log.d(LOG_TAG, "Started listening at address" + mServer.getAddress());
-			}
+			Log.d(LOG_TAG, "Started niddler server on " + mServer.getAddress());
 		}
 	}
 
@@ -101,6 +85,20 @@ public final class Niddler implements NiddlerServer.WebSocketListener, Closeable
 	 */
 	public void attachToApplication(final Application application, final long autoStopAfter) {
 		mAutoStopAfter = autoStopAfter;
+		if (mLifeCycleWatcher == null) {
+			mLifeCycleWatcher = new NiddlerServiceLifeCycleWatcher(new ServiceConnection() {
+				@Override
+				public void onServiceConnected(final ComponentName name, final IBinder service) {
+					mNiddlerService = ((NiddlerService.NiddlerBinder) service).getService();
+					mNiddlerService.initialize(Niddler.this, mAutoStopAfter);
+				}
+
+				@Override
+				public void onServiceDisconnected(final ComponentName name) {
+					mNiddlerService = null;
+				}
+			});
+		}
 		application.unregisterActivityLifecycleCallbacks(mLifeCycleWatcher);
 		application.registerActivityLifecycleCallbacks(mLifeCycleWatcher);
 	}
