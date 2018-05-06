@@ -10,7 +10,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.nio.file.attribute.AclEntryPermission;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -75,7 +74,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 	}
 
 	void onDebuggerAttached(@NonNull final ServerConnection connection) {
-		mDebuggerConfiguration.connectionLost();
+		onDebuggerConnectionClosed();
 		mServerConnection = connection;
 	}
 
@@ -275,7 +274,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 			return;
 		}
 
-		onDebuggerConfigurationMessage(object.getString(DEBUG_TYPE_KEY), object.getJSONObject(DEBUG_PAYLOAD));
+		onDebuggerConfigurationMessage(object.getString(DEBUG_TYPE_KEY), object.optJSONObject(DEBUG_PAYLOAD));
 	}
 
 	@Nullable
@@ -306,6 +305,12 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		}
 		if (future != null) {
 			future.offer(response);
+		}
+	}
+
+	void onConnectionClosed(final ServerConnection connection) {
+		if (mServerConnection == connection) {
+			onDebuggerConnectionClosed();
 		}
 	}
 
@@ -606,10 +611,10 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		}
 
 		void setActive(final boolean active) {
-			try{
+			try {
 				mWriteLock.lock();
 				mIsActive = active;
-			}finally {
+			} finally {
 				mWriteLock.unlock();
 			}
 		}
@@ -925,7 +930,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		object.put("type", "debugRequest");
 		object.put("requestId", request.getMessageId());
 		if (response != null) {
-			object.put("response", MessageBuilder.buildMessage(response));
+			object.put("response", MessageBuilder.buildMessageJson(response));
 		}
 		return object.toString();
 	}
@@ -943,7 +948,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 
 	static class CompletableFuture<T> implements Future<T> {
 
-		private final BlockingQueue<T> reply = new ArrayBlockingQueue<>(1);
+		private final BlockingQueue<OptionalWrapper<T>> reply = new ArrayBlockingQueue<>(1);
 		private volatile boolean done = false;
 
 		CompletableFuture() {
@@ -951,7 +956,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 
 		CompletableFuture(T value) {
 			try {
-				reply.put(value);
+				reply.put(new OptionalWrapper<>(value));
 			} catch (final InterruptedException ignored) {
 			}
 		}
@@ -959,7 +964,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		void offer(final T value) {
 			try {
 				done = true;
-				reply.put(value);
+				reply.put(new OptionalWrapper<T>(value));
 			} catch (final InterruptedException ignored) {
 				if (Log.isLoggable(TAG, Log.WARN)) {
 					Log.w(TAG, "Failed to offer:", ignored);
@@ -984,16 +989,25 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 
 		@Override
 		public T get() throws InterruptedException {
-			return reply.take();
+			return reply.take().value;
 		}
 
 		@Override
 		public T get(final long timeout, @NonNull final TimeUnit unit) throws InterruptedException, TimeoutException {
-			final T replyOrNull = reply.poll(timeout, unit);
+			final OptionalWrapper<T> replyOrNull = reply.poll(timeout, unit);
 			if (replyOrNull == null) {
 				throw new TimeoutException();
 			}
-			return replyOrNull;
+			return replyOrNull.value;
+		}
+	}
+
+	static class OptionalWrapper<T> {
+
+		T value;
+
+		OptionalWrapper(T value) {
+			this.value = value;
 		}
 	}
 

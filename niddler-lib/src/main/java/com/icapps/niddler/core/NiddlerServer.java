@@ -87,6 +87,7 @@ class NiddlerServer extends WebSocketServer {
 			final Iterator<ServerConnection> iterator = mConnections.iterator();
 			while (iterator.hasNext()) {
 				final ServerConnection connection = iterator.next();
+				mNiddlerDebugger.onConnectionClosed(connection);
 				connection.closed();
 				if (connection.isFor(conn)) {
 					iterator.remove();
@@ -167,6 +168,7 @@ class NiddlerServer extends WebSocketServer {
 
 		final ServerConnection connection = getConnection(conn);
 		if (connection != null) {
+			mNiddlerDebugger.onConnectionClosed(connection);
 			connection.closed();
 		}
 	}
