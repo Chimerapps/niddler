@@ -1,6 +1,5 @@
 package com.icapps.niddler.core;
 
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -59,8 +58,7 @@ final class MessageBuilder {
 		return object.toString();
 	}
 
-	@Nullable
-	private static JSONObject buildMessageJson(final NiddlerResponse response) {
+	static JSONObject buildMessageJson(final NiddlerResponse response) {
 		if (response == null) {
 			return null;
 		}
