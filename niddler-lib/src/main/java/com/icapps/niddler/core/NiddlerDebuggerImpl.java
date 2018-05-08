@@ -307,7 +307,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 
 	@Override
 	public void cancelWaitForConnection() {
-		synchronized (mDebuggerConfiguration){
+		synchronized (mDebuggerConfiguration) {
 			mDebuggerConnectionListener = null;
 			mDebuggerConfiguration.setWaitingForDebugger(false);
 		}
@@ -402,10 +402,10 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 			try {
 				mWriteLock.lock();
 				mWaitingForDebugger = waiting;
-				if (!mWaitingForDebugger) {
-					mWaitingForDebuggerVariable.open();
-				} else {
+				if (mWaitingForDebugger) {
 					mWaitingForDebuggerVariable.close();
+				} else {
+					mWaitingForDebuggerVariable.open();
 				}
 			} finally {
 				mWriteLock.unlock();
