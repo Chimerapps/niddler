@@ -90,6 +90,24 @@ public interface NiddlerDebugger {
 	 */
 	boolean ensureCallTime(final long startTime) throws IOException;
 
+	/**
+	 * Instructs the debugger server to hold all calls until a debugger has connected and has started a session. Can be cancelled with {#cancelWaitForConnection}
+	 *
+	 * @param onDebuggerConnected Callback to be executed when a debugger has connected and started a session. Can be called on any thread
+	 * @return True if we transitioned to the waiting state and the called should inform the user, false if not
+	 */
+	boolean waitForConnection(@NonNull final Runnable onDebuggerConnected);
+
+	/**
+	 * @return True if the debugger server is currently waiting until a debugger has connected
+	 */
+	boolean isWaitingForConnection();
+
+	/**
+	 *
+	 */
+	void cancelWaitForConnection();
+
 	abstract class DebugMessage {
 		/**
 		 * Headers, optional

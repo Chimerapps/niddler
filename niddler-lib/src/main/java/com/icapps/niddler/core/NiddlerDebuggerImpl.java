@@ -1,5 +1,6 @@
 package com.icapps.niddler.core;
 
+import android.os.ConditionVariable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -67,6 +68,9 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 	@NonNull
 	private final Map<String, CompletableFuture<DebugRequest>> mWaitingRequests;
 
+	@Nullable
+	private Runnable mDebuggerConnectionListener;
+
 	NiddlerDebuggerImpl() {
 		mDebuggerConfiguration = new DebuggerConfiguration();
 		mWaitingResponses = new HashMap<>();
@@ -100,6 +104,15 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 			switch (messageType) {
 				case MESSAGE_ACTIVATE:
 					mDebuggerConfiguration.setActive(true);
+					synchronized (mDebuggerConfiguration) {
+						if (mDebuggerConfiguration.isWaitingForDebugger()) {
+							mDebuggerConfiguration.setWaitingForDebugger(false);
+							if (mDebuggerConnectionListener != null) {
+								mDebuggerConnectionListener.run();
+							}
+							mDebuggerConnectionListener = null;
+						}
+					}
 					break;
 				case MESSAGE_DEACTIVATE:
 					mDebuggerConfiguration.setActive(false);
@@ -269,6 +282,32 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		}
 	}
 
+	@Override
+	public boolean waitForConnection(@NonNull final Runnable onDebuggerConnected) {
+		synchronized (mDebuggerConfiguration) {
+			if (mServerConnection != null && mDebuggerConfiguration.active()) {
+				return false;
+			}
+			if (mDebuggerConfiguration.isWaitingForDebugger()) {
+				return false;
+			}
+
+			mDebuggerConfiguration.setWaitingForDebugger(true);
+			mDebuggerConnectionListener = onDebuggerConnected;
+			return true;
+		}
+	}
+
+	@Override
+	public boolean isWaitingForConnection() {
+		return false;
+	}
+
+	@Override
+	public void cancelWaitForConnection() {
+
+	}
+
 	void onControlMessage(@NonNull final JSONObject object, final ServerConnection connection) throws JSONException {
 		if (mServerConnection != connection) {
 			return;
@@ -329,6 +368,12 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		private long mPreBlacklistTimeout = 0L;
 		private long mPostBlacklistTimeout = 0L;
 		private long mTimePerCall = 0L;
+		private boolean mWaitingForDebugger;
+		private final ConditionVariable mWaitingForDebuggerVariable = new ConditionVariable();
+
+		DebuggerConfiguration() {
+			mWaitingForDebuggerVariable.open();
+		}
 
 		boolean active() {
 			try {
@@ -336,6 +381,29 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 				return mIsActive;
 			} finally {
 				mReadLock.unlock();
+			}
+		}
+
+		boolean isWaitingForDebugger() {
+			try {
+				mReadLock.lock();
+				return mWaitingForDebugger;
+			} finally {
+				mReadLock.unlock();
+			}
+		}
+
+		void setWaitingForDebugger(boolean waiting) {
+			try {
+				mWriteLock.lock();
+				mWaitingForDebugger = waiting;
+				if (!mWaitingForDebugger) {
+					mWaitingForDebuggerVariable.open();
+				} else {
+					mWaitingForDebuggerVariable.close();
+				}
+			} finally {
+				mWriteLock.unlock();
 			}
 		}
 
@@ -379,6 +447,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		}
 
 		boolean inBlacklisted(@NonNull final CharSequence url) {
+			mWaitingForDebuggerVariable.block();
 			try {
 				mReadLock.lock();
 
@@ -471,6 +540,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 
 		@Nullable
 		CompletableFuture<DebugRequest> handleRequestOverride(@NonNull final NiddlerRequest request, @NonNull final NiddlerDebuggerImpl debugger) throws IOException {
+			mWaitingForDebuggerVariable.block();
 			try {
 				mReadLock.lock();
 
@@ -491,6 +561,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 
 		@Nullable
 		CompletableFuture<DebugResponse> handleRequest(@NonNull final NiddlerRequest request, @NonNull final NiddlerDebuggerImpl debugger) throws IOException {
+			mWaitingForDebuggerVariable.block();
 			try {
 				mReadLock.lock();
 
@@ -513,6 +584,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		CompletableFuture<DebugResponse> handleResponse(@NonNull final NiddlerRequest request,
 				@NonNull final NiddlerResponse response,
 				final NiddlerDebuggerImpl niddlerDebugger) throws IOException {
+			mWaitingForDebuggerVariable.block();
 			try {
 				mReadLock.lock();
 
@@ -573,6 +645,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		}
 
 		long preBlacklistTimeout() {
+			mWaitingForDebuggerVariable.block();
 			try {
 				mReadLock.lock();
 				return mIsActive ? mPreBlacklistTimeout : 0L;
@@ -582,6 +655,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		}
 
 		long postBlacklistTimeout() {
+			mWaitingForDebuggerVariable.block();
 			try {
 				mReadLock.lock();
 				return mIsActive ? mPostBlacklistTimeout : 0L;
@@ -591,6 +665,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		}
 
 		long minimalCallDuration() {
+			mWaitingForDebuggerVariable.block();
 			try {
 				mReadLock.lock();
 				return mIsActive ? mTimePerCall : 0L;
