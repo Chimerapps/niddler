@@ -119,15 +119,15 @@ class NiddlerServiceLifeCycleWatcher implements Application.ActivityLifecycleCal
 							dialog.cancel();
 						}
 					})
-					.setOnCancelListener(new DialogInterface.OnCancelListener() {
-						@Override
-						public void onCancel(final DialogInterface dialog) {
-							if (mNiddler != null) {
-								mNiddler.debugger().cancelWaitForConnection();
-							}
-						}
-					})
 					.create();
+		}
+
+		@Override
+		public void onCancel(final DialogInterface dialog) {
+			super.onCancel(dialog);
+			if (mNiddler != null) {
+				mNiddler.debugger().cancelWaitForConnection();
+			}
 		}
 
 		@Override

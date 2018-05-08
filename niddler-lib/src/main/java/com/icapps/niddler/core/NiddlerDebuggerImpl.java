@@ -300,12 +300,17 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 
 	@Override
 	public boolean isWaitingForConnection() {
-		return false;
+		synchronized (mDebuggerConfiguration) {
+			return mDebuggerConfiguration.isWaitingForDebugger();
+		}
 	}
 
 	@Override
 	public void cancelWaitForConnection() {
-
+		synchronized (mDebuggerConfiguration){
+			mDebuggerConnectionListener = null;
+			mDebuggerConfiguration.setWaitingForDebugger(false);
+		}
 	}
 
 	void onControlMessage(@NonNull final JSONObject object, final ServerConnection connection) throws JSONException {
