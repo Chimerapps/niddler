@@ -104,7 +104,7 @@ public interface NiddlerDebugger {
 	boolean isWaitingForConnection();
 
 	/**
-	 *
+	 * Tells the debugger server to stop waiting for a debugger connection and proceed
 	 */
 	void cancelWaitForConnection();
 
