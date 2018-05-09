@@ -28,6 +28,7 @@ public final class Niddler implements NiddlerServer.WebSocketListener, Closeable
 
 	public static final String NIDDLER_DEBUG_RESPONSE_HEADER = "X-Niddler-Debug";
 	public static final String NIDDLER_DEBUG_TIMING_RESPONSE_HEADER = "X-Niddler-Debug-Timing";
+	public static final String INTENT_EXTRA_WAIT_FOR_DEBUGGER = "Niddler-Wait-For-Debugger";
 
 	private static final String LOG_TAG = Niddler.class.getSimpleName();
 
@@ -97,7 +98,7 @@ public final class Niddler implements NiddlerServer.WebSocketListener, Closeable
 				public void onServiceDisconnected(final ComponentName name) {
 					mNiddlerService = null;
 				}
-			});
+			}, this);
 		}
 		application.unregisterActivityLifecycleCallbacks(mLifeCycleWatcher);
 		application.registerActivityLifecycleCallbacks(mLifeCycleWatcher);
