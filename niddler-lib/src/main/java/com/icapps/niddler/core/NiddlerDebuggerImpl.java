@@ -731,7 +731,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 
 		@Nullable
 		static String extractMatchingRegex(final JSONObject object) {
-			return object.optString("regex");
+			return object.optString("regex", null);
 		}
 
 	}
@@ -786,7 +786,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 			final String regexString = extractMatchingRegex(object);
 
 			mRegex = regexString == null ? null : Pattern.compile(regexString);
-			mMethod = object.optString("matchMethod");
+			mMethod = object.optString("matchMethod", null);
 			mDebugResponse = parseResponse(object);
 		}
 
@@ -823,7 +823,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 			final String regexString = extractMatchingRegex(object);
 
 			mRegex = regexString == null ? null : Pattern.compile(regexString);
-			mMethod = object.optString("matchMethod");
+			mMethod = object.optString("matchMethod", null);
 		}
 
 		@Nullable
@@ -861,7 +861,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 			final String regexString = extractMatchingRegex(object);
 
 			mRegex = regexString == null ? null : Pattern.compile(regexString);
-			mMethod = object.optString("matchMethod");
+			mMethod = object.optString("matchMethod", null);
 			mResponseCode = object.has("responseCode") ? object.optInt("responseCode") : null;
 		}
 
@@ -908,7 +908,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 			final String regexString = extractMatchingRegex(object);
 
 			mRegex = regexString == null ? null : Pattern.compile(regexString);
-			mMethod = object.optString("matchMethod");
+			mMethod = object.optString("matchMethod", null);
 			mDebugRequest = parseResponseOverride(object);
 		}
 
@@ -945,7 +945,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 			final String regexString = extractMatchingRegex(object);
 
 			mRegex = regexString == null ? null : Pattern.compile(regexString);
-			mMethod = object.optString("matchMethod");
+			mMethod = object.optString("matchMethod", null);
 		}
 
 		@Nullable
@@ -974,8 +974,8 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		return new DebugResponse(config.getInt("code"),
 				config.getString("message"),
 				parseHeaders(config.optJSONObject("headers")),
-				config.optString("encodedBody"),
-				config.optString("bodyMimeType"));
+				config.optString("encodedBody", null),
+				config.optString("bodyMimeType", null));
 	}
 
 	@NonNull
@@ -983,8 +983,8 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		return new DebugRequest(config.getString("url"),
 				config.getString("method"),
 				parseHeaders(config.optJSONObject("headers")),
-				config.optString("encodedBody"),
-				config.optString("bodyMimeType"));
+				config.optString("encodedBody", null),
+				config.optString("bodyMimeType", null));
 	}
 
 	@Nullable

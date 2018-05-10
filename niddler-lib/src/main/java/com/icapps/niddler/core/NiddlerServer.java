@@ -117,7 +117,7 @@ class NiddlerServer extends WebSocketServer {
 
 		try {
 			final JSONObject object = new JSONObject(message);
-			final String type = object.optString("type");
+			final String type = object.optString("type", null);
 			switch (type) {
 				case MESSAGE_AUTH:
 					if (!connection.checkAuthReply(MessageParser.parseAuthReply(object), mPassword)) {
