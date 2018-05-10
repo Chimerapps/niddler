@@ -101,6 +101,9 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 	}
 
 	private void onDebuggerConfigurationMessage(@NonNull final String messageType, final JSONObject body, final JSONObject envelopeObject) {
+		if (Log.isLoggable(TAG, Log.VERBOSE)) {
+			Log.v(TAG, "Received debugger message: " + messageType + "->\n" + envelopeObject);
+		}
 		try {
 			switch (messageType) {
 				case MESSAGE_ACTIVATE:
