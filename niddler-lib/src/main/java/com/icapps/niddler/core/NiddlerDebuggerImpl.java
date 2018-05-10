@@ -100,7 +100,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		}
 	}
 
-	private void onDebuggerConfigurationMessage(@NonNull final String messageType, final JSONObject body) {
+	private void onDebuggerConfigurationMessage(@NonNull final String messageType, final JSONObject body, final JSONObject envelopeObject) {
 		try {
 			switch (messageType) {
 				case MESSAGE_ACTIVATE:
@@ -134,7 +134,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 					mDebuggerConfiguration.addRequestAction(new DefaultResponseAction(body));
 					break;
 				case MESSAGE_DEBUG_REPLY:
-					onDebugResponse(body.getString(KEY_MESSAGE_ID), parseResponse(body));
+					onDebugResponse(envelopeObject.getString(KEY_MESSAGE_ID), parseResponse(body));
 					break;
 				case MESSAGE_ADD_REQUEST:
 					mDebuggerConfiguration.addRequestAction(new DebugRequestAction(body));
@@ -319,7 +319,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 			return;
 		}
 
-		onDebuggerConfigurationMessage(object.getString(DEBUG_TYPE_KEY), object.optJSONObject(DEBUG_PAYLOAD));
+		onDebuggerConfigurationMessage(object.getString(DEBUG_TYPE_KEY), object.optJSONObject(DEBUG_PAYLOAD), object);
 	}
 
 	@Nullable
