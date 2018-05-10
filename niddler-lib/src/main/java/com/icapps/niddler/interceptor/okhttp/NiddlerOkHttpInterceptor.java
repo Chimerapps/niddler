@@ -150,7 +150,13 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 				.message(debugResponse.message);
 
 		if (debugResponse.headers != null) {
-			builder.headers(Headers.of(debugResponse.headers));
+			final Headers.Builder headers = new Headers.Builder();
+			for (final Map.Entry<String, List<String>> entry : debugResponse.headers.entrySet()) {
+				for (final String value : entry.getValue()) {
+					headers.add(entry.getKey(), value);
+				}
+			}
+			builder.headers(headers.build());
 		}
 
 		if (!TextUtils.isEmpty(debugResponse.encodedBody)) {
@@ -175,7 +181,13 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 				.url(debugRequest.url)
 				.method(debugRequest.method, body);
 		if (debugRequest.headers != null) {
-			builder.headers(Headers.of(debugRequest.headers));
+			final Headers.Builder headers = new Headers.Builder();
+			for (final Map.Entry<String, List<String>> entry : debugRequest.headers.entrySet()) {
+				for (final String value : entry.getValue()) {
+					headers.add(entry.getKey(), value);
+				}
+			}
+			builder.headers(headers.build());
 		}
 		return builder.build();
 	}

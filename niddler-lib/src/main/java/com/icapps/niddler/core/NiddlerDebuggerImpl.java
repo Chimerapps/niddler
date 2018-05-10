@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.icapps.niddler.core.debug.NiddlerDebugger;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -987,18 +988,23 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 	}
 
 	@Nullable
-	private static Map<String, String> parseHeaders(@Nullable final JSONObject headersObject) throws JSONException {
+	private static Map<String, List<String>> parseHeaders(@Nullable final JSONObject headersObject) throws JSONException {
 		if (headersObject == null) {
 			return null;
 		}
 
-		final Map<String, String> headers = new HashMap<>();
+		final Map<String, List<String>> headers = new HashMap<>();
 
 		final Iterator<String> keys = headersObject.keys();
 		while (keys.hasNext()) {
 			final String key = keys.next();
-			final String value = headersObject.getString(key);
-			headers.put(key, value);
+			final JSONArray array = headersObject.getJSONArray(key);
+			final int numItems = array.length();
+			final List<String> headersForKey = new ArrayList<>(numItems);
+			for (int i = 0; i < numItems; ++i) {
+				headersForKey.add(array.getString(i));
+			}
+			headers.put(key, headersForKey);
 		}
 
 		return headers;
