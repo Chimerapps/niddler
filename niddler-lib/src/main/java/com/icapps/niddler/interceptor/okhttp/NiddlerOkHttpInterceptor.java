@@ -167,10 +167,10 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 		builder.request(request);
 		builder.receivedResponseAtMillis(System.currentTimeMillis());
 
-		if (response != null) {
-			builder.protocol(response.protocol());
-		} else {
+		if (response == null) {
 			builder.protocol(Protocol.HTTP_1_1);
+		} else {
+			builder.protocol(response.protocol());
 		}
 
 		return builder.build();
