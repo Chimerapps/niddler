@@ -7,6 +7,7 @@ import com.icapps.niddler.core.NiddlerRequest;
 import com.icapps.niddler.core.NiddlerResponse;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -113,7 +114,7 @@ public interface NiddlerDebugger {
 		 * Headers, optional
 		 */
 		@Nullable
-		public final Map<String, String> headers;
+		public final Map<String, List<String>> headers;
 
 		/**
 		 * base64 encoded body if any
@@ -127,7 +128,7 @@ public interface NiddlerDebugger {
 		@Nullable
 		public final String bodyMimeType;
 
-		DebugMessage(@Nullable final Map<String, String> headers, @Nullable final String encodedBody, @Nullable final String bodyMimeType) {
+		DebugMessage(@Nullable final Map<String, List<String>> headers, @Nullable final String encodedBody, @Nullable final String bodyMimeType) {
 			this.headers = headers;
 			this.encodedBody = encodedBody;
 			this.bodyMimeType = bodyMimeType;
@@ -148,7 +149,7 @@ public interface NiddlerDebugger {
 
 		public DebugResponse(final int code,
 				@NonNull final String message,
-				@Nullable final Map<String, String> headers,
+				@Nullable final Map<String, List<String>> headers,
 				@Nullable final String encodedBody,
 				@Nullable final String bodyMimeType) {
 			super(headers, encodedBody, bodyMimeType);
@@ -172,7 +173,7 @@ public interface NiddlerDebugger {
 
 		public DebugRequest(@NonNull final String url,
 				@NonNull final String method,
-				@Nullable final Map<String, String> headers,
+				@Nullable final Map<String, List<String>> headers,
 				@Nullable final String encodedBody,
 				@Nullable final String bodyMimeType) {
 			super(headers, encodedBody, bodyMimeType);

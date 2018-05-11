@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
+import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
@@ -86,7 +87,7 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 		mNiddler.logRequest(niddlerRequest);
 
 		final NiddlerDebugger.DebugResponse debuggerBeforeExecuteOverride = mDebugger.handleRequest(niddlerRequest);
-		Response debugResponse = makeResponse(debuggerBeforeExecuteOverride);
+		Response debugResponse = makeResponse(debuggerBeforeExecuteOverride, finalRequest, null);
 
 		final Response response = (debugResponse != null) ? debugResponse : chain.proceed(finalRequest);
 
@@ -118,7 +119,7 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 		} else {
 			final int newWait = (int) (System.currentTimeMillis() - sentAt);
 			final int newReadTime = (int) (System.currentTimeMillis() - sentAt);
-			final Response debugResp = makeResponse(debugFromResponse);
+			final Response debugResp = makeResponse(debugFromResponse, response.request(), response);
 
 			final NiddlerResponse debugNiddlerResponse = new NiddlerOkHttpResponse(debugResp, uuid,
 					null,
@@ -140,7 +141,7 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 	}
 
 	@Nullable
-	private static Response makeResponse(@Nullable final NiddlerDebugger.DebugResponse debugResponse) {
+	private static Response makeResponse(@Nullable final NiddlerDebugger.DebugResponse debugResponse, final Request request, @Nullable final Response response) {
 		if (debugResponse == null) {
 			return null;
 		}
@@ -150,14 +151,27 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 				.message(debugResponse.message);
 
 		if (debugResponse.headers != null) {
-			builder.headers(Headers.of(debugResponse.headers));
+			final Headers.Builder headers = new Headers.Builder();
+			for (final Map.Entry<String, List<String>> entry : debugResponse.headers.entrySet()) {
+				for (final String value : entry.getValue()) {
+					headers.add(entry.getKey(), value);
+				}
+			}
+			builder.headers(headers.build());
 		}
 
 		if (!TextUtils.isEmpty(debugResponse.encodedBody)) {
 			builder.body(ResponseBody.create(MediaType.parse(debugResponse.bodyMimeType), Base64.decode(debugResponse.encodedBody, Base64.DEFAULT)));
 		}
 		builder.sentRequestAtMillis(System.currentTimeMillis());
+		builder.request(request);
 		builder.receivedResponseAtMillis(System.currentTimeMillis());
+
+		if (response != null) {
+			builder.protocol(response.protocol());
+		} else {
+			builder.protocol(Protocol.HTTP_1_1);
+		}
 
 		return builder.build();
 	}
@@ -175,7 +189,13 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 				.url(debugRequest.url)
 				.method(debugRequest.method, body);
 		if (debugRequest.headers != null) {
-			builder.headers(Headers.of(debugRequest.headers));
+			final Headers.Builder headers = new Headers.Builder();
+			for (final Map.Entry<String, List<String>> entry : debugRequest.headers.entrySet()) {
+				for (final String value : entry.getValue()) {
+					headers.add(entry.getKey(), value);
+				}
+			}
+			builder.headers(headers.build());
 		}
 		return builder.build();
 	}
