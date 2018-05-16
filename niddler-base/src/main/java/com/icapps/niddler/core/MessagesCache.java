@@ -1,6 +1,6 @@
 package com.icapps.niddler.core;
 
-import com.icapps.niddler.util.StringSizeUtil;
+import com.icapps.niddler.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,7 +34,7 @@ final class MessagesCache {
 			return;
 		}
 
-		final long size = StringSizeUtil.calculateMemoryUsage(message);
+		final long size = StringUtil.calculateMemoryUsage(message);
 
 		synchronized (mMessages) {
 			while ((size + mCacheSize) > mMaxCacheSize) {
@@ -58,7 +58,7 @@ final class MessagesCache {
 			return false;
 		}
 		final String message = mMessages.remove(0);
-		mCacheSize -= StringSizeUtil.calculateMemoryUsage(message);
+		mCacheSize -= StringUtil.calculateMemoryUsage(message);
 		return true;
 	}
 

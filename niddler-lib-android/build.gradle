@@ -23,9 +23,7 @@ android {
 }
 
 dependencies {
-    implementation 'org.java-websocket:Java-WebSocket:1.3.8'
-
-    compileOnly 'com.squareup.okhttp3:okhttp:3.10.0'
+    compile project(":niddler-base")
     compileOnly 'com.android.support:support-annotations:26.1.0'
 }
 

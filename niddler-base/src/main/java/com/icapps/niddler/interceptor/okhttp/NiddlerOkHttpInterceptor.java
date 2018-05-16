@@ -2,13 +2,12 @@ package com.icapps.niddler.interceptor.okhttp;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
-import android.util.Base64;
 
 import com.icapps.niddler.core.Niddler;
 import com.icapps.niddler.core.NiddlerRequest;
 import com.icapps.niddler.core.NiddlerResponse;
 import com.icapps.niddler.core.debug.NiddlerDebugger;
+import com.icapps.niddler.util.StringUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -160,8 +159,8 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 			builder.headers(headers.build());
 		}
 
-		if (!TextUtils.isEmpty(debugResponse.encodedBody)) {
-			builder.body(ResponseBody.create(MediaType.parse(debugResponse.bodyMimeType), Base64.decode(debugResponse.encodedBody, Base64.DEFAULT)));
+		if (!StringUtil.isEmpty(debugResponse.encodedBody)) {
+			builder.body(ResponseBody.create(MediaType.parse(debugResponse.bodyMimeType), StringUtil.fromBase64(debugResponse.encodedBody)));
 		}
 		builder.sentRequestAtMillis(System.currentTimeMillis());
 		builder.request(request);
@@ -179,8 +178,8 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 	@NonNull
 	private static Request makeRequest(@NonNull final NiddlerDebugger.DebugRequest debugRequest) {
 		final RequestBody body;
-		if (!TextUtils.isEmpty(debugRequest.encodedBody)) {
-			body = RequestBody.create(MediaType.parse(debugRequest.bodyMimeType), Base64.decode(debugRequest.encodedBody, Base64.DEFAULT));
+		if (!StringUtil.isEmpty(debugRequest.encodedBody)) {
+			body = RequestBody.create(MediaType.parse(debugRequest.bodyMimeType), StringUtil.fromBase64(debugRequest.encodedBody));
 		} else {
 			body = null;
 		}

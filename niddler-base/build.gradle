@@ -1,0 +1,18 @@
+group 'com.icapps'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.7
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.java-websocket:Java-WebSocket:1.3.8'
+
+    compileOnly 'com.squareup.okhttp3:okhttp:3.10.0'
+    compileOnly 'com.android.support:support-annotations:26.1.0'
+    compileOnly 'com.google.android:android:4.1.1.4'
+
+}

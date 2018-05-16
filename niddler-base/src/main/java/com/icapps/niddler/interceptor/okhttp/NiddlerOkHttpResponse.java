@@ -20,6 +20,7 @@ import okio.BufferedSource;
 
 /**
  * @author Maarten Van Giel
+ * @author Nicola Verbeeck
  */
 final class NiddlerOkHttpResponse implements NiddlerResponse {
 

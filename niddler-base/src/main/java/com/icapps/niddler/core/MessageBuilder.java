@@ -1,8 +1,7 @@
 package com.icapps.niddler.core;
 
-import android.text.TextUtils;
-import android.util.Base64;
-import android.util.Log;
+import com.icapps.niddler.util.LogUtil;
+import com.icapps.niddler.util.StringUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,7 +42,7 @@ final class MessageBuilder {
 			object.put("method", request.getMethod());
 			object.put("url", request.getUrl());
 		} catch (final JSONException e) {
-			Log.e("MessageBuilder", "Failed to create json: ", e);
+			LogUtil.logError("MessageBuilder", "Failed to create json: ", e);
 
 			return null;
 		}
@@ -75,7 +74,7 @@ final class MessageBuilder {
 			object.put("httpVersion", response.getHttpVersion());
 			object.put("statusLine", response.getStatusLine());
 		} catch (final JSONException e) {
-			Log.e("MessageBuilder", "Failed to create json: ", e);
+			LogUtil.logError("MessageBuilder", "Failed to create json: ", e);
 
 			return null;
 		}
@@ -89,7 +88,7 @@ final class MessageBuilder {
 			object.put("serverName", serverInfo.name);
 			object.put("serverDescription", serverInfo.description);
 		} catch (final JSONException e) {
-			Log.e("MessageBuilder", "Failed to create json: ", e);
+			LogUtil.logError("MessageBuilder", "Failed to create json: ", e);
 
 			return "";
 		}
@@ -101,11 +100,11 @@ final class MessageBuilder {
 		try {
 			object.put("type", "authRequest");
 			object.put("hash", request.hashKey);
-			if (!TextUtils.isEmpty(request.packageName)) {
+			if (!StringUtil.isEmpty(request.packageName)) {
 				object.put("package", request.packageName);
 			}
 		} catch (final JSONException e) {
-			Log.e("MessageBuilder", "Failed to create json: ", e);
+			LogUtil.logError("MessageBuilder", "Failed to create json: ", e);
 
 			return "";
 		}
@@ -129,7 +128,7 @@ final class MessageBuilder {
 		try {
 			base.writeBody(out);
 		} catch (final IOException e) {
-			Log.e("MessageBuilder", "Failed to write body", e);
+			LogUtil.logError("MessageBuilder", "Failed to write body", e);
 
 			return null;
 		}
@@ -137,7 +136,7 @@ final class MessageBuilder {
 		if (bytes == null) {
 			return null;
 		}
-		return Base64.encodeToString(bytes, Base64.URL_SAFE | Base64.NO_PADDING | Base64.NO_WRAP);
+		return StringUtil.toString(bytes);
 	}
 
 	private static JSONObject createHeadersObject(final NiddlerMessageBase base) throws JSONException {

@@ -2,6 +2,7 @@ package com.icapps.sampleapplication;
 
 import android.app.Application;
 
+import com.icapps.niddler.core.AndroidNiddler;
 import com.icapps.niddler.core.Niddler;
 import com.icapps.niddler.interceptor.okhttp.NiddlerOkHttpInterceptor;
 import com.icapps.sampleapplication.api.ExampleJsonApi;
@@ -23,9 +24,9 @@ public class NiddlerSampleApplication extends Application {
 	public void onCreate() {
 		super.onCreate();
 
-		final Niddler niddler = new Niddler.Builder()
+		final AndroidNiddler niddler = new AndroidNiddler.Builder()
 				.setPort(0)
-				.setNiddlerInformation(Niddler.NiddlerServerInfo.fromApplication(this))
+				.setNiddlerInformation(AndroidNiddler.fromApplication(this))
 				.build();
 
 		niddler.attachToApplication(this);

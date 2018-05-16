@@ -1,11 +1,11 @@
 package com.icapps.niddler.core;
 
-import android.os.ConditionVariable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.icapps.niddler.core.debug.NiddlerDebugger;
+import com.icapps.niddler.util.ConditionVariable;
+import com.icapps.niddler.util.LogUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -101,8 +101,8 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 	}
 
 	private void onDebuggerConfigurationMessage(@NonNull final String messageType, final JSONObject body, final JSONObject envelopeObject) {
-		if (Log.isLoggable(TAG, Log.VERBOSE)) {
-			Log.v(TAG, String.format("Received debugger message: %s ->\n%s", messageType, envelopeObject));
+		if (LogUtil.isLoggable(TAG, LogUtil.VERBOSE)) {
+			LogUtil.logVerbose(TAG, String.format("Received debugger message: %s ->\n%s", messageType, envelopeObject));
 		}
 		try {
 			switch (messageType) {
@@ -171,8 +171,8 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 					break;
 			}
 		} catch (final JSONException e) {
-			if (Log.isLoggable(TAG, Log.WARN)) {
-				Log.w(TAG, "Invalid debugger json message:", e);
+			if (LogUtil.isLoggable(TAG, LogUtil.WARN)) {
+				LogUtil.logWarning(TAG, "Invalid debugger json message:", e);
 			}
 		}
 	}
@@ -626,8 +626,8 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 				connection.send(makeDebugRequestMessage(request, response));
 			} catch (final JSONException e) {
 				future.offer(null);
-				if (Log.isLoggable(TAG, Log.WARN)) {
-					Log.w(TAG, "Failed to offer:", e);
+				if (LogUtil.isLoggable(TAG, LogUtil.WARN)) {
+					LogUtil.logWarning(TAG, "Failed to offer:", e);
 				}
 			}
 			return future;
@@ -646,8 +646,8 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 				connection.send(makeDebugRequestOverrideMessage(request));
 			} catch (final JSONException e) {
 				future.offer(null);
-				if (Log.isLoggable(TAG, Log.WARN)) {
-					Log.w(TAG, "Failed to offer:", e);
+				if (LogUtil.isLoggable(TAG, LogUtil.WARN)) {
+					LogUtil.logWarning(TAG, "Failed to offer:", e);
 				}
 			}
 			return future;
@@ -1055,8 +1055,8 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 				done = true;
 				reply.put(new OptionalWrapper<T>(value));
 			} catch (final InterruptedException ignored) {
-				if (Log.isLoggable(TAG, Log.WARN)) {
-					Log.w(TAG, "Failed to offer:", ignored);
+				if (LogUtil.isLoggable(TAG, LogUtil.WARN)) {
+					LogUtil.logWarning(TAG, "Failed to offer:", ignored);
 				}
 			}
 		}

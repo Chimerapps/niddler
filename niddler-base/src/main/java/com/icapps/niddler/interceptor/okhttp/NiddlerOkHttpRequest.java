@@ -19,6 +19,7 @@ import okio.Okio;
 
 /**
  * @author Maarten Van Giel
+ * @author Nicola Verbeeck
  */
 final class NiddlerOkHttpRequest implements NiddlerRequest {
 
