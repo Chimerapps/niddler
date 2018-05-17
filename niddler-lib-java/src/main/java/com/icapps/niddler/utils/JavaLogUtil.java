@@ -3,8 +3,8 @@ package com.icapps.niddler.utils;
 import com.icapps.niddler.util.LogUtil;
 
 import java.util.logging.Level;
-import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 /**
  * @author Nicola Verbeeck
@@ -16,12 +16,12 @@ public class JavaLogUtil extends LogUtil {
 	protected void doLog(final int level, final String tag, final String message, final Throwable error) {
 		final LogRecord record = new LogRecord(mapLevel(level), message);
 		record.setThrown(error);
-		LogManager.getLogManager().getLogger(tag).log(record);
+		Logger.getLogger(tag).log(record);
 	}
 
 	@Override
 	protected boolean doIsLoggable(final String tag, final int level) {
-		return LogManager.getLogManager().getLogger(tag).isLoggable(mapLevel(level));
+		return Logger.getLogger(tag).isLoggable(mapLevel(level));
 	}
 
 	private static Level mapLevel(final int level) {
