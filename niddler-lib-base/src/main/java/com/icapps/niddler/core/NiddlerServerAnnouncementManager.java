@@ -172,7 +172,7 @@ class NiddlerServerAnnouncementManager implements Runnable {
 		try {
 			selfDescriptor.put("packageName", mPackageName);
 			selfDescriptor.put("port", mServer.getPort());
-			selfDescriptor.put("pid", android.os.Process.myPid());
+			selfDescriptor.put("pid", -1);
 			selfDescriptor.put("protocol", Niddler.NiddlerServerInfo.PROTOCOL_VERSION);
 		} catch (final JSONException ignored) {
 		}
@@ -279,7 +279,7 @@ class NiddlerServerAnnouncementManager implements Runnable {
 			out.writeInt(packageBytes.length);
 			out.write(packageBytes);
 			out.writeInt(mServer.getPort());
-			out.writeInt(android.os.Process.myPid());
+			out.writeInt(-1);
 			out.writeInt(Niddler.NiddlerServerInfo.PROTOCOL_VERSION);
 			out.flush();
 

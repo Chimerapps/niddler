@@ -7,6 +7,8 @@ import android.os.Build;
 import android.os.IBinder;
 
 import com.icapps.niddler.service.NiddlerService;
+import com.icapps.niddler.util.AndroidLogUtil;
+import com.icapps.niddler.util.LogUtil;
 
 /**
  * @author Nicola Verbeeck
@@ -65,7 +67,7 @@ public final class AndroidNiddler extends Niddler implements Niddler.PlatformNid
 	}
 
 	@Override
-	public void close() {
+	public void closePlatform() {
 		final NiddlerService niddlerService = mNiddlerService;
 		if (niddlerService != null) {
 			niddlerService.stopSelf();
@@ -84,6 +86,10 @@ public final class AndroidNiddler extends Niddler implements Niddler.PlatformNid
 	}
 
 	public static class Builder extends Niddler.Builder<AndroidNiddler> {
+
+		public Builder() {
+			LogUtil.instance = new AndroidLogUtil();
+		}
 
 		@Override
 		public AndroidNiddler build() {

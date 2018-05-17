@@ -12,7 +12,7 @@ import java.io.IOException;
  * @author Nicola Verbeeck
  */
 @SuppressWarnings("WeakerAccess")
-public class Niddler implements Closeable {
+public abstract class Niddler implements Closeable {
 
 	public static final String NIDDLER_DEBUG_RESPONSE_HEADER = "X-Niddler-Debug";
 	public static final String NIDDLER_DEBUG_TIMING_RESPONSE_HEADER = "X-Niddler-Debug-Timing";
@@ -168,6 +168,6 @@ public class Niddler implements Closeable {
 	}
 
 	interface PlatformNiddler {
-		void close();
+		void closePlatform();
 	}
 }

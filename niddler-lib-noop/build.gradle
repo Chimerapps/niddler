@@ -2,6 +2,15 @@ plugins {
     id "com.jfrog.bintray" version "1.7.3"
 }
 
+apply from: '../constants.gradle'
+
+def artifactVersion = project.ext.releaseVersion
+def artifactGroup = 'com.icapps.niddler'
+def artifactName = "niddler-noop"
+
+group "$artifactGroup"
+version "$artifactVersion"
+
 apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'
 
@@ -22,13 +31,33 @@ android {
     }
 }
 
-task androidJavadocs(type: Javadoc) {
-    source = android.sourceSets.main.java.getSrcDirs()
-}
+android.libraryVariants.all { variant ->
+    def name = variant.buildType.name
+    if (!name.equals("release")) {
+        return
+    }
+    task("generateJavadoc", type: Javadoc) {
+        source = android.sourceSets.main.java.getSrcDirs()
+        options {
+            links "http://docs.oracle.com/javase/7/docs/api/"
+            linksOffline "https://developer.android.com/reference",
+                    "${android.sdkDirectory}/docs/reference"
+            encoding = "UTF-8"
+        }
+        exclude "**/BuildConfig.java"
+        exclude "**/R.java"
+        doFirst {
+            classpath =
+                    files(
+                            variant.javaCompile.classpath.files,
+                            project.android.getBootClasspath())
+        }
+    }
 
-task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
-    classifier = 'javadoc'
-    from androidJavadocs.destinationDir
+    task("androidJavadocsJar", type: Jar, dependsOn: generateJavadoc) {
+        classifier = 'javadoc'
+        from generateJavadoc.destinationDir
+    }
 }
 
 task sourceJar(type: Jar) {
@@ -40,12 +69,12 @@ bintray {
     key = System.getenv('BINTRAY_KEY')
     pkg {
         repo = 'maven'
-        name = 'niddler-noop'
+        name = "$artifactName"
         licenses = ['Apache-2.0']
         vcsUrl = 'https://github.com/icapps/niddler'
 
         version {
-            name = "$ARTIFACT_VERSION"
+            name = "$artifactVersion"
             desc = "Niddler network inspector library - NOOP"
             released = new Date()
         }
@@ -83,9 +112,9 @@ publishing {
                 classifier "sources"
             }
             artifact androidJavadocsJar
-            groupId "$ARTIFACT_PACKAGE"
-            version "$ARTIFACT_VERSION"
-            artifactId "$ARTIFACT_NAME"
+            groupId "$artifactGroup"
+            version "$artifactVersion"
+            artifactId "$artifactName"
             pom.withXml {
                 def root = asNode()
                 root.appendNode('description', 'Niddler network inspector library - NOOP')

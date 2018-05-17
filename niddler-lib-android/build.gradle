@@ -2,7 +2,14 @@ plugins {
     id "com.jfrog.bintray" version "1.7.3"
 }
 
-group 'com.icapps'
+apply from: '../constants.gradle'
+
+def artifactVersion = project.ext.releaseVersion
+def artifactGroup = 'com.icapps.niddler'
+def artifactName = "niddler"
+
+group "$artifactGroup"
+version "$artifactVersion"
 
 apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'
@@ -23,17 +30,37 @@ android {
 }
 
 dependencies {
-    compile project(":niddler-base")
+    compile project(':niddler-lib-base')
     compileOnly 'com.android.support:support-annotations:26.1.0'
 }
 
-task androidJavadocs(type: Javadoc) {
-    source = android.sourceSets.main.java.getSrcDirs()
-}
+android.libraryVariants.all { variant ->
+    def name = variant.buildType.name
+    if (!name.equals("release")) {
+        return
+    }
+    task("generateJavadoc", type: Javadoc) {
+        source = android.sourceSets.main.java.getSrcDirs()
+        options {
+            links "http://docs.oracle.com/javase/7/docs/api/"
+            linksOffline "https://developer.android.com/reference",
+                    "${android.sdkDirectory}/docs/reference"
+            encoding = "UTF-8"
+        }
+        exclude "**/BuildConfig.java"
+        exclude "**/R.java"
+        doFirst {
+            classpath =
+                    files(
+                            variant.javaCompile.classpath.files,
+                            project.android.getBootClasspath())
+        }
+    }
 
-task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
-    classifier = 'javadoc'
-    from androidJavadocs.destinationDir
+    task("androidJavadocsJar", type: Jar, dependsOn: generateJavadoc) {
+        classifier = 'javadoc'
+        from generateJavadoc.destinationDir
+    }
 }
 
 task sourceJar(type: Jar) {
@@ -45,12 +72,12 @@ bintray {
     key = System.getenv('BINTRAY_KEY')
     pkg {
         repo = 'maven'
-        name = 'niddler'
+        name = "$artifactName"
         licenses = ['Apache-2.0']
         vcsUrl = 'https://github.com/icapps/niddler'
 
         version {
-            name = "$ARTIFACT_VERSION"
+            name = "$artifactVersion"
             desc = "Niddler network inspector library"
             released = new Date()
         }
@@ -84,18 +111,19 @@ def pomConfig = {
 publishing {
     publications {
         MyPublication(MavenPublication) {
-            artifact("$buildDir/outputs/aar/niddler-lib-release.aar")
+            artifact("$buildDir/outputs/aar/niddler-lib-android-release.aar")
             artifact sourceJar {
                 classifier "sources"
             }
             artifact androidJavadocsJar
-            groupId "$ARTIFACT_PACKAGE"
-            version "$ARTIFACT_VERSION"
-            artifactId "$ARTIFACT_NAME"
+            groupId "$artifactGroup"
+            version "$artifactVersion"
+            artifactId "$artifactName"
+
             pom.withXml {
                 def root = asNode()
                 root.appendNode('description', 'Niddler network inspector library')
-                root.appendNode('name', 'niddler')
+                root.appendNode('name', "$artifactName")
                 root.appendNode('url', 'https://github.com/icapps/niddler')
                 root.children().last() + pomConfig
 
@@ -118,6 +146,10 @@ publishing {
                         dependencyNode.appendNode('version', it.version)
                     }
                 }
+                def dependencyNode = dependenciesNode.appendNode('dependency')
+                dependencyNode.appendNode('groupId', artifactGroup)
+                dependencyNode.appendNode('artifactId', "niddler-base")
+                dependencyNode.appendNode('version', artifactVersion)
             }
         }
     }

@@ -1,4 +1,4 @@
-include ':niddler-base', ':niddler-lib-android', ':niddler-lib-noop'
+include ':niddler-lib-base', ':niddler-lib-android', ':niddler-lib-noop', ':niddler-lib-java'
 include ':niddler-example'
 
 rootProject.name = 'niddler'

@@ -61,7 +61,7 @@ class NiddlerImpl implements NiddlerServer.WebSocketListener {
 	void close() throws IOException {
 		final Niddler.PlatformNiddler platform = mPlatform;
 		if (platform != null) {
-			platform.close();
+			platform.closePlatform();
 		}
 
 		if (mServer != null) {

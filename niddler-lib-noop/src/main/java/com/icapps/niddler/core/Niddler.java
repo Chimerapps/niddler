@@ -11,9 +11,9 @@ import java.io.IOException;
  * @author Nicola Verbeeck
  */
 @SuppressWarnings({"UnusedParameters", "unused"})
-public final class Niddler implements Closeable {
+public abstract class Niddler implements Closeable {
 
-	private Niddler() {
+	Niddler() {
 	}
 
 	public void logRequest(final NiddlerRequest request) {
@@ -78,7 +78,7 @@ public final class Niddler implements Closeable {
 	}
 
 	@SuppressWarnings("WeakerAccess")
-	public static final class Builder {
+	public static abstract class Builder<T extends Niddler> {
 
 		public Builder(final String a) {
 		}
@@ -92,7 +92,7 @@ public final class Niddler implements Closeable {
 		 * @param port The port to be used
 		 * @return Builder
 		 */
-		public Builder setPort(final int port) {
+		public Builder<T> setPort(final int port) {
 			return this;
 		}
 
@@ -102,7 +102,7 @@ public final class Niddler implements Closeable {
 		 * @param cacheSize The cache size to be used, in bytes
 		 * @return Builder
 		 */
-		public Builder setCacheSize(final long cacheSize) {
+		public Builder<T> setCacheSize(final long cacheSize) {
 			return this;
 		}
 
@@ -112,7 +112,7 @@ public final class Niddler implements Closeable {
 		 * @param niddlerServerInfo The additional information about this Niddler server
 		 * @return Builder
 		 */
-		public Builder setNiddlerInformation(final NiddlerServerInfo niddlerServerInfo) {
+		public Builder<T> setNiddlerInformation(final NiddlerServerInfo niddlerServerInfo) {
 			return this;
 		}
 
@@ -121,11 +121,12 @@ public final class Niddler implements Closeable {
 		 *
 		 * @return a Niddler instance
 		 */
-		@SuppressWarnings("MethodMayBeStatic")
-		public Niddler build() {
-			return new Niddler();
-		}
+		public abstract T build();
 
+	}
+
+	interface PlatformNiddler {
+		void closePlatform();
 	}
 
 }
