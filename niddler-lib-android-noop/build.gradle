@@ -15,7 +15,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'
 
 dependencies {
-    compileOnly 'com.squareup.okhttp3:okhttp:3.9.1'
+    compile project(':niddler-lib-base-noop')
     compileOnly 'com.android.support:support-annotations:26.1.0'
 }
 
@@ -107,7 +107,7 @@ def pomConfig = {
 publishing {
     publications {
         MyPublication(MavenPublication) {
-            artifact("$buildDir/outputs/aar/niddler-lib-noop-release.aar")
+            artifact("$buildDir/outputs/aar/niddler-lib-android-noop-release.aar")
             artifact sourceJar {
                 classifier "sources"
             }
@@ -141,6 +141,10 @@ publishing {
                         dependencyNode.appendNode('version', it.version)
                     }
                 }
+                def dependencyNode = dependenciesNode.appendNode('dependency')
+                dependencyNode.appendNode('groupId', artifactGroup)
+                dependencyNode.appendNode('artifactId', "niddler-noop-base")
+                dependencyNode.appendNode('version', artifactVersion)
             }
         }
     }

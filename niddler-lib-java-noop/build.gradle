@@ -1,0 +1,101 @@
+buildscript {
+
+    repositories {
+        mavenCentral()
+        jcenter()
+
+    }
+}
+plugins {
+    id "com.jfrog.bintray" version "1.7.3"
+}
+
+apply from: '../constants.gradle'
+
+def artifactVersion = project.ext.releaseVersion
+def artifactGroup = 'com.icapps.niddler'
+def artifactName = "niddler-java-noop"
+
+group "$artifactGroup"
+version "$artifactVersion"
+
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    compile project(':niddler-lib-base-noop')
+}
+
+task sourceJar(type: Jar, dependsOn: classes) {
+    classifier 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_KEY')
+    pkg {
+        repo = 'maven'
+        name = "$artifactName"
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/icapps/niddler'
+
+        version {
+            name = "$artifactVersion"
+            desc = "Niddler network inspector java no-op library"
+            released = new Date()
+        }
+    }
+    publications = ['maven']
+}
+
+def pomConfig = {
+    licenses {
+        license {
+            name "The Apache Software License, Version 2.0"
+            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            distribution "repo"
+        }
+    }
+    developers {
+        developer {
+            name "Nicola Verbeeck"
+            email "nicola@chimerapps.com"
+            organization "Chimerapps"
+        }
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId "$artifactGroup"
+            artifactId "$artifactName"
+            version "$artifactVersion"
+
+            from components.java
+
+            artifact sourceJar
+            artifact javadocJar
+
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('description', 'Niddler network inspector java no-op library')
+                root.appendNode('name', "$artifactName")
+                root.appendNode('url', 'https://github.com/icapps/niddler')
+                root.children().last() + pomConfig
+            }
+        }
+    }
+}
+

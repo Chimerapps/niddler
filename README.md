@@ -49,8 +49,8 @@ Using the service is not required. You can also call `niddler.start()` and `nidd
 build.gradle:
 ```
 //Ensure jcenter is in the repo list (1.0.0-alpha10 is the latest semi stable version)
-debugCompile 'com.icapps.niddler:java-niddler:1.0.0-alpha10'
-releaseCompile 'com.icapps.niddler:java-niddler-noop:1.0.0-alpha10'
+debugCompile 'com.icapps.niddler:niddler-java:1.0.0-alpha10'
+releaseCompile 'com.icapps.niddler:niddler-java-noop:1.0.0-alpha10'
 ```
 
 Use with java application:

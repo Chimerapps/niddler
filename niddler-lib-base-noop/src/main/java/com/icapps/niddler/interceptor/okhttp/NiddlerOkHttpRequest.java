@@ -1,12 +1,13 @@
 package com.icapps.niddler.interceptor.okhttp;
 
 import com.icapps.niddler.core.NiddlerRequest;
-import okhttp3.Request;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
+
+import okhttp3.Request;
 
 /**
  * @author Maarten Van Giel

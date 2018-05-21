@@ -36,7 +36,7 @@ android {
 
 dependencies {
     debugImplementation project(':niddler-lib-android')
-    releaseImplementation project(':niddler-lib-noop')
+    releaseImplementation project(':niddler-lib-android-noop')
     implementation 'com.android.support:appcompat-v7:26.1.0'
     implementation 'com.squareup.retrofit2:retrofit:2.1.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.1.0'
