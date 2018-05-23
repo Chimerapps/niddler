@@ -27,7 +27,14 @@ fun main(args: Array<String>) {
 
     niddler.start()
 
-    val okHttp =OkHttpClient.Builder()
+    if (args.isNotEmpty()) {
+        println("Waiting for debugger")
+        niddler.debugger().waitForConnection {
+            println("Debugger connected")
+        }
+    }
+
+    val okHttp = OkHttpClient.Builder()
         .addInterceptor(NiddlerOkHttpInterceptor(niddler))
         .build()
 
