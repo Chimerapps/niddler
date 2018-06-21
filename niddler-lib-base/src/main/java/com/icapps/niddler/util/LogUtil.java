@@ -1,9 +1,12 @@
 package com.icapps.niddler.util;
 
+import android.support.annotation.RestrictTo;
+
 /**
  * @author Nicola Verbeeck
  * @version 1
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public abstract class LogUtil {
 
 	public static final int VERBOSE = 2;
@@ -19,43 +22,43 @@ public abstract class LogUtil {
 		return current != null && current.doIsLoggable(tag, level);
 	}
 
-	public static void logDebug(final String tag, final String message) {
+	public static void niddlerLogDebug(final String tag, final String message) {
 		final LogUtil current = instance;
 		if (current != null) {
 			current.doLog(DEBUG, tag, message, null);
 		}
 	}
 
-	public static void logInfo(final String tag, final String message) {
+	public static void niddlerLogInfo(final String tag, final String message) {
 		final LogUtil current = instance;
 		if (current != null) {
 			current.doLog(INFO, tag, message, null);
 		}
 	}
 
-	public static void logWarning(final String tag, final String message) {
-		logWarning(tag, message, null);
+	public static void niddlerLogWarning(final String tag, final String message) {
+		niddlerLogWarning(tag, message, null);
 	}
 
-	public static void logWarning(final String tag, final String message, final Throwable error) {
+	public static void niddlerLogWarning(final String tag, final String message, final Throwable error) {
 		final LogUtil current = instance;
 		if (current != null) {
 			current.doLog(WARN, tag, message, error);
 		}
 	}
 
-	public static void logError(final String tag, final String message) {
-		logError(tag, message, null);
+	public static void niddlerLogError(final String tag, final String message) {
+		niddlerLogError(tag, message, null);
 	}
 
-	public static void logError(final String tag, final String message, final Throwable error) {
+	public static void niddlerLogError(final String tag, final String message, final Throwable error) {
 		final LogUtil current = instance;
 		if (current != null) {
 			current.doLog(ERROR, tag, message, null);
 		}
 	}
 
-	public static void logVerbose(final String tag, final String message) {
+	public static void niddlerLogVerbose(final String tag, final String message) {
 		final LogUtil current = instance;
 		if (current != null) {
 			current.doLog(VERBOSE, tag, message, null);

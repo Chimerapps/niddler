@@ -30,7 +30,7 @@ class NiddlerImpl implements NiddlerServer.WebSocketListener {
 		try {
 			mServer = new NiddlerServer(password, port, niddlerServerInfo.name, this);
 		} catch (final UnknownHostException ex) {
-			LogUtil.logError(LOG_TAG, "Failed to start server: " + ex.getLocalizedMessage());
+			LogUtil.niddlerLogError(LOG_TAG, "Failed to start server: " + ex.getLocalizedMessage());
 		}
 		mMessageCache = new MessagesCache(cacheSize);
 		mNiddlerServerInfo = niddlerServerInfo;
@@ -50,7 +50,7 @@ class NiddlerImpl implements NiddlerServer.WebSocketListener {
 		if ((mServer != null) && !mIsStarted) {
 			mServer.start();
 			mIsStarted = true;
-			LogUtil.logDebug(LOG_TAG, "Started niddler server on " + mServer.getAddress());
+			LogUtil.niddlerLogDebug(LOG_TAG, "Started niddler server on " + mServer.getAddress());
 		}
 	}
 

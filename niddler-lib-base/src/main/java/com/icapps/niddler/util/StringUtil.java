@@ -1,11 +1,13 @@
 package com.icapps.niddler.util;
 
 import android.support.annotation.Nullable;
+import android.support.annotation.RestrictTo;
 
 
 /**
  * @author Nicola Verbeeck
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class StringUtil {
 
 	private StringUtil() {

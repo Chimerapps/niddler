@@ -65,7 +65,7 @@ class NiddlerServer extends WebSocketServer {
 
 	@Override
 	public final void onOpen(final WebSocket conn, final ClientHandshake handshake) {
-		LogUtil.logDebug(LOG_TAG, "New socket connection: " + handshake.getResourceDescriptor());
+		LogUtil.niddlerLogDebug(LOG_TAG, "New socket connection: " + handshake.getResourceDescriptor());
 
 		final ServerConnection connection = new ServerConnection(conn);
 		synchronized (mConnections) {
@@ -81,7 +81,7 @@ class NiddlerServer extends WebSocketServer {
 
 	@Override
 	public final void onClose(final WebSocket conn, final int code, final String reason, final boolean remote) {
-		LogUtil.logDebug(LOG_TAG, "Connection closed: " + conn);
+		LogUtil.niddlerLogDebug(LOG_TAG, "Connection closed: " + conn);
 
 		synchronized (mConnections) {
 			final Iterator<ServerConnection> iterator = mConnections.iterator();
@@ -121,7 +121,7 @@ class NiddlerServer extends WebSocketServer {
 			switch (type) {
 				case MESSAGE_AUTH:
 					if (!connection.checkAuthReply(MessageParser.parseAuthReply(object), mPassword)) {
-						LogUtil.logWarning(LOG_TAG, "Client sent wrong authentication code!");
+						LogUtil.niddlerLogWarning(LOG_TAG, "Client sent wrong authentication code!");
 						return;
 					}
 					authSuccess(conn);
@@ -138,10 +138,10 @@ class NiddlerServer extends WebSocketServer {
 					mNiddlerDebugger.onControlMessage(object, connection);
 					break;
 				default:
-					LogUtil.logWarning(LOG_TAG, "Received unsolicited message from client: " + message);
+					LogUtil.niddlerLogWarning(LOG_TAG, "Received unsolicited message from client: " + message);
 			}
 		} catch (final JSONException e) {
-			LogUtil.logWarning(LOG_TAG, "Received non-json message from server: " + message, e);
+			LogUtil.niddlerLogWarning(LOG_TAG, "Received non-json message from server: " + message, e);
 		}
 	}
 
@@ -164,7 +164,7 @@ class NiddlerServer extends WebSocketServer {
 
 	@Override
 	public final void onError(final WebSocket conn, final Exception ex) {
-		LogUtil.logError(LOG_TAG, "WebSocket error", ex);
+		LogUtil.niddlerLogError(LOG_TAG, "WebSocket error", ex);
 
 		final ServerConnection connection = getConnection(conn);
 		if (connection != null) {
@@ -188,7 +188,7 @@ class NiddlerServer extends WebSocketServer {
 				} catch (final NotYetConnectedException ignored) {
 					//Nothing to do, wait for the connection to complete
 				} catch (final IllegalArgumentException ignored) {
-					LogUtil.logError(LOG_TAG, "WebSocket error", ignored);
+					LogUtil.niddlerLogError(LOG_TAG, "WebSocket error", ignored);
 				}
 			}
 		}

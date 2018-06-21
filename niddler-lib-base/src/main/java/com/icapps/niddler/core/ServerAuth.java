@@ -45,7 +45,7 @@ final class ServerAuth {
 			final String mustBe = StringUtil.toString(MessageDigest.getInstance("SHA-512").digest((request.hashKey + password).getBytes("UTF-8")));
 			return reply.hashKey.equals(mustBe);
 		} catch (final NoSuchAlgorithmException e) {
-			LogUtil.logError("ServerAuth", "SHA-512 not found", e);
+			LogUtil.niddlerLogError("ServerAuth", "SHA-512 not found", e);
 
 			return false;
 		} catch (final UnsupportedEncodingException e) {

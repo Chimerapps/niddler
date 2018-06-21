@@ -1,11 +1,13 @@
 package com.icapps.niddler.util;
 
+import android.support.annotation.RestrictTo;
 import android.util.Log;
 
 /**
  * @author Nicola Verbeeck
  * @version 1
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class AndroidLogUtil extends LogUtil {
 
 	@Override

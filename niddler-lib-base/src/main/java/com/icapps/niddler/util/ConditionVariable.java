@@ -15,6 +15,8 @@
  */
 package com.icapps.niddler.util;
 
+import android.support.annotation.RestrictTo;
+
 /**
  * Class that implements the condition variable locking paradigm.
  * <p>
@@ -28,6 +30,7 @@ package com.icapps.niddler.util;
  * This class uses itself as the object to wait on, so if you wait()
  * or notify() on a ConditionVariable, the results are undefined.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class ConditionVariable {
 	private volatile boolean mCondition;
 

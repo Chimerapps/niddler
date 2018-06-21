@@ -42,7 +42,7 @@ final class MessageBuilder {
 			object.put("method", request.getMethod());
 			object.put("url", request.getUrl());
 		} catch (final JSONException e) {
-			LogUtil.logError("MessageBuilder", "Failed to create json: ", e);
+			LogUtil.niddlerLogError("MessageBuilder", "Failed to create json: ", e);
 
 			return null;
 		}
@@ -74,7 +74,7 @@ final class MessageBuilder {
 			object.put("httpVersion", response.getHttpVersion());
 			object.put("statusLine", response.getStatusLine());
 		} catch (final JSONException e) {
-			LogUtil.logError("MessageBuilder", "Failed to create json: ", e);
+			LogUtil.niddlerLogError("MessageBuilder", "Failed to create json: ", e);
 
 			return null;
 		}
@@ -88,7 +88,7 @@ final class MessageBuilder {
 			object.put("serverName", serverInfo.name);
 			object.put("serverDescription", serverInfo.description);
 		} catch (final JSONException e) {
-			LogUtil.logError("MessageBuilder", "Failed to create json: ", e);
+			LogUtil.niddlerLogError("MessageBuilder", "Failed to create json: ", e);
 
 			return "";
 		}
@@ -104,7 +104,7 @@ final class MessageBuilder {
 				object.put("package", request.packageName);
 			}
 		} catch (final JSONException e) {
-			LogUtil.logError("MessageBuilder", "Failed to create json: ", e);
+			LogUtil.niddlerLogError("MessageBuilder", "Failed to create json: ", e);
 
 			return "";
 		}
@@ -128,7 +128,7 @@ final class MessageBuilder {
 		try {
 			base.writeBody(out);
 		} catch (final IOException e) {
-			LogUtil.logError("MessageBuilder", "Failed to write body", e);
+			LogUtil.niddlerLogError("MessageBuilder", "Failed to write body", e);
 
 			return null;
 		}

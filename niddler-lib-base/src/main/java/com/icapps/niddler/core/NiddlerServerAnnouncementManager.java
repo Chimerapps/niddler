@@ -63,7 +63,7 @@ class NiddlerServerAnnouncementManager implements Runnable {
 
 	void start() {
 		if (mIsRunning.getAndSet(true)) {
-			LogUtil.logError(LOG_TAG, "Niddler announcement server is already running!");
+			LogUtil.niddlerLogError(LOG_TAG, "Niddler announcement server is already running!");
 			return;
 		}
 		final Thread thread = new Thread(this, "Niddler Announcement");
@@ -90,7 +90,7 @@ class NiddlerServerAnnouncementManager implements Runnable {
 
 	@Override
 	public void run() {
-		LogUtil.logDebug(LOG_TAG, "Starting announcement loop");
+		LogUtil.niddlerLogDebug(LOG_TAG, "Starting announcement loop");
 
 		while (mIsRunning.get()) {
 			//Ensure the master or slave is closed
@@ -99,7 +99,7 @@ class NiddlerServerAnnouncementManager implements Runnable {
 			try {
 				//Try to become the master
 				final ServerSocket masterAttempt = new ServerSocket(ANNOUNCEMENT_SOCKET_PORT);
-				LogUtil.logDebug(LOG_TAG, "Running as master");
+				LogUtil.niddlerLogDebug(LOG_TAG, "Running as master");
 				try {
 					masterAttempt.setSoTimeout(MASTER_ACCEPT_TIMEOUT);
 				} catch (final IOException e) {
@@ -130,7 +130,7 @@ class NiddlerServerAnnouncementManager implements Runnable {
 			}
 		}
 
-		LogUtil.logDebug(LOG_TAG, "Announcement loop finished");
+		LogUtil.niddlerLogDebug(LOG_TAG, "Announcement loop finished");
 	}
 
 	private void masterLoop(@NonNull final ServerSocket masterSocket) {
@@ -150,7 +150,7 @@ class NiddlerServerAnnouncementManager implements Runnable {
 				}
 			} catch (final Throwable ignored) {
 				if (mIsRunning.get()) {
-					LogUtil.logWarning(LOG_TAG, "Failed to accept/handle child", ignored);
+					LogUtil.niddlerLogWarning(LOG_TAG, "Failed to accept/handle child", ignored);
 				}
 			}
 		}
@@ -218,7 +218,7 @@ class NiddlerServerAnnouncementManager implements Runnable {
 		}
 
 		if (version > ANNOUNCEMENT_VERSION) {
-			LogUtil.logInfo(LOG_TAG, "Got announcement of newer version, consume all");
+			LogUtil.niddlerLogInfo(LOG_TAG, "Got announcement of newer version, consume all");
 			int res = dataInput.read();
 			while (res != -1) {
 				try {
@@ -238,7 +238,7 @@ class NiddlerServerAnnouncementManager implements Runnable {
 			final int port,
 			final int pid,
 			final int niddlerProtocolVersion) {
-		LogUtil.logDebug(LOG_TAG, "Got announcement for " + packageName);
+		LogUtil.niddlerLogDebug(LOG_TAG, "Got announcement for " + packageName);
 		synchronized (mSlaves) {
 			mSlaves.add(new Slave(child, in, packageName, port, pid, niddlerProtocolVersion));
 		}
@@ -271,7 +271,7 @@ class NiddlerServerAnnouncementManager implements Runnable {
 					slaveSocket.close();
 				}
 			}
-			LogUtil.logDebug(LOG_TAG, "Sending announcement for " + mPackageName);
+			LogUtil.niddlerLogDebug(LOG_TAG, "Sending announcement for " + mPackageName);
 			final DataOutputStream out = new DataOutputStream(slaveSocket.getOutputStream());
 			out.write(REQUEST_ANNOUNCE);
 			final byte[] packageBytes = mPackageName.getBytes("UTF-8");
