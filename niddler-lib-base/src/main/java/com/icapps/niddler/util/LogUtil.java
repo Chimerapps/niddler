@@ -54,7 +54,7 @@ public abstract class LogUtil {
 	public static void niddlerLogError(final String tag, final String message, final Throwable error) {
 		final LogUtil current = instance;
 		if (current != null) {
-			current.doLog(ERROR, tag, message, null);
+			current.doLog(ERROR, tag, message, error);
 		}
 	}
 

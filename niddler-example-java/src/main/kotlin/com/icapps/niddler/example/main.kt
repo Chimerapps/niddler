@@ -42,8 +42,12 @@ fun main(args: Array<String>) {
         .get()
         .url("https://jsonplaceholder.typicode.com/posts")
         .build()
+    val request2 = request.newBuilder().build()
 
-    okHttp.newCall(request).execute()
+    val response1 = okHttp.newCall(request).execute()
+    println("Request 1 executed (" + response1.code() + ")")
+    val response2 = okHttp.newCall(request2).execute()
+    println("Request 2 executed (" + response2.code() + ")")
 
     println("Press return to stop")
     System.`in`.read()

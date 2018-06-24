@@ -60,6 +60,8 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 	private static final String MESSAGE_ADD_REQUEST_OVERRIDE = "addRequestOverride";
 	private static final String MESSAGE_REMOVE_REQUEST_OVERRIDE = "removeRequestOverride";
 
+	private static final long NANO_TO_MILLI = 1000000L;
+
 	@NonNull
 	private final DebuggerConfiguration mDebuggerConfiguration;
 	@Nullable
@@ -271,7 +273,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 
 	@Override
 	public boolean ensureCallTime(final long startTime) throws IOException {
-		final long totalTimeInFlight = (System.nanoTime() - startTime) / 1000L;
+		final long totalTimeInFlight = (System.nanoTime() - startTime) / NANO_TO_MILLI; //nano to msec
 		final long minDuration = mDebuggerConfiguration.minimalCallDuration();
 		final long diff = minDuration - totalTimeInFlight;
 		if (diff <= 0) {
@@ -343,7 +345,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		return DebuggerConfiguration.sendHandleRequestOverride(request, connection, mWaitingRequests);
 	}
 
-	private void onDebugResponse(@NonNull final String messageId, @NonNull final DebugResponse response) {
+	private void onDebugResponse(@NonNull final String messageId, @Nullable final DebugResponse response) {
 		final CompletableFuture<DebugResponse> future;
 		synchronized (mWaitingResponses) {
 			future = mWaitingResponses.get(messageId);
@@ -972,8 +974,11 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		}
 	}
 
-	@NonNull
-	static DebugResponse parseResponse(@NonNull final JSONObject config) throws JSONException {
+	@Nullable
+	static DebugResponse parseResponse(@Nullable final JSONObject config) throws JSONException {
+		if (config == null) {
+			return null;
+		}
 		return new DebugResponse(config.getInt("code"),
 				config.getString("message"),
 				parseHeaders(config.optJSONObject("headers")),
@@ -998,7 +1003,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 
 		final Map<String, List<String>> headers = new HashMap<>();
 
-		final Iterator<String> keys = headersObject.keys();
+		@SuppressWarnings("unchecked") final Iterator<String> keys = headersObject.keys();
 		while (keys.hasNext()) {
 			final String key = keys.next();
 			final JSONArray array = headersObject.getJSONArray(key);
@@ -1053,7 +1058,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		void offer(final T value) {
 			try {
 				done = true;
-				reply.put(new OptionalWrapper<T>(value));
+				reply.put(new OptionalWrapper<>(value));
 			} catch (final InterruptedException ignored) {
 				if (LogUtil.isLoggable(TAG, LogUtil.WARN)) {
 					LogUtil.niddlerLogWarning(TAG, "Failed to offer:", ignored);
