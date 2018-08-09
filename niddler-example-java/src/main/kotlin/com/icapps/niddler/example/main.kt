@@ -17,14 +17,14 @@ fun main(args: Array<String>) {
 
     val logManager = LogManager.getLogManager()
     JavaNiddler::class.java.getResourceAsStream("/logging.properties")
-        .use({ `is` -> logManager.readConfiguration(`is`) })
+            .use({ `is` -> logManager.readConfiguration(`is`) })
 
     val niddler = JavaNiddler.Builder()
-        .setPort(10299)
-        .setCacheSize(1024L * 1024L)
-        .setNiddlerInformation(Niddler.NiddlerServerInfo("Niddler-Example",
-                                                         "Example java niddler application"))
-        .build()
+            .setPort(10299)
+            .setCacheSize(1024L * 1024L)
+            .setNiddlerInformation(Niddler.NiddlerServerInfo("Niddler-Example",
+                    "Example java niddler application"))
+            .build()
 
     niddler.start()
 
@@ -36,18 +36,22 @@ fun main(args: Array<String>) {
     }
 
     val okHttp = OkHttpClient.Builder()
-        .addInterceptor(NiddlerOkHttpInterceptor(niddler))
-        .build()
+            .addInterceptor(NiddlerOkHttpInterceptor(niddler))
+            .build()
 
     val request = Request.Builder()
-        .get()
-        .url("https://jsonplaceholder.typicode.com/posts")
-        .build()
+            .get()
+            .url("https://jsonplaceholder.typicode.com/posts")
+            .build()
     val request2 = request.newBuilder().build()
     val request3 = Request.Builder()
-        .url("http://httpbin.org/post")
-        .post(FormBody.Builder().add("token", "add10 92201").add("type", "custom").build())
-        .build()
+            .url("http://httpbin.org/post")
+            .post(FormBody.Builder().add("token", "add10 92201").add("type", "custom").build())
+            .build()
+    val request4 = Request.Builder()
+            .get()
+            .url("http://httpbin.org/xml")
+            .build()
 
     val response1 = okHttp.newCall(request).execute()
     println("Request 1 executed (" + response1.code() + ")")
@@ -55,6 +59,8 @@ fun main(args: Array<String>) {
     println("Request 2 executed (" + response2.code() + ")")
     val response3 = okHttp.newCall(request3).execute()
     println("Request 3 executed (" + response3.code() + ")")
+    val response4 = okHttp.newCall(request4).execute()
+    println("Request 4 executed (" + response4.code() + ")")
 
     println("Press return to stop")
     System.`in`.read()
