@@ -71,6 +71,8 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 	@NonNull
 	private final Map<String, CompletableFuture<DebugRequest>> mWaitingRequests;
 
+	static int maxStackTraceDepth = 0;
+
 	@Nullable
 	private Runnable mDebuggerConnectionListener;
 
@@ -1031,7 +1033,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 
 	@NonNull
 	static String makeDebugRequestOverrideMessage(@NonNull final NiddlerRequest request) throws JSONException {
-		final JSONObject requestObj = MessageBuilder.buildMessageJson(request);
+		final JSONObject requestObj = MessageBuilder.buildMessageJson(request, maxStackTraceDepth);
 
 		final JSONObject object = new JSONObject();
 		object.put("type", "debugRequest");

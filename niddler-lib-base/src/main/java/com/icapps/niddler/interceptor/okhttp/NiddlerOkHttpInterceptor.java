@@ -66,6 +66,13 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 		final long callStartTime = System.nanoTime();
 
 		final Request origRequest = chain.request();
+		final StackTraceElement[] traces;
+		final Niddler.StackTraceKey traceKey = origRequest.tag(Niddler.StackTraceKey.class);
+		if (traceKey == null) {
+			traces = null;
+		} else {
+			traces = mNiddler.popTraceForId(traceKey);
+		}
 
 		boolean changedTime = mDebugger.applyDelayBeforeBlacklist();
 		if (isBlacklisted(origRequest.url().toString())) {
@@ -75,13 +82,13 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 
 		final String uuid = UUID.randomUUID().toString();
 
-		final NiddlerRequest origNiddlerRequest = new NiddlerOkHttpRequest(origRequest, uuid, buildExtraNiddlerHeaders(changedTime ? FLAG_TIME : 0));
+		final NiddlerRequest origNiddlerRequest = new NiddlerOkHttpRequest(origRequest, uuid, buildExtraNiddlerHeaders(changedTime ? FLAG_TIME : 0), traces);
 		final NiddlerDebugger.DebugRequest overriddenRequest = mDebugger.overrideRequest(origNiddlerRequest);
 
 		final Request finalRequest = (overriddenRequest == null) ? origRequest : makeRequest(overriddenRequest);
 
 		final NiddlerRequest niddlerRequest = (overriddenRequest == null)
-				? origNiddlerRequest : new NiddlerOkHttpRequest(finalRequest, uuid, buildExtraNiddlerHeaders(changedTime ? FLAG_TIME : 0));
+				? origNiddlerRequest : new NiddlerOkHttpRequest(finalRequest, uuid, buildExtraNiddlerHeaders(changedTime ? FLAG_TIME : 0), traces);
 
 		mNiddler.logRequest(niddlerRequest);
 
@@ -104,7 +111,7 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 		final Map<String, String> extraHeaders = buildExtraNiddlerHeaders((changedTime ? FLAG_TIME : 0) + (debuggerBeforeExecuteOverride != null ? FLAG_MODIFIED_RESPONSE : 0));
 
 		final NiddlerResponse niddlerResponse = new NiddlerOkHttpResponse(response, uuid,
-				(networkRequest == null) ? null : new NiddlerOkHttpRequest(networkRequest, uuid, null),
+				(networkRequest == null) ? null : new NiddlerOkHttpRequest(networkRequest, uuid, null, null),
 				(networkResponse == null) ? null : new NiddlerOkHttpResponse(networkResponse, uuid, null, null, writeTime, readTime, wait, null),
 				writeTime, readTime, wait, extraHeaders);
 

@@ -5,6 +5,7 @@ import android.app.Application;
 import com.icapps.niddler.core.AndroidNiddler;
 import com.icapps.niddler.core.Niddler;
 import com.icapps.niddler.interceptor.okhttp.NiddlerOkHttpInterceptor;
+import com.icapps.niddler.retrofit.NiddlerRetrofitCallInjector;
 import com.icapps.sampleapplication.api.ExampleJsonApi;
 import com.icapps.sampleapplication.api.ExampleXMLApi;
 
@@ -27,6 +28,7 @@ public class NiddlerSampleApplication extends Application {
 		final AndroidNiddler niddler = new AndroidNiddler.Builder()
 				.setPort(0)
 				.setNiddlerInformation(AndroidNiddler.fromApplication(this))
+				.setMaxStackTraceSize(10)
 				.build();
 
 		niddler.attachToApplication(this);
@@ -35,11 +37,12 @@ public class NiddlerSampleApplication extends Application {
 				.addInterceptor(new NiddlerOkHttpInterceptor(niddler))
 				.build();
 
-		Retrofit jsonRetrofit = new Retrofit.Builder()
+		Retrofit.Builder jsonRetrofitBuilder = new Retrofit.Builder()
 				.baseUrl("https://jsonplaceholder.typicode.com")
 				.client(okHttpClient)
-				.addConverterFactory(GsonConverterFactory.create())
-				.build();
+				.addConverterFactory(GsonConverterFactory.create());
+		NiddlerRetrofitCallInjector.inject(jsonRetrofitBuilder, niddler, okHttpClient);
+		final Retrofit jsonRetrofit = jsonRetrofitBuilder.build();
 		mJsonApi = jsonRetrofit.create(ExampleJsonApi.class);
 
 		Retrofit xmlRetrofit = new Retrofit.Builder()

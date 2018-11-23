@@ -1,10 +1,14 @@
 package com.icapps.niddler.core;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.icapps.niddler.core.debug.NiddlerDebugger;
 
 import java.io.Closeable;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author Maarten Van Giel
@@ -17,9 +21,25 @@ public abstract class Niddler implements Closeable {
 	public static final String NIDDLER_DEBUG_TIMING_RESPONSE_HEADER = "X-Niddler-Debug-Timing";
 	public static final String INTENT_EXTRA_WAIT_FOR_DEBUGGER = "Niddler-Wait-For-Debugger";
 
+	private static final StackTraceKey EMPTY = new StackTraceKey();
+
 	private static final FakeNiddlerDebugger mFakeDebugger = new FakeNiddlerDebugger();
 
 	protected Niddler() {
+	}
+
+	public boolean isStackTracingEnabled() {
+		return false;
+	}
+
+	@Nullable
+	public StackTraceElement[] popTraceForId(@NonNull final StackTraceKey stackTraceId) {
+		return null;
+	}
+
+	@NonNull
+	public StackTraceKey pushStackTrace(@NonNull final StackTraceElement[] trace) {
+		return EMPTY;
 	}
 
 	public void logRequest(final NiddlerRequest request) {
@@ -114,6 +134,16 @@ public abstract class Niddler implements Closeable {
 		}
 
 		/**
+		 * Sets the maximum request stack trace depth. 0 by default
+		 *
+		 * @param maxStackTraceSize Max stack trace depth. Set to 0 to disable request origin tracing
+		 * @return Builder
+		 */
+		public Builder<T> setMaxStackTraceSize(int maxStackTraceSize) {
+			return this;
+		}
+
+		/**
 		 * Sets the port on which Niddler will listen for incoming connections
 		 *
 		 * @param port The port to be used
@@ -154,5 +184,8 @@ public abstract class Niddler implements Closeable {
 
 	interface PlatformNiddler {
 		void closePlatform();
+	}
+
+	public static class StackTraceKey {
 	}
 }

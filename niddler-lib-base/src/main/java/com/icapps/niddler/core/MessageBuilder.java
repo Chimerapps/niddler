@@ -9,6 +9,7 @@ import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -23,15 +24,15 @@ final class MessageBuilder {
 		//Utility class
 	}
 
-	static String buildMessage(final NiddlerRequest request) {
-		final JSONObject object = buildMessageJson(request);
+	static String buildMessage(final NiddlerRequest request, final int stackTraceMaxDepth) {
+		final JSONObject object = buildMessageJson(request, stackTraceMaxDepth);
 		if (object == null) {
 			return null;
 		}
 		return object.toString();
 	}
 
-	static JSONObject buildMessageJson(final NiddlerRequest request) {
+	static JSONObject buildMessageJson(final NiddlerRequest request, final int stackTraceMaxDepth) {
 		if (request == null) {
 			return null;
 		}
@@ -41,6 +42,17 @@ final class MessageBuilder {
 			initGeneric(object, request);
 			object.put("method", request.getMethod());
 			object.put("url", request.getUrl());
+
+			final StackTraceElement[] trace = request.getRequestStackTrace();
+			if (trace != null) {
+				final int end = Math.min(trace.length, stackTraceMaxDepth);
+				if (end > 0) {
+					for (int i = 0; i < end; ++i) {
+						object.accumulate("trace", (trace[i].toString()));
+					}
+				}
+			}
+
 		} catch (final JSONException e) {
 			LogUtil.niddlerLogError("MessageBuilder", "Failed to create json: ", e);
 
@@ -66,7 +78,7 @@ final class MessageBuilder {
 			object.put("type", "response");
 			initGeneric(object, response);
 			object.put("statusCode", response.getStatusCode());
-			object.put("networkRequest", buildMessageJson(response.actualNetworkRequest()));
+			object.put("networkRequest", buildMessageJson(response.actualNetworkRequest(), 0));
 			object.put("networkReply", buildMessageJson(response.actualNetworkReply()));
 			object.put("writeTime", response.getWriteTime());
 			object.put("readTime", response.getReadTime());

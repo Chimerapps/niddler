@@ -29,13 +29,17 @@ final class NiddlerOkHttpRequest implements NiddlerRequest {
 	private final long mTimestamp;
 	@Nullable
 	private final Map<String, String> mExtraHeaders;
+	@Nullable
+	private final StackTraceElement[] mStackTraceElements;
 
-	NiddlerOkHttpRequest(final Request request, final String requestId, @Nullable final Map<String, String> extraHeaders) {
+	NiddlerOkHttpRequest(final Request request, final String requestId, @Nullable final Map<String, String> extraHeaders,
+						 @Nullable final StackTraceElement[] stackTraceElements) {
 		mRequest = request;
 		mRequestId = requestId;
 		mMessageId = UUID.randomUUID().toString();
 		mTimestamp = System.currentTimeMillis();
 		mExtraHeaders = extraHeaders;
+		mStackTraceElements = stackTraceElements;
 	}
 
 	@Override
@@ -72,6 +76,12 @@ final class NiddlerOkHttpRequest implements NiddlerRequest {
 			}
 		}
 		return headers;
+	}
+
+	@Nullable
+	@Override
+	public StackTraceElement[] getRequestStackTrace() {
+		return mStackTraceElements;
 	}
 
 	@Override

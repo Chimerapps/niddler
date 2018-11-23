@@ -1,11 +1,17 @@
 package com.icapps.niddler.core;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.icapps.niddler.core.debug.NiddlerDebugger;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
 /**
  * @author Maarten Van Giel
@@ -17,19 +23,55 @@ public abstract class Niddler implements Closeable {
 	public static final String NIDDLER_DEBUG_RESPONSE_HEADER = "X-Niddler-Debug";
 	public static final String NIDDLER_DEBUG_TIMING_RESPONSE_HEADER = "X-Niddler-Debug-Timing";
 	public static final String INTENT_EXTRA_WAIT_FOR_DEBUGGER = "Niddler-Wait-For-Debugger";
+	private static final int MAX_TRACE_CACHE_SIZE = 100;
+
+	private final LinkedHashMap<StackTraceKey, StackTraceElement[]> mStackTraceMap;
 
 	final NiddlerImpl mNiddlerImpl;
+	private final int mStackTraceMaxDepth;
 
-	protected Niddler(final String password, final int port, final long cacheSize, final NiddlerServerInfo niddlerServerInfo) {
+	protected Niddler(final String password, final int port, final long cacheSize,
+                      final NiddlerServerInfo niddlerServerInfo, final int stackTraceMaxDepth) {
 		mNiddlerImpl = new NiddlerImpl(password, port, cacheSize, niddlerServerInfo);
+        mStackTraceMaxDepth = stackTraceMaxDepth;
+        NiddlerDebuggerImpl.maxStackTraceDepth = stackTraceMaxDepth;
+		mStackTraceMap = new LinkedHashMap<>();
 	}
 
 	public void logRequest(final NiddlerRequest request) {
-		mNiddlerImpl.send(MessageBuilder.buildMessage(request));
+		mNiddlerImpl.send(MessageBuilder.buildMessage(request, mStackTraceMaxDepth));
 	}
 
 	public void logResponse(final NiddlerResponse response) {
 		mNiddlerImpl.send(MessageBuilder.buildMessage(response));
+	}
+
+	public boolean isStackTracingEnabled() {
+		return mStackTraceMaxDepth > 0;
+	}
+
+	@Nullable
+	public StackTraceElement[] popTraceForId(@NonNull final StackTraceKey stackTraceId) {
+		synchronized (mStackTraceMap) {
+			return mStackTraceMap.remove(stackTraceId);
+		}
+	}
+
+	@NonNull
+	public StackTraceKey pushStackTrace(@NonNull final StackTraceElement[] trace) {
+		synchronized (mStackTraceMap) {
+			final StackTraceKey traceId = new StackTraceKey(UUID.randomUUID().toString() + Arrays.hashCode(trace));
+			mStackTraceMap.put(traceId, trace);
+			while (mStackTraceMap.size() > MAX_TRACE_CACHE_SIZE) {
+				StackTraceKey lastKey = null;
+				for (Map.Entry<StackTraceKey, StackTraceElement[]> e : mStackTraceMap.entrySet()) {
+					lastKey = e.getKey();
+				}
+				if (lastKey == null) break;
+				mStackTraceMap.remove(lastKey);
+			}
+			return traceId;
+		}
 	}
 
 	public void start() {
@@ -109,6 +151,7 @@ public abstract class Niddler implements Closeable {
 		protected long mCacheSize = 1024 * 1024; // By default use 1 MB cache
 		protected NiddlerServerInfo mNiddlerServerInfo = null;
 		protected String mPassword;
+		protected int mMaxStackTraceSize = 0;
 
 		/**
 		 * Creates a new builder with a given password to use for the niddler server authentication
@@ -133,6 +176,17 @@ public abstract class Niddler implements Closeable {
 		 */
 		public Builder<T> setPort(final int port) {
 			mPort = port;
+			return this;
+		}
+
+		/**
+		 * Sets the maximum request stack trace depth. 0 by default
+		 *
+		 * @param maxStackTraceSize Max stack trace depth. Set to 0 to disable request origin tracing
+		 * @return Builder
+		 */
+		public Builder<T> setMaxStackTraceSize(int maxStackTraceSize) {
+			mMaxStackTraceSize = maxStackTraceSize;
 			return this;
 		}
 
@@ -169,5 +223,32 @@ public abstract class Niddler implements Closeable {
 
 	interface PlatformNiddler {
 		void closePlatform();
+	}
+
+	public static class StackTraceKey {
+
+		@NonNull
+		private final String mId;
+
+		StackTraceKey(@NonNull final String id) {
+			mId = id;
+		}
+
+		@Override
+		public boolean equals(final Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (o == null || getClass() != o.getClass()) {
+				return false;
+			}
+			final StackTraceKey that = (StackTraceKey) o;
+			return mId.equals(that.mId);
+		}
+
+		@Override
+		public int hashCode() {
+			return mId.hashCode();
+		}
 	}
 }
