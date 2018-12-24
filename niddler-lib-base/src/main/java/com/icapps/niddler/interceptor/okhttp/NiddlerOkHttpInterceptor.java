@@ -10,11 +10,11 @@ import com.icapps.niddler.core.debug.NiddlerDebugger;
 import com.icapps.niddler.util.StringUtil;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
 
 import okhttp3.Headers;
@@ -34,192 +34,220 @@ import static com.icapps.niddler.core.Niddler.NIDDLER_DEBUG_TIMING_RESPONSE_HEAD
  */
 public class NiddlerOkHttpInterceptor implements Interceptor {
 
-	private static final int FLAG_MODIFIED_RESPONSE = 1;
-	private static final int FLAG_TIME = 2;
+    private static final int FLAG_MODIFIED_RESPONSE = 1;
+    private static final int FLAG_TIME = 2;
 
-	private final Niddler mNiddler;
-	private final List<Pattern> mBlacklist;
-	@NonNull
-	private final NiddlerDebugger mDebugger;
+    private final Niddler mNiddler;
+    private final List<Niddler.StaticBlackListEntry> mBlacklist;
+    @NonNull
+    private final NiddlerDebugger mDebugger;
 
-	public NiddlerOkHttpInterceptor(final Niddler niddler) {
-		mNiddler = niddler;
-		mBlacklist = new ArrayList<>();
-		mDebugger = niddler.debugger();
-	}
+    public NiddlerOkHttpInterceptor(final Niddler niddler) {
+        mNiddler = niddler;
+        mBlacklist = new CopyOnWriteArrayList<>();
+        mDebugger = niddler.debugger();
 
-	/**
-	 * Adds a static blacklist on the given url pattern. The pattern is interpreted as a java regex ({@link Pattern}). Items matching the blacklist are not tracked by niddler.
-	 * This blacklist is independent from any debugger blacklists
-	 *
-	 * @param urlPattern The pattern to add to the blacklist
-	 * @return This instance
-	 */
-	@SuppressWarnings("unused")
-	public NiddlerOkHttpInterceptor blacklist(@NonNull final String urlPattern) {
-		mBlacklist.add(Pattern.compile(urlPattern));
-		return this;
-	}
+        mNiddler.registerBlacklistListener(new Niddler.StaticBlacklistListener() {
+            @Override
+            public void setBlacklistItemEnabled(@NonNull final String pattern, final boolean enabled) {
+                NiddlerOkHttpInterceptor.this.setBlacklistItemEnabled(pattern, enabled);
+            }
+        });
+    }
 
-	@Override
-	public Response intercept(final Chain chain) throws IOException {
-		final long callStartTime = System.nanoTime();
+    /**
+     * Adds a static blacklist on the given url pattern. The pattern is interpreted as a java regex ({@link Pattern}). Items matching the blacklist are not tracked by niddler.
+     * This blacklist is independent from any debugger blacklists
+     *
+     * @param urlPattern The pattern to add to the blacklist
+     * @return This instance
+     */
+    @SuppressWarnings("unused")
+    public NiddlerOkHttpInterceptor blacklist(@NonNull final String urlPattern) {
+        mBlacklist.add(new Niddler.StaticBlackListEntry(urlPattern));
+        mNiddler.onStaticBlacklistChanged(mBlacklist);
+        return this;
+    }
 
-		final Request origRequest = chain.request();
-		final StackTraceElement[] traces;
-		final Niddler.StackTraceKey traceKey = origRequest.tag(Niddler.StackTraceKey.class);
-		if (traceKey == null) {
-			traces = null;
-		} else {
-			traces = mNiddler.popTraceForId(traceKey);
-		}
+    /**
+     * Allows you to enable/disable static blacklist items based on the pattern. This only affects the static blacklist, independent from debugger blacklists
+     *
+     * @param pattern The pattern to enable/disable in the blacklist. Only existing blacklist items, added via {@link #blacklist(String)} are considered
+     * @param enabled Flag indicating if the static blacklist item should be enabled or disabled
+     */
+    public void setBlacklistItemEnabled(final String pattern, final boolean enabled) {
+        boolean modified = false;
+        for (final Niddler.StaticBlackListEntry blackListEntry : mBlacklist) {
+            if (blackListEntry.isForPattern(pattern)) {
+                if (blackListEntry.setEnabled(enabled))
+                    modified = true;
+            }
+        }
+        if (modified)
+            mNiddler.onStaticBlacklistChanged(mBlacklist);
+    }
 
-		boolean changedTime = mDebugger.applyDelayBeforeBlacklist();
-		if (isBlacklisted(origRequest.url().toString())) {
-			return chain.proceed(origRequest);
-		}
-		changedTime |= mDebugger.applyDelayAfterBlacklist();
+    @NonNull
+    @Override
+    public Response intercept(@NonNull final Chain chain) throws IOException {
+        final long callStartTime = System.nanoTime();
 
-		final String uuid = UUID.randomUUID().toString();
+        final Request origRequest = chain.request();
+        final StackTraceElement[] traces;
+        final Niddler.StackTraceKey traceKey = origRequest.tag(Niddler.StackTraceKey.class);
+        if (traceKey == null) {
+            traces = null;
+        } else {
+            traces = mNiddler.popTraceForId(traceKey);
+        }
 
-		final NiddlerRequest origNiddlerRequest = new NiddlerOkHttpRequest(origRequest, uuid, buildExtraNiddlerHeaders(changedTime ? FLAG_TIME : 0), traces);
-		final NiddlerDebugger.DebugRequest overriddenRequest = mDebugger.overrideRequest(origNiddlerRequest);
+        boolean changedTime = mDebugger.applyDelayBeforeBlacklist();
+        if (isBlacklisted(origRequest.url().toString())) {
+            return chain.proceed(origRequest);
+        }
+        changedTime |= mDebugger.applyDelayAfterBlacklist();
 
-		final Request finalRequest = (overriddenRequest == null) ? origRequest : makeRequest(overriddenRequest);
+        final String uuid = UUID.randomUUID().toString();
 
-		final NiddlerRequest niddlerRequest = (overriddenRequest == null)
-				? origNiddlerRequest : new NiddlerOkHttpRequest(finalRequest, uuid, buildExtraNiddlerHeaders(changedTime ? FLAG_TIME : 0), traces);
+        final NiddlerRequest origNiddlerRequest = new NiddlerOkHttpRequest(origRequest, uuid, buildExtraNiddlerHeaders(changedTime ? FLAG_TIME : 0), traces);
+        final NiddlerDebugger.DebugRequest overriddenRequest = mDebugger.overrideRequest(origNiddlerRequest);
 
-		mNiddler.logRequest(niddlerRequest);
+        final Request finalRequest = (overriddenRequest == null) ? origRequest : makeRequest(overriddenRequest);
 
-		final NiddlerDebugger.DebugResponse debuggerBeforeExecuteOverride = mDebugger.handleRequest(niddlerRequest);
-		Response debugResponse = makeResponse(debuggerBeforeExecuteOverride, finalRequest, null);
+        final NiddlerRequest niddlerRequest = (overriddenRequest == null)
+                ? origNiddlerRequest : new NiddlerOkHttpRequest(finalRequest, uuid, buildExtraNiddlerHeaders(changedTime ? FLAG_TIME : 0), traces);
 
-		final Response response = (debugResponse != null) ? debugResponse : chain.proceed(finalRequest);
+        mNiddler.logRequest(niddlerRequest);
 
-		final long now = System.currentTimeMillis();
-		final long sentAt = response.sentRequestAtMillis();
-		final long receivedAt = response.receivedResponseAtMillis();
-		final int wait = (int) (receivedAt - sentAt);
-		final int writeTime = 0; //Unknown
-		final int readTime = (int) (now - sentAt); //Unknown-ish
+        final NiddlerDebugger.DebugResponse debuggerBeforeExecuteOverride = mDebugger.handleRequest(niddlerRequest);
+        Response debugResponse = makeResponse(debuggerBeforeExecuteOverride, finalRequest, null);
 
-		final Response networkResponse = response.networkResponse();
-		final Request networkRequest = (networkResponse == null) ? null : networkResponse.request();
+        final Response response = (debugResponse != null) ? debugResponse : chain.proceed(finalRequest);
 
-		changedTime = mDebugger.ensureCallTime(callStartTime);
-		final Map<String, String> extraHeaders = buildExtraNiddlerHeaders((changedTime ? FLAG_TIME : 0) + (debuggerBeforeExecuteOverride != null ? FLAG_MODIFIED_RESPONSE : 0));
+        final long now = System.currentTimeMillis();
+        final long sentAt = response.sentRequestAtMillis();
+        final long receivedAt = response.receivedResponseAtMillis();
+        final int wait = (int) (receivedAt - sentAt);
+        final int writeTime = 0; //Unknown
+        final int readTime = (int) (now - sentAt); //Unknown-ish
 
-		final NiddlerResponse niddlerResponse = new NiddlerOkHttpResponse(response, uuid,
-				(networkRequest == null) ? null : new NiddlerOkHttpRequest(networkRequest, uuid, null, null),
-				(networkResponse == null) ? null : new NiddlerOkHttpResponse(networkResponse, uuid, null, null, writeTime, readTime, wait, null),
-				writeTime, readTime, wait, extraHeaders);
+        final Response networkResponse = response.networkResponse();
+        final Request networkRequest = (networkResponse == null) ? null : networkResponse.request();
 
-		NiddlerDebugger.DebugResponse debugFromResponse = null;
-		if (debugResponse == null) {
-			debugFromResponse = mDebugger.handleResponse(niddlerRequest, niddlerResponse);
-		}
-		if (debugFromResponse == null) {
-			mNiddler.logResponse(niddlerResponse);
-			return response;
-		} else {
-			final int newWait = (int) (System.currentTimeMillis() - sentAt);
-			final int newReadTime = (int) (System.currentTimeMillis() - sentAt);
-			final Response debugResp = makeResponse(debugFromResponse, response.request(), response);
+        changedTime = mDebugger.ensureCallTime(callStartTime);
+        final Map<String, String> extraHeaders = buildExtraNiddlerHeaders((changedTime ? FLAG_TIME : 0) + (debuggerBeforeExecuteOverride != null ? FLAG_MODIFIED_RESPONSE : 0));
 
-			final NiddlerResponse debugNiddlerResponse = new NiddlerOkHttpResponse(debugResp, uuid,
-					null,
-					null,
-					writeTime, newReadTime, newWait, buildExtraNiddlerHeaders(FLAG_MODIFIED_RESPONSE + (changedTime ? FLAG_TIME : 0)));
+        final NiddlerResponse niddlerResponse = new NiddlerOkHttpResponse(response, uuid,
+                (networkRequest == null) ? null : new NiddlerOkHttpRequest(networkRequest, uuid, null, null),
+                (networkResponse == null) ? null : new NiddlerOkHttpResponse(networkResponse, uuid, null, null, writeTime, readTime, wait, null),
+                writeTime, readTime, wait, extraHeaders);
 
-			mNiddler.logResponse(debugNiddlerResponse);
-			return debugResp;
-		}
-	}
+        NiddlerDebugger.DebugResponse debugFromResponse = null;
+        if (debugResponse == null) {
+            debugFromResponse = mDebugger.handleResponse(niddlerRequest, niddlerResponse);
+        }
+        if (debugFromResponse == null) {
+            mNiddler.logResponse(niddlerResponse);
+            return response;
+        } else {
+            final int newWait = (int) (System.currentTimeMillis() - sentAt);
+            final int newReadTime = (int) (System.currentTimeMillis() - sentAt);
+            final Response debugResp = makeResponse(debugFromResponse, response.request(), response);
 
-	private boolean isBlacklisted(@NonNull final CharSequence url) {
-		for (final Pattern pattern : mBlacklist) {
-			if (pattern.matcher(url).matches()) {
-				return true;
-			}
-		}
-		return mDebugger.isBlacklisted(url);
-	}
+            final NiddlerResponse debugNiddlerResponse = new NiddlerOkHttpResponse(debugResp, uuid,
+                    null,
+                    null,
+                    writeTime, newReadTime, newWait, buildExtraNiddlerHeaders(FLAG_MODIFIED_RESPONSE + (changedTime ? FLAG_TIME : 0)));
 
-	@Nullable
-	private static Response makeResponse(@Nullable final NiddlerDebugger.DebugResponse debugResponse, final Request request, @Nullable final Response response) {
-		if (debugResponse == null) {
-			return null;
-		}
+            mNiddler.logResponse(debugNiddlerResponse);
+            return debugResp;
+        }
+    }
 
-		final Response.Builder builder = new Response.Builder()
-				.code(debugResponse.code)
-				.message(debugResponse.message);
+    private boolean isBlacklisted(@NonNull final CharSequence url) {
+        for (final Niddler.StaticBlackListEntry entry : mBlacklist) {
+            if (entry.matches(url)) {
+                return true;
+            }
+        }
+        return mDebugger.isBlacklisted(url);
+    }
 
-		if (debugResponse.headers != null) {
-			final Headers.Builder headers = new Headers.Builder();
-			for (final Map.Entry<String, List<String>> entry : debugResponse.headers.entrySet()) {
-				for (final String value : entry.getValue()) {
-					headers.add(entry.getKey(), value);
-				}
-			}
-			builder.headers(headers.build());
-		}
+    @Nullable
+    private static Response makeResponse(@Nullable final NiddlerDebugger.DebugResponse debugResponse, final Request request, @Nullable final Response response) {
+        if (debugResponse == null) {
+            return null;
+        }
 
-		if (!StringUtil.isEmpty(debugResponse.encodedBody)) {
-			builder.body(ResponseBody.create(MediaType.parse(debugResponse.bodyMimeType), StringUtil.fromBase64(debugResponse.encodedBody)));
-		}
-		builder.sentRequestAtMillis(System.currentTimeMillis());
-		builder.request(request);
-		builder.receivedResponseAtMillis(System.currentTimeMillis());
+        final Response.Builder builder = new Response.Builder()
+                .code(debugResponse.code)
+                .message(debugResponse.message);
 
-		if (response == null) {
-			builder.protocol(Protocol.HTTP_1_1);
-		} else {
-			builder.protocol(response.protocol());
-		}
+        if (debugResponse.headers != null) {
+            final Headers.Builder headers = new Headers.Builder();
+            for (final Map.Entry<String, List<String>> entry : debugResponse.headers.entrySet()) {
+                for (final String value : entry.getValue()) {
+                    headers.add(entry.getKey(), value);
+                }
+            }
+            builder.headers(headers.build());
+        }
 
-		return builder.build();
-	}
+        if (!StringUtil.isEmpty(debugResponse.encodedBody)) {
+            builder.body(ResponseBody.create(MediaType.parse(debugResponse.bodyMimeType), StringUtil.fromBase64(debugResponse.encodedBody)));
+        }
+        builder.sentRequestAtMillis(System.currentTimeMillis());
+        builder.request(request);
+        builder.receivedResponseAtMillis(System.currentTimeMillis());
 
-	@NonNull
-	private static Request makeRequest(@NonNull final NiddlerDebugger.DebugRequest debugRequest) {
-		final RequestBody body;
-		if (!StringUtil.isEmpty(debugRequest.encodedBody)) {
-			body = RequestBody.create(MediaType.parse(debugRequest.bodyMimeType), StringUtil.fromBase64(debugRequest.encodedBody));
-		} else {
-			body = null;
-		}
+        if (response == null) {
+            builder.protocol(Protocol.HTTP_1_1);
+        } else {
+            builder.protocol(response.protocol());
+        }
 
-		final Request.Builder builder = new Request.Builder()
-				.url(debugRequest.url)
-				.method(debugRequest.method, body);
-		if (debugRequest.headers != null) {
-			final Headers.Builder headers = new Headers.Builder();
-			for (final Map.Entry<String, List<String>> entry : debugRequest.headers.entrySet()) {
-				for (final String value : entry.getValue()) {
-					headers.add(entry.getKey(), value);
-				}
-			}
-			builder.headers(headers.build());
-		}
-		return builder.build();
-	}
+        return builder.build();
+    }
 
-	@Nullable
-	private static Map<String, String> buildExtraNiddlerHeaders(final int flags) {
-		if (flags == 0) {
-			return null;
-		}
+    @NonNull
+    private static Request makeRequest(@NonNull final NiddlerDebugger.DebugRequest debugRequest) {
+        final RequestBody body;
+        if (!StringUtil.isEmpty(debugRequest.encodedBody)) {
+            body = RequestBody.create(MediaType.parse(debugRequest.bodyMimeType), StringUtil.fromBase64(debugRequest.encodedBody));
+        } else {
+            body = null;
+        }
 
-		final Map<String, String> extra = new HashMap<>();
-		if ((flags & FLAG_TIME) != 0) {
-			extra.put(NIDDLER_DEBUG_TIMING_RESPONSE_HEADER, "true");
-		}
-		if ((flags & FLAG_MODIFIED_RESPONSE) != 0) {
-			extra.put(NIDDLER_DEBUG_RESPONSE_HEADER, "true");
-		}
+        final Request.Builder builder = new Request.Builder()
+                .url(debugRequest.url)
+                .method(debugRequest.method, body);
+        if (debugRequest.headers != null) {
+            final Headers.Builder headers = new Headers.Builder();
+            for (final Map.Entry<String, List<String>> entry : debugRequest.headers.entrySet()) {
+                for (final String value : entry.getValue()) {
+                    headers.add(entry.getKey(), value);
+                }
+            }
+            builder.headers(headers.build());
+        }
+        return builder.build();
+    }
 
-		return extra;
-	}
+    @Nullable
+    private static Map<String, String> buildExtraNiddlerHeaders(final int flags) {
+        if (flags == 0) {
+            return null;
+        }
+
+        final Map<String, String> extra = new HashMap<>();
+        if ((flags & FLAG_TIME) != 0) {
+            extra.put(NIDDLER_DEBUG_TIMING_RESPONSE_HEADER, "true");
+        }
+        if ((flags & FLAG_MODIFIED_RESPONSE) != 0) {
+            extra.put(NIDDLER_DEBUG_RESPONSE_HEADER, "true");
+        }
+
+        return extra;
+    }
+
 }
