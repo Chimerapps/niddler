@@ -21,8 +21,9 @@ public final class AndroidNiddler extends Niddler implements Niddler.PlatformNid
 
 	private NiddlerService mNiddlerService;
 
-	private AndroidNiddler(final String password, final int port, final long cacheSize, final NiddlerServerInfo niddlerServerInfo) {
-		super(password, port, cacheSize, niddlerServerInfo);
+	private AndroidNiddler(final String password, final int port, final long cacheSize,
+						   final NiddlerServerInfo niddlerServerInfo, final int maxStackTraceSize) {
+		super(password, port, cacheSize, niddlerServerInfo, maxStackTraceSize);
 		mNiddlerImpl.setPlatform(this);
 	}
 
@@ -93,7 +94,7 @@ public final class AndroidNiddler extends Niddler implements Niddler.PlatformNid
 
 		@Override
 		public AndroidNiddler build() {
-			return new AndroidNiddler(mPassword, mPort, mCacheSize, mNiddlerServerInfo);
+			return new AndroidNiddler(mPassword, mPort, mCacheSize, mNiddlerServerInfo, mMaxStackTraceSize);
 		}
 	}
 }

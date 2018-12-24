@@ -6,9 +6,7 @@ buildscript {
 
     }
 }
-plugins {
-    id "com.jfrog.bintray" version "1.7.3"
-}
+apply plugin: 'com.jfrog.bintray'
 
 apply from: '../constants.gradle'
 
@@ -24,8 +22,9 @@ apply plugin: 'maven-publish'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    compileOnly 'com.android.support:support-annotations:26.1.0'
-    compileOnly 'com.squareup.okhttp3:okhttp:3.10.0'
+    compileOnly 'com.android.support:support-annotations:28.0.0'
+    compileOnly 'com.squareup.okhttp3:okhttp:3.11.0'
+    compileOnly 'com.squareup.retrofit2:retrofit:2.5.0'
 }
 
 sourceCompatibility = "1.7"

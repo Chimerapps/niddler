@@ -3,8 +3,8 @@ package com.icapps.sampleapplication;
 import android.app.Application;
 
 import com.icapps.niddler.core.AndroidNiddler;
-import com.icapps.niddler.core.Niddler;
 import com.icapps.niddler.interceptor.okhttp.NiddlerOkHttpInterceptor;
+import com.icapps.niddler.retrofit.NiddlerRetrofitCallInjector;
 import com.icapps.sampleapplication.api.ExampleJsonApi;
 import com.icapps.sampleapplication.api.ExampleXMLApi;
 
@@ -17,44 +17,49 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 public class NiddlerSampleApplication extends Application {
 
-	private ExampleJsonApi mJsonApi;
-	private ExampleXMLApi mXMLApi;
+    private ExampleJsonApi mJsonApi;
+    private ExampleXMLApi mXMLApi;
 
-	@Override
-	public void onCreate() {
-		super.onCreate();
+    @Override
+    public void onCreate() {
+        super.onCreate();
 
-		final AndroidNiddler niddler = new AndroidNiddler.Builder()
-				.setPort(0)
-				.setNiddlerInformation(AndroidNiddler.fromApplication(this))
-				.build();
+        final AndroidNiddler niddler = new AndroidNiddler.Builder()
+                .setPort(0)
+                .setNiddlerInformation(AndroidNiddler.fromApplication(this))
+                .setMaxStackTraceSize(10)
+                .build();
 
-		niddler.attachToApplication(this);
+        niddler.attachToApplication(this);
 
-		final OkHttpClient okHttpClient = new OkHttpClient.Builder()
-				.addInterceptor(new NiddlerOkHttpInterceptor(niddler))
-				.build();
+        final NiddlerOkHttpInterceptor okHttpInterceptor = new NiddlerOkHttpInterceptor(niddler);
+        okHttpInterceptor.blacklist(".*raw\\.githubusercontent\\.com.*");
 
-		Retrofit jsonRetrofit = new Retrofit.Builder()
-				.baseUrl("https://jsonplaceholder.typicode.com")
-				.client(okHttpClient)
-				.addConverterFactory(GsonConverterFactory.create())
-				.build();
-		mJsonApi = jsonRetrofit.create(ExampleJsonApi.class);
+        final OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .addInterceptor(okHttpInterceptor)
+                .build();
 
-		Retrofit xmlRetrofit = new Retrofit.Builder()
-				.baseUrl("https://raw.githubusercontent.com/")
-				.client(okHttpClient)
-				.build();
-		mXMLApi = xmlRetrofit.create(ExampleXMLApi.class);
-	}
+        Retrofit.Builder jsonRetrofitBuilder = new Retrofit.Builder()
+                .baseUrl("https://jsonplaceholder.typicode.com")
+                .client(okHttpClient)
+                .addConverterFactory(GsonConverterFactory.create());
+        NiddlerRetrofitCallInjector.inject(jsonRetrofitBuilder, niddler, okHttpClient);
+        final Retrofit jsonRetrofit = jsonRetrofitBuilder.build();
+        mJsonApi = jsonRetrofit.create(ExampleJsonApi.class);
 
-	public ExampleJsonApi getJsonPlaceholderApi() {
-		return mJsonApi;
-	}
+        Retrofit xmlRetrofit = new Retrofit.Builder()
+                .baseUrl("https://raw.githubusercontent.com/")
+                .client(okHttpClient)
+                .build();
+        mXMLApi = xmlRetrofit.create(ExampleXMLApi.class);
+    }
 
-	public ExampleXMLApi getXmlPlaceholderApi() {
-		return mXMLApi;
-	}
+    public ExampleJsonApi getJsonPlaceholderApi() {
+        return mJsonApi;
+    }
+
+    public ExampleXMLApi getXmlPlaceholderApi() {
+        return mXMLApi;
+    }
 
 }

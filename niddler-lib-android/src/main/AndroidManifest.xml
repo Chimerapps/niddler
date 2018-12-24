@@ -1,8 +1,6 @@
 <manifest
         xmlns:android="http://schemas.android.com/apk/res/android" package="com.icapps.niddler">
 
-    <uses-sdk android:minSdkVersion="14"/>
-
     <application>
         <service android:name=".service.NiddlerService" android:exported="false" android:label="Niddler server"/>
     </application>
