@@ -132,13 +132,16 @@ final class MessageBuilder {
     }
 
     @NonNull
-    static String buildMessage(@NonNull final List<Niddler.StaticBlackListEntry> blacklist) {
+    static String buildMessage(@NonNull final String id, @NonNull final String name,
+                               @NonNull final List<Niddler.StaticBlackListEntry> blacklist) {
         if (blacklist.isEmpty()) {
             return "{\"type\":\"staticBlacklist\"}";
         }
         final JSONObject object = new JSONObject();
         try {
             object.put("type", "staticBlacklist");
+            object.put("id", id);
+            object.put("name", name);
             JSONArray array = new JSONArray();
             for (final Niddler.StaticBlackListEntry blackListEntry : blacklist) {
                 final JSONObject inner = new JSONObject();

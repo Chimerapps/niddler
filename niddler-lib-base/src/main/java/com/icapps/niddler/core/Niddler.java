@@ -37,12 +37,14 @@ public abstract class Niddler implements Closeable {
     protected Niddler(final String password, final int port, final long cacheSize,
                       final NiddlerServerInfo niddlerServerInfo, final int stackTraceMaxDepth) {
         mBlacklistListeners = new HashSet<>();
-        mNiddlerImpl = new NiddlerImpl(password, port, cacheSize, niddlerServerInfo, new StaticBlacklistListener() {
+        mNiddlerImpl = new NiddlerImpl(password, port, cacheSize, niddlerServerInfo, new NiddlerImpl.StaticBlacklistDispatchListener() {
+
             @Override
-            public void setBlacklistItemEnabled(@NonNull final String pattern, final boolean enabled) {
+            public void setBlacklistItemEnabled(@NonNull final String id, @NonNull final String pattern, final boolean enabled) {
                 synchronized (mBlacklistListeners) {
                     for (final StaticBlacklistListener blacklistListener : mBlacklistListeners) {
-                        blacklistListener.setBlacklistItemEnabled(pattern, enabled);
+                        if (id.equals(blacklistListener.getId()))
+                            blacklistListener.setBlacklistItemEnabled(pattern, enabled);
                     }
                 }
             }
@@ -145,8 +147,9 @@ public abstract class Niddler implements Closeable {
      *
      * @param blacklist The current blacklist. Thread safe
      */
-    public void onStaticBlacklistChanged(@NonNull final List<StaticBlackListEntry> blacklist) {
-        mNiddlerImpl.onStaticBlacklistChanged(blacklist);
+    public void onStaticBlacklistChanged(@NonNull final String id, @NonNull final String name,
+                                         @NonNull final List<StaticBlackListEntry> blacklist) {
+        mNiddlerImpl.onStaticBlacklistChanged(id, name, blacklist);
     }
 
     /**
@@ -328,6 +331,14 @@ public abstract class Niddler implements Closeable {
      * Listener for updating the static blacklist
      */
     public interface StaticBlacklistListener {
+
+        /**
+         * The id of the blacklist handler. This id must not change during the lifetime of the handler
+         *
+         * @return The id of the blacklist handler
+         */
+        @NonNull
+        String getId();
 
         /**
          * Called when the static blacklist should be updated to reflect the new enabled status

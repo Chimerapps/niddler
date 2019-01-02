@@ -37,17 +37,39 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
     private static final int FLAG_MODIFIED_RESPONSE = 1;
     private static final int FLAG_TIME = 2;
 
+    @NonNull
     private final Niddler mNiddler;
+    @NonNull
+    private final String mName;
+    @NonNull
+    private final String mId;
     private final List<Niddler.StaticBlackListEntry> mBlacklist;
     @NonNull
     private final NiddlerDebugger mDebugger;
 
-    public NiddlerOkHttpInterceptor(final Niddler niddler) {
+    /**
+     * Deprecated, use {@link #NiddlerOkHttpInterceptor(Niddler, String)} instead
+     */
+    @Deprecated
+    public NiddlerOkHttpInterceptor(@NonNull final Niddler niddller) {
+        this(niddller, "<No name>");
+    }
+
+    public NiddlerOkHttpInterceptor(@NonNull final Niddler niddler, @NonNull final String name) {
         mNiddler = niddler;
         mBlacklist = new CopyOnWriteArrayList<>();
         mDebugger = niddler.debugger();
+        mName = name;
+        mId = UUID.randomUUID().toString();
 
         mNiddler.registerBlacklistListener(new Niddler.StaticBlacklistListener() {
+
+            @NonNull
+            @Override
+            public String getId() {
+                return mId;
+            }
+
             @Override
             public void setBlacklistItemEnabled(@NonNull final String pattern, final boolean enabled) {
                 NiddlerOkHttpInterceptor.this.setBlacklistItemEnabled(pattern, enabled);
@@ -65,7 +87,7 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
     @SuppressWarnings("unused")
     public NiddlerOkHttpInterceptor blacklist(@NonNull final String urlPattern) {
         mBlacklist.add(new Niddler.StaticBlackListEntry(urlPattern));
-        mNiddler.onStaticBlacklistChanged(mBlacklist);
+        mNiddler.onStaticBlacklistChanged(mId, mName, mBlacklist);
         return this;
     }
 
@@ -75,7 +97,7 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
      * @param pattern The pattern to enable/disable in the blacklist. Only existing blacklist items, added via {@link #blacklist(String)} are considered
      * @param enabled Flag indicating if the static blacklist item should be enabled or disabled
      */
-    public void setBlacklistItemEnabled(final String pattern, final boolean enabled) {
+    private void setBlacklistItemEnabled(@NonNull final String pattern, final boolean enabled) {
         boolean modified = false;
         for (final Niddler.StaticBlackListEntry blackListEntry : mBlacklist) {
             if (blackListEntry.isForPattern(pattern)) {
@@ -84,7 +106,7 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
             }
         }
         if (modified)
-            mNiddler.onStaticBlacklistChanged(mBlacklist);
+            mNiddler.onStaticBlacklistChanged(mId, mName, mBlacklist);
     }
 
     @NonNull

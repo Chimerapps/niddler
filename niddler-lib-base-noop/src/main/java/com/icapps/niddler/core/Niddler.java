@@ -100,8 +100,11 @@ public abstract class Niddler implements Closeable {
      * Notifies niddler that the static blacklist has been modified
      *
      * @param blacklist The current blacklist. Thread safe
+     * @param id        The id of the blacklist handler
+     * @param name      The name of the blacklist handler
      */
-    public void onStaticBlacklistChanged(@NonNull final List<StaticBlackListEntry> blacklist) {
+    public void onStaticBlacklistChanged(@NonNull final String id, @NonNull final String name,
+                                         @NonNull final List<StaticBlackListEntry> blacklist) {
     }
 
     /**
@@ -235,6 +238,14 @@ public abstract class Niddler implements Closeable {
      */
     public interface StaticBlacklistListener {
 
+        /**
+         * The id of the blacklist handler. This id must not change during the lifetime of the handler
+         *
+         * @return The id of the blacklist handler
+         */
+        @NonNull
+        String getId();
+        
         /**
          * Called when the static blacklist should be updated to reflect the new enabled status
          *

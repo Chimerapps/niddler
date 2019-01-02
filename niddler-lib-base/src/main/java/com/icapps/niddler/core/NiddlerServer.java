@@ -34,10 +34,10 @@ class NiddlerServer extends WebSocketServer {
     private final String mPassword;
     private final NiddlerDebuggerImpl mNiddlerDebugger;
     private final NiddlerServerAnnouncementManager mServerAnnouncementManager;
-    private final Niddler.StaticBlacklistListener mStaticBlacklistListener;
+    private final NiddlerImpl.StaticBlacklistDispatchListener mStaticBlacklistListener;
 
     private NiddlerServer(final String password, final InetSocketAddress address, final String packageName,
-                          final WebSocketListener listener, final Niddler.StaticBlacklistListener blacklistListener) {
+                          final WebSocketListener listener, final NiddlerImpl.StaticBlacklistDispatchListener blacklistListener) {
         super(address);
         mPackageName = packageName;
         mListener = listener;
@@ -49,7 +49,7 @@ class NiddlerServer extends WebSocketServer {
     }
 
     NiddlerServer(final String password, final int port, final String packageName,
-                  final WebSocketListener listener, final Niddler.StaticBlacklistListener blacklistListener) throws UnknownHostException {
+                  final WebSocketListener listener, final NiddlerImpl.StaticBlacklistDispatchListener blacklistListener) throws UnknownHostException {
         this(password, new InetSocketAddress(port), packageName, listener, blacklistListener);
     }
 
@@ -141,7 +141,7 @@ class NiddlerServer extends WebSocketServer {
                     mNiddlerDebugger.onControlMessage(object, connection);
                     break;
                 case MESSAGE_STATIC_BLACKLIST_UPDATE:
-                    mStaticBlacklistListener.setBlacklistItemEnabled(object.getString("pattern"), object.getBoolean("enabled"));
+                    mStaticBlacklistListener.setBlacklistItemEnabled(object.getString("id"), object.getString("pattern"), object.getBoolean("enabled"));
                     break;
                 default:
                     LogUtil.niddlerLogWarning(LOG_TAG, "Received unsolicited message from client: " + message);

@@ -9,8 +9,9 @@ import org.java_websocket.WebSocket;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Nicola Verbeeck
@@ -28,11 +29,12 @@ class NiddlerImpl implements NiddlerServer.WebSocketListener {
 
     private boolean mIsStarted = false;
     private boolean mIsClosed = false;
-    private String mStaticBlacklistMessage;
+    @NonNull
+    private final Map<String, String> mStaticBlacklistMessage;
 
 
-    protected NiddlerImpl(final String password, final int port, final long cacheSize, final Niddler.NiddlerServerInfo niddlerServerInfo,
-                          final Niddler.StaticBlacklistListener blacklistListener) {
+    NiddlerImpl(final String password, final int port, final long cacheSize, final Niddler.NiddlerServerInfo niddlerServerInfo,
+                final StaticBlacklistDispatchListener blacklistListener) {
         try {
             mServer = new NiddlerServer(password, port, niddlerServerInfo.name, this, blacklistListener);
         } catch (final UnknownHostException ex) {
@@ -40,7 +42,7 @@ class NiddlerImpl implements NiddlerServer.WebSocketListener {
         }
         mMessageCache = new MessagesCache(cacheSize);
         mNiddlerServerInfo = niddlerServerInfo;
-        mStaticBlacklistMessage = MessageBuilder.buildMessage(Collections.<Niddler.StaticBlackListEntry>emptyList());
+        mStaticBlacklistMessage = new HashMap<>();
     }
 
     @Override
@@ -52,7 +54,9 @@ class NiddlerImpl implements NiddlerServer.WebSocketListener {
             conn.send(message);
         }
         if (!mStaticBlacklistMessage.isEmpty()) {
-            conn.send(mStaticBlacklistMessage);
+            for (final Map.Entry<String, String> entry : mStaticBlacklistMessage.entrySet()) {
+                conn.send(entry.getValue());
+            }
         }
     }
 
@@ -105,10 +109,12 @@ class NiddlerImpl implements NiddlerServer.WebSocketListener {
         }
     }
 
-    void onStaticBlacklistChanged(@NonNull final List<Niddler.StaticBlackListEntry> blacklist) {
-        mStaticBlacklistMessage = MessageBuilder.buildMessage(blacklist);
+    void onStaticBlacklistChanged(@NonNull final String id, @NonNull final String name,
+                                  @NonNull final List<Niddler.StaticBlackListEntry> blacklist) {
+        final String message = MessageBuilder.buildMessage(id, name, blacklist);
+        mStaticBlacklistMessage.put(id, message);
         if (isStarted() && !isClosed() && !mStaticBlacklistMessage.isEmpty()) {
-            mServer.sendToAll(mStaticBlacklistMessage);
+            mServer.sendToAll(message);
         }
 
     }
@@ -117,4 +123,16 @@ class NiddlerImpl implements NiddlerServer.WebSocketListener {
         return mServer.getPort();
     }
 
+    interface StaticBlacklistDispatchListener {
+
+        /**
+         * Called when the static blacklist should be updated to reflect the new enabled status
+         *
+         * @param pattern The pattern to enable/disable
+         * @param enabled Flag indicating if the static blacklist item is enabled or disabled
+         * @param id      The id of the blacklist handler to update
+         */
+        void setBlacklistItemEnabled(@NonNull final String id, @NonNull final String pattern, final boolean enabled);
+
+    }
 }
