@@ -55,6 +55,13 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
         this(niddller, "<No name>");
     }
 
+    /**
+     * Creates the authenticator that will report messages to the provided niddler. The name is only
+     * used for identification purposes on the client
+     *
+     * @param niddler The niddler instance to report to
+     * @param name    A name for this interceptor
+     */
     public NiddlerOkHttpInterceptor(@NonNull final Niddler niddler, @NonNull final String name) {
         mNiddler = niddler;
         mBlacklist = new CopyOnWriteArrayList<>();
