@@ -36,7 +36,7 @@ fun main(args: Array<String>) {
     }
 
     val okHttp = OkHttpClient.Builder()
-            .addInterceptor(NiddlerOkHttpInterceptor(niddler))
+            .addInterceptor(NiddlerOkHttpInterceptor(niddler, "Default Interceptor"))
             .build()
 
     val request = Request.Builder()

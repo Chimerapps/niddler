@@ -53,7 +53,10 @@ final class MessageBuilder {
                     }
                 }
             }
-
+            final List<String> context = request.getRequestContext();
+            if (context != null && !context.isEmpty()) {
+                object.put("context", context);
+            }
         } catch (final JSONException e) {
             LogUtil.niddlerLogError("MessageBuilder", "Failed to create json: ", e);
 
@@ -142,14 +145,14 @@ final class MessageBuilder {
             object.put("type", "staticBlacklist");
             object.put("id", id);
             object.put("name", name);
-            JSONArray array = new JSONArray();
+            final JSONArray array = new JSONArray();
             for (final Niddler.StaticBlackListEntry blackListEntry : blacklist) {
                 final JSONObject inner = new JSONObject();
                 inner.put("pattern", blackListEntry.pattern());
                 inner.put("enabled", blackListEntry.isEnabled());
                 array.put(inner);
             }
-            object.accumulate("entries", array);
+            object.put("entries", array);
         } catch (final JSONException e) {
             LogUtil.niddlerLogError("MessageBuilder", "Failed to create json: ", e);
             return "";

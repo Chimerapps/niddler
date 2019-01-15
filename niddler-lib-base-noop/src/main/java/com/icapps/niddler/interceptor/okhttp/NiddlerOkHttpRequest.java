@@ -1,5 +1,7 @@
 package com.icapps.niddler.interceptor.okhttp;
 
+import android.support.annotation.Nullable;
+
 import com.icapps.niddler.core.NiddlerRequest;
 
 import java.io.IOException;
@@ -54,4 +56,15 @@ public class NiddlerOkHttpRequest implements NiddlerRequest {
 		// Do nothing
 	}
 
+	@Nullable
+	@Override
+	public StackTraceElement[] getRequestStackTrace() {
+		return null;
+	}
+
+	@Nullable
+	@Override
+	public List<String> getRequestContext() {
+		return null;
+	}
 }

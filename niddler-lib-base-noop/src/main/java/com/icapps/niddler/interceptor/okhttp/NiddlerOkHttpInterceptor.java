@@ -5,8 +5,10 @@ import android.support.annotation.NonNull;
 import com.icapps.niddler.core.Niddler;
 
 import java.io.IOException;
+import java.util.List;
 
 import okhttp3.Interceptor;
+import okhttp3.Request;
 import okhttp3.Response;
 
 /**
@@ -40,4 +42,10 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
     public Response intercept(final Chain chain) throws IOException {
         return chain.proceed(chain.request());
     }
+
+    @NonNull
+    public static Request appendContext(@NonNull final Request request, @NonNull final String context) {
+        return request;
+    }
+
 }

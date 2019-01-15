@@ -10,6 +10,7 @@ import com.icapps.niddler.core.debug.NiddlerDebugger;
 import com.icapps.niddler.util.StringUtil;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,17 +36,17 @@ import static com.icapps.niddler.core.Niddler.NIDDLER_DEBUG_TIMING_RESPONSE_HEAD
 public class NiddlerOkHttpInterceptor implements Interceptor {
 
     private static final int FLAG_MODIFIED_RESPONSE = 1;
-    private static final int FLAG_TIME = 2;
+    private static final int FLAG_TIME              = 2;
 
     @NonNull
-    private final Niddler mNiddler;
+    private final Niddler                            mNiddler;
     @NonNull
-    private final String mName;
+    private final String                             mName;
     @NonNull
-    private final String mId;
+    private final String                             mId;
     private final List<Niddler.StaticBlackListEntry> mBlacklist;
     @NonNull
-    private final NiddlerDebugger mDebugger;
+    private final NiddlerDebugger                    mDebugger;
 
     /**
      * Deprecated, use {@link #NiddlerOkHttpInterceptor(Niddler, String)} instead
@@ -101,19 +102,24 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
     /**
      * Allows you to enable/disable static blacklist items based on the pattern. This only affects the static blacklist, independent from debugger blacklists
      *
-     * @param pattern The pattern to enable/disable in the blacklist. Only existing blacklist items, added via {@link #blacklist(String)} are considered
+     * @param pattern The pattern to enable/disable in the blacklist. If a pattern is added that does not exist yet in the blacklist, it is added
      * @param enabled Flag indicating if the static blacklist item should be enabled or disabled
      */
     private void setBlacklistItemEnabled(@NonNull final String pattern, final boolean enabled) {
         boolean modified = false;
         for (final Niddler.StaticBlackListEntry blackListEntry : mBlacklist) {
             if (blackListEntry.isForPattern(pattern)) {
-                if (blackListEntry.setEnabled(enabled))
+                if (blackListEntry.setEnabled(enabled)) {
                     modified = true;
+                }
             }
         }
-        if (modified)
-            mNiddler.onStaticBlacklistChanged(mId, mName, mBlacklist);
+        if (!modified) {
+            final Niddler.StaticBlackListEntry entry = new Niddler.StaticBlackListEntry(pattern);
+            entry.setEnabled(enabled);
+            mBlacklist.add(entry);
+        }
+        mNiddler.onStaticBlacklistChanged(mId, mName, mBlacklist);
     }
 
     @NonNull
@@ -124,6 +130,7 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
         final Request origRequest = chain.request();
         final StackTraceElement[] traces;
         final Niddler.StackTraceKey traceKey = origRequest.tag(Niddler.StackTraceKey.class);
+        final NiddlerRequestContext requestContext = origRequest.tag(NiddlerRequestContext.class);
         if (traceKey == null) {
             traces = null;
         } else {
@@ -138,13 +145,13 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 
         final String uuid = UUID.randomUUID().toString();
 
-        final NiddlerRequest origNiddlerRequest = new NiddlerOkHttpRequest(origRequest, uuid, buildExtraNiddlerHeaders(changedTime ? FLAG_TIME : 0), traces);
+        final NiddlerRequest origNiddlerRequest = new NiddlerOkHttpRequest(origRequest, uuid, buildExtraNiddlerHeaders(changedTime ? FLAG_TIME : 0), traces, requestContext);
         final NiddlerDebugger.DebugRequest overriddenRequest = mDebugger.overrideRequest(origNiddlerRequest);
 
         final Request finalRequest = (overriddenRequest == null) ? origRequest : makeRequest(overriddenRequest);
 
         final NiddlerRequest niddlerRequest = (overriddenRequest == null)
-                ? origNiddlerRequest : new NiddlerOkHttpRequest(finalRequest, uuid, buildExtraNiddlerHeaders(changedTime ? FLAG_TIME : 0), traces);
+                ? origNiddlerRequest : new NiddlerOkHttpRequest(finalRequest, uuid, buildExtraNiddlerHeaders(changedTime ? FLAG_TIME : 0), traces, requestContext);
 
         mNiddler.logRequest(niddlerRequest);
 
@@ -167,7 +174,7 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
         final Map<String, String> extraHeaders = buildExtraNiddlerHeaders((changedTime ? FLAG_TIME : 0) + (debuggerBeforeExecuteOverride != null ? FLAG_MODIFIED_RESPONSE : 0));
 
         final NiddlerResponse niddlerResponse = new NiddlerOkHttpResponse(response, uuid,
-                (networkRequest == null) ? null : new NiddlerOkHttpRequest(networkRequest, uuid, null, null),
+                (networkRequest == null) ? null : new NiddlerOkHttpRequest(networkRequest, uuid, null, null, null),
                 (networkResponse == null) ? null : new NiddlerOkHttpResponse(networkResponse, uuid, null, null, writeTime, readTime, wait, null),
                 writeTime, readTime, wait, extraHeaders);
 
@@ -277,6 +284,36 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
         }
 
         return extra;
+    }
+
+    @NonNull
+    public static Request appendContext(@NonNull final Request request, @NonNull final String context) {
+        NiddlerRequestContext existingContext = request.tag(NiddlerRequestContext.class);
+        final Request requestToReturn;
+        if (existingContext == null) {
+            existingContext = new NiddlerRequestContext(new ArrayList<String>());
+            requestToReturn = request.newBuilder().tag(NiddlerRequestContext.class, existingContext).build();
+        } else {
+            requestToReturn = request;
+        }
+        existingContext.appendContext(context);
+        return requestToReturn;
+    }
+
+    static class NiddlerRequestContext {
+        final List<String> mContextInformation;
+
+        NiddlerRequestContext(final List<String> contextInformation) {
+            mContextInformation = contextInformation;
+        }
+
+        void appendContext(@NonNull final String context) {
+            mContextInformation.add(context);
+        }
+
+        List<String> getContextInformation() {
+            return mContextInformation;
+        }
     }
 
 }
