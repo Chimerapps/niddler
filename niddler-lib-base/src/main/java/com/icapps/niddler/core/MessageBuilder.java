@@ -49,13 +49,15 @@ final class MessageBuilder {
                 final int end = Math.min(trace.length, stackTraceMaxDepth);
                 if (end > 0) {
                     for (int i = 0; i < end; ++i) {
-                        object.accumulate("trace", (trace[i].toString()));
+                        object.append("trace", (trace[i].toString()));
                     }
                 }
             }
             final List<String> context = request.getRequestContext();
             if (context != null && !context.isEmpty()) {
-                object.put("context", context);
+                for (final String contextItem : context) {
+                    object.append("context", contextItem);
+                }
             }
         } catch (final JSONException e) {
             LogUtil.niddlerLogError("MessageBuilder", "Failed to create json: ", e);
