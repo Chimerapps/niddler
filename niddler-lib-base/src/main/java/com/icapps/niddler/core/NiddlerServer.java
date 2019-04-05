@@ -1,6 +1,7 @@
 package com.icapps.niddler.core;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.icapps.niddler.core.debug.NiddlerDebugger;
 import com.icapps.niddler.util.LogUtil;
@@ -28,15 +29,15 @@ class NiddlerServer extends WebSocketServer {
 
     private static final String LOG_TAG = NiddlerServer.class.getSimpleName();
 
-    private final String mPackageName;
-    private final WebSocketListener mListener;
-    private final List<ServerConnection> mConnections;
-    private final String mPassword;
-    private final NiddlerDebuggerImpl mNiddlerDebugger;
-    private final NiddlerServerAnnouncementManager mServerAnnouncementManager;
+    private final String                                      mPackageName;
+    private final WebSocketListener                           mListener;
+    private final List<ServerConnection>                      mConnections;
+    private final String                                      mPassword;
+    private final NiddlerDebuggerImpl                         mNiddlerDebugger;
+    private final NiddlerServerAnnouncementManager            mServerAnnouncementManager;
     private final NiddlerImpl.StaticBlacklistDispatchListener mStaticBlacklistListener;
 
-    private NiddlerServer(final String password, final InetSocketAddress address, final String packageName,
+    private NiddlerServer(final String password, final InetSocketAddress address, final String packageName, @Nullable final String icon,
                           final WebSocketListener listener, final NiddlerImpl.StaticBlacklistDispatchListener blacklistListener) {
         super(address);
         mPackageName = packageName;
@@ -44,13 +45,13 @@ class NiddlerServer extends WebSocketServer {
         mPassword = password;
         mConnections = new LinkedList<>();
         mNiddlerDebugger = new NiddlerDebuggerImpl();
-        mServerAnnouncementManager = new NiddlerServerAnnouncementManager(packageName, this);
+        mServerAnnouncementManager = new NiddlerServerAnnouncementManager(packageName, icon, this);
         mStaticBlacklistListener = blacklistListener;
     }
 
-    NiddlerServer(final String password, final int port, final String packageName,
+    NiddlerServer(final String password, final int port, final String packageName, @Nullable final String icon,
                   final WebSocketListener listener, final NiddlerImpl.StaticBlacklistDispatchListener blacklistListener) throws UnknownHostException {
-        this(password, new InetSocketAddress(port), packageName, listener, blacklistListener);
+        this(password, new InetSocketAddress(port), packageName, icon, listener, blacklistListener);
     }
 
     @Override
@@ -104,10 +105,10 @@ class NiddlerServer extends WebSocketServer {
         mServerAnnouncementManager.start();
     }
 
-    private static final String MESSAGE_AUTH = "authReply";
-    private static final String MESSAGE_START_DEBUG = "startDebug";
-    private static final String MESSAGE_END_DEBUG = "endDebug";
-    private static final String MESSAGE_DEBUG_CONTROL = "controlDebug";
+    private static final String MESSAGE_AUTH                    = "authReply";
+    private static final String MESSAGE_START_DEBUG             = "startDebug";
+    private static final String MESSAGE_END_DEBUG               = "endDebug";
+    private static final String MESSAGE_DEBUG_CONTROL           = "controlDebug";
     private static final String MESSAGE_STATIC_BLACKLIST_UPDATE = "controlStaticBlacklist";
 
     @Override

@@ -23,16 +23,16 @@ import java.util.regex.Pattern;
 @SuppressWarnings("WeakerAccess")
 public abstract class Niddler implements Closeable {
 
-    public static final String NIDDLER_DEBUG_RESPONSE_HEADER = "X-Niddler-Debug";
-    public static final String NIDDLER_DEBUG_TIMING_RESPONSE_HEADER = "X-Niddler-Debug-Timing";
-    public static final String INTENT_EXTRA_WAIT_FOR_DEBUGGER = "Niddler-Wait-For-Debugger";
-    private static final int MAX_TRACE_CACHE_SIZE = 100;
+    public static final  String NIDDLER_DEBUG_RESPONSE_HEADER        = "X-Niddler-Debug";
+    public static final  String NIDDLER_DEBUG_TIMING_RESPONSE_HEADER = "X-Niddler-Debug-Timing";
+    public static final  String INTENT_EXTRA_WAIT_FOR_DEBUGGER       = "Niddler-Wait-For-Debugger";
+    private static final int    MAX_TRACE_CACHE_SIZE                 = 100;
 
     private final LinkedHashMap<StackTraceKey, StackTraceElement[]> mStackTraceMap;
-    private final Set<StaticBlacklistListener> mBlacklistListeners;
+    private final Set<StaticBlacklistListener>                      mBlacklistListeners;
 
-    final NiddlerImpl mNiddlerImpl;
-    private final int mStackTraceMaxDepth;
+    final         NiddlerImpl mNiddlerImpl;
+    private final int         mStackTraceMaxDepth;
 
     protected Niddler(final String password, final int port, final long cacheSize,
                       final NiddlerServerInfo niddlerServerInfo, final int stackTraceMaxDepth) {
@@ -43,8 +43,9 @@ public abstract class Niddler implements Closeable {
             public void setBlacklistItemEnabled(@NonNull final String id, @NonNull final String pattern, final boolean enabled) {
                 synchronized (mBlacklistListeners) {
                     for (final StaticBlacklistListener blacklistListener : mBlacklistListeners) {
-                        if (id.equals(blacklistListener.getId()))
+                        if (id.equals(blacklistListener.getId())) {
                             blacklistListener.setBlacklistItemEnabled(pattern, enabled);
+                        }
                     }
                 }
             }
@@ -83,7 +84,9 @@ public abstract class Niddler implements Closeable {
                 for (Map.Entry<StackTraceKey, StackTraceElement[]> e : mStackTraceMap.entrySet()) {
                     lastKey = e.getKey();
                 }
-                if (lastKey == null) break;
+                if (lastKey == null) {
+                    break;
+                }
                 mStackTraceMap.remove(lastKey);
             }
             return traceId;
@@ -170,13 +173,20 @@ public abstract class Niddler implements Closeable {
          * Protocol version 4:
          * - Support for configuration (blacklist, basic debugging)
          */
-        static final int PROTOCOL_VERSION = 4;
-        final String name;
-        final String description;
+        static final int    PROTOCOL_VERSION = 4;
+        final        String name;
+        final        String description;
+        @Nullable
+        final        String icon;
 
-        public NiddlerServerInfo(final String name, final String description) {
+        public NiddlerServerInfo(final String name, final String description, @Nullable final String icon) {
             this.name = name;
             this.description = description;
+            this.icon = icon;
+        }
+
+        public NiddlerServerInfo(final String name, final String description) {
+            this(name, description, null);
         }
 
     }
@@ -184,11 +194,11 @@ public abstract class Niddler implements Closeable {
     @SuppressWarnings({"unused", "SameParameterValue", "MagicNumber"})
     public static abstract class Builder<T extends Niddler> {
 
-        protected int mPort = 6555;
-        protected long mCacheSize = 1024 * 1024; // By default use 1 MB cache
+        protected int               mPort              = 6555;
+        protected long              mCacheSize         = 1024 * 1024; // By default use 1 MB cache
         protected NiddlerServerInfo mNiddlerServerInfo = null;
-        protected String mPassword;
-        protected int mMaxStackTraceSize = 0;
+        protected String            mPassword;
+        protected int               mMaxStackTraceSize = 0;
 
         /**
          * Creates a new builder with a given password to use for the niddler server authentication
@@ -294,7 +304,7 @@ public abstract class Niddler implements Closeable {
      */
     public static class StaticBlackListEntry {
         private final Pattern mPattern;
-        private boolean mEnabled;
+        private       boolean mEnabled;
 
         public StaticBlackListEntry(@NonNull final String pattern) {
             mPattern = Pattern.compile(pattern);
