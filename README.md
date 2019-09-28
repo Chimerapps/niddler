@@ -20,18 +20,18 @@ Example usage with Android Application:
 ```kotlin
 class NiddlerSampleApplication : Application() {
 
-	override fun onCreate() {
+    override fun onCreate() {
         super.onCreate()
 
-		val niddler = AndroidNiddler.Builder()
-                        .setPort(0) //Use port 0 to prevent conflicting ports, auto-discovery will find it anyway!
-                        .setNiddlerInformation(AndroidNiddler.fromApplication(this))
-                        .setMaxStackTraceSize(10)
-                        .build()
+        val niddler = AndroidNiddler.Builder()
+                    .setPort(0) //Use port 0 to prevent conflicting ports, auto-discovery will find it anyway!
+                    .setNiddlerInformation(AndroidNiddler.fromApplication(this))
+                    .setMaxStackTraceSize(10)
+                    .build()
 
-		niddler.attachToApplication(this) //Make the niddler service start whenever an activity starts
+        niddler.attachToApplication(this) //Make the niddler service start whenever an activity starts
 
-		//Create an interceptor for okHttp 3+
+        //Create an interceptor for okHttp 3+
         val okHttpInterceptor = NiddlerOkHttpInterceptor(niddler, "Default")
         //Blacklist some items based on regex on the URL, these won't show up in niddler
         okHttpInterceptor.blacklist(".*raw\\.githubusercontent\\.com.*")
@@ -39,16 +39,16 @@ class NiddlerSampleApplication : Application() {
         //Create okhttp client. Note that we add this interceptor as an application layer interceptor, this ensures we see 'unpacked' responses
         //When using multiple interceptors, add niddler last!
         val okHttpClient = OkHttpClient.Builder()
-                .addInterceptor(okHttpInterceptor)
-                .build()
+                    .addInterceptor(okHttpInterceptor)
+                    .build()
 
         // Every request done with this OkHttpClient will now be logged with Niddler
 
         //Advanced configuration, add stack traces when using retrofit
         val retrofitBuilder = Retrofit.Builder()
-                        .baseUrl("https://example.com")
-                        .client(okHttpClient)
-                        ...
+                    .baseUrl("https://example.com")
+                    .client(okHttpClient)
+                    ...
 
         //Inject custom call factory that adds stack trace information to retrofit
         NiddlerRetrofitCallInjector.inject(retrofitBuilder, niddler, okHttpClient)
@@ -76,23 +76,23 @@ Use with java application:
 ```java
 public class Sample {
 
-	public static void main(final String[] args) {
-		final JavaNiddlerNiddler niddler = new JavaNiddler.Builder("superSecretPassword")
-				.setPort(0)
-				.setNiddlerInformation(Niddler.NiddlerServerInfo("Exmaple", "Example description"))
-				.build();
+    public static void main(final String[] args) {
+        final JavaNiddlerNiddler niddler = new JavaNiddler.Builder("superSecretPassword")
+                        .setPort(0)
+                        .setNiddlerInformation(Niddler.NiddlerServerInfo("Exmaple", "Example description"))
+                        .build();
 
-		final OkHttpClient okHttpClient = new OkHttpClient.Builder()
-				.addInterceptor(new NiddlerOkHttpInterceptor(niddler))
-				.build();
+        final OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                        .addInterceptor(new NiddlerOkHttpInterceptor(niddler))
+                        .build();
 
         niddler.start();
-        
+
         //Run application
-		// Every request done with this OkHttpClient will now be logged with Niddler
-		
-		niddler.close();
-	}
+        // Every request done with this OkHttpClient will now be logged with Niddler
+
+        niddler.close();
+    }
 
 }
 ```
