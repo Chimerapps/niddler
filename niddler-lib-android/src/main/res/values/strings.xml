@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="niddler_running_notification_big">Niddler is running for \'%1$s\' on port \'%2$d\'. Touch to stop</string>
+    <string name="niddler_running_notification">Niddler is running. Touch to stop.</string>
+
+</resources>
