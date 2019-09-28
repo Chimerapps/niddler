@@ -42,10 +42,10 @@ class NiddlerSampleApplication : Application() {
                 .addInterceptor(okHttpInterceptor)
                 .build()
 
-		// Every request done with this OkHttpClient will now be logged with Niddler
+        // Every request done with this OkHttpClient will now be logged with Niddler
 
-		//Advanced configuration, add stack traces when using retrofit
-		val retrofitBuilder = Retrofit.Builder()
+        //Advanced configuration, add stack traces when using retrofit
+        val retrofitBuilder = Retrofit.Builder()
                         .baseUrl("https://example.com")
                         .client(okHttpClient)
                         ...
@@ -55,7 +55,7 @@ class NiddlerSampleApplication : Application() {
         val retrofitInstance = retrofitBuilder.build()
 
         ...
-	}
+    }
 
 }
 ```
