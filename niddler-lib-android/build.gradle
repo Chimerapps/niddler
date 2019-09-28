@@ -50,9 +50,11 @@ android.libraryVariants.all { variant ->
         doFirst {
             classpath =
                     files(
-                            variant.javaCompile.classpath.files,
-                            project.android.getBootClasspath())
+                            android.sourceSets.main.java.srcDirs,
+                            project.android.getBootClasspath(),
+                            project.file("../niddler-lib-base/src/main/java"))
         }
+        failOnError false
     }
 
     task("androidJavadocsJar", type: Jar, dependsOn: generateJavadoc) {
