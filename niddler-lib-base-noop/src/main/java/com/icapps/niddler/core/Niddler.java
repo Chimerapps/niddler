@@ -15,9 +15,9 @@ import java.util.List;
 @SuppressWarnings("WeakerAccess")
 public abstract class Niddler implements Closeable {
 
-    public static final String NIDDLER_DEBUG_RESPONSE_HEADER = "X-Niddler-Debug";
+    public static final String NIDDLER_DEBUG_RESPONSE_HEADER        = "X-Niddler-Debug";
     public static final String NIDDLER_DEBUG_TIMING_RESPONSE_HEADER = "X-Niddler-Debug-Timing";
-    public static final String INTENT_EXTRA_WAIT_FOR_DEBUGGER = "Niddler-Wait-For-Debugger";
+    public static final String INTENT_EXTRA_WAIT_FOR_DEBUGGER       = "Niddler-Wait-For-Debugger";
 
     private static final StackTraceKey EMPTY = new StackTraceKey();
 
@@ -122,15 +122,21 @@ public abstract class Niddler implements Closeable {
          * Protocol version 4:
          * - Support for configuration (blacklist, basic debugging)
          */
-        static final int PROTOCOL_VERSION = 4;
-        final String name;
-        final String description;
+        static final int    PROTOCOL_VERSION = 4;
+        final        String name;
+        final        String description;
+        @Nullable
+        final        String icon;
 
-        public NiddlerServerInfo(final String name, final String description) {
+        public NiddlerServerInfo(final String name, final String description, @Nullable final String icon) {
             this.name = name;
             this.description = description;
+            this.icon = icon;
         }
 
+        public NiddlerServerInfo(final String name, final String description) {
+            this(name, description, null);
+        }
     }
 
     @SuppressWarnings({"unused", "SameParameterValue", "MagicNumber"})
@@ -245,7 +251,7 @@ public abstract class Niddler implements Closeable {
          */
         @NonNull
         String getId();
-        
+
         /**
          * Called when the static blacklist should be updated to reflect the new enabled status
          *
