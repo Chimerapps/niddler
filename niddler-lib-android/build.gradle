@@ -28,7 +28,7 @@ android {
 }
 
 dependencies {
-    compile project(':niddler-lib-base')
+    api project(':niddler-lib-base')
     compileOnly 'com.android.support:support-annotations:28.0.0'
 }
 
@@ -113,7 +113,9 @@ publishing {
             artifact sourceJar {
                 classifier "sources"
             }
-            artifact androidJavadocsJar
+            afterEvaluate {
+                artifact androidJavadocsJar
+            }
             groupId "$artifactGroup"
             version "$artifactVersion"
             artifactId "$artifactName"
