@@ -2,46 +2,65 @@
 
 ![Logo](niddler_logo.png)
 
-Niddler is a network debugging utility for Android and java apps that caches network requests/responses, and exposes them over a websocket based protocol. It comes with a simple interceptor for Square's [OkHttpClient](http://square.github.io/okhttp/), as well as a no-op interceptor for use in release scenario's.
+Niddler is a network debugging utility for Android and java apps that caches network requests/responses, and exposes them over a websocket based protocol. It comes with a convenient interceptor for Square's [OkHttpClient](http://square.github.io/okhttp/), as well as a no-op interceptor for use in release scenario's.
 
-Niddler is meant to be used with [Niddler-ui](https://github.com/icapps/niddler-ui), which is a plugin for IntelliJ/Android Studio. When used together it allows you to visualize network activity, easily navigate JSON/XML responses, debug, ...
+Niddler is meant to be used with [Niddler-ui](https://github.com/Chimerapps/niddler-ui), which is a plugin for IntelliJ/Android Studio. When used together it allows you to visualize network activity, easily navigate JSON/XML responses, debug, ...
 
-Niddler is a collaboration of [iCapps](http://www.icapps.com) and [Chimerapps](http://www.chimerapps.com/).
+Niddler is a collaboration of [icapps](http://www.icapps.com) and [Chimerapps](http://www.chimerapps.com/).
 
 ## Example use (Android)
 build.gradle:
 ```
-//Ensure jcenter is in the repo list (1.0.0-alpha10 is the latest semi stable version)
-debugCompile 'com.icapps.niddler:niddler:1.0.0-alpha10'
-releaseCompile 'com.icapps.niddler:niddler-noop:1.0.0-alpha10'
+//Ensure jcenter is in the repo list
+debugCompile 'com.icapps.niddler:niddler:{latest version}'
+releaseCompile 'com.icapps.niddler:niddler-noop:{latest version}'
 ```
 
-Use with Android Application:
-```
-public class NiddlerSampleApplication extends Application {
+Example usage with Android Application:
+```kotlin
+class NiddlerSampleApplication : Application() {
 
-	@Override
-	public void onCreate() {
-		super.onCreate();
+	override fun onCreate() {
+        super.onCreate()
 
-		final AndroidNiddler niddler = new AndroidNiddler.Builder("superSecretPassword")
-				.setPort(6555)  //Or 0 to have auto-discovery do it's magic
-				.setNiddlerInformation(Niddler.NiddlerServerInfo.fromApplication(this))
-				.build();
+		val niddler = AndroidNiddler.Builder()
+                        .setPort(0) //Use port 0 to prevent conflicting ports, auto-discovery will find it anyway!
+                        .setNiddlerInformation(AndroidNiddler.fromApplication(this))
+                        .setMaxStackTraceSize(10)
+                        .build()
 
-		niddler.attachToApplication(this);
+		niddler.attachToApplication(this) //Make the niddler service start whenever an activity starts
 
-		final OkHttpClient okHttpClient = new OkHttpClient.Builder()
-				.addInterceptor(new NiddlerOkHttpInterceptor(niddler))
-				.build();
+		//Create an interceptor for okHttp 3+
+        val okHttpInterceptor = NiddlerOkHttpInterceptor(niddler, "Default")
+        //Blacklist some items based on regex on the URL, these won't show up in niddler
+        okHttpInterceptor.blacklist(".*raw\\.githubusercontent\\.com.*")
+
+        //Create okhttp client. Note that we add this interceptor as an application layer interceptor, this ensures we see 'unpacked' responses
+        //When using multiple interceptors, add niddler last!
+        val okHttpClient = OkHttpClient.Builder()
+                .addInterceptor(okHttpInterceptor)
+                .build()
 
 		// Every request done with this OkHttpClient will now be logged with Niddler
+
+		//Advanced configuration, add stack traces when using retrofit
+		val retrofitBuilder = Retrofit.Builder()
+                        .baseUrl("https://example.com")
+                        .client(okHttpClient)
+                        ...
+
+        //Inject custom call factory that adds stack trace information to retrofit
+        NiddlerRetrofitCallInjector.inject(retrofitBuilder, niddler, okHttpClient)
+        val retrofitInstance = retrofitBuilder.build()
+
+        ...
 	}
 
 }
 ```
 
-Calling `niddler.attachToApplication(application)` will launch a service with a notification. The service is bound to the lifecycle of your app (meaning that if your last activity closes, the service will be unbound). The notification provides visual feedback that Niddler is running, and allows you to stop the Niddler service. It is also a good reminder that Niddler is a debugging tool and not meant to be included in production apps.
+Calling `niddler.attachToApplication(application)` will launch a service with a notification. The service is partly bound to the lifecycle of your app, when activities start, it starts the server up. The notification provides visual feedback that Niddler is running, and allows you to stop the Niddler service. It is also a good reminder that Niddler is a debugging tool and not meant to be included in production apps.
 
 Using the service is not required. You can also call `niddler.start()` and `niddler.close()` if you wish to start and stop Niddler manually.
 
@@ -54,12 +73,12 @@ releaseCompile 'com.icapps.niddler:niddler-java-noop:1.0.0-alpha10'
 ```
 
 Use with java application:
-```
+```java
 public class Sample {
 
 	public static void main(final String[] args) {
 		final JavaNiddlerNiddler niddler = new JavaNiddler.Builder("superSecretPassword")
-				.setPort(6555)  //Or 0 to have auto-discovery do it's magic
+				.setPort(0)
 				.setNiddlerInformation(Niddler.NiddlerServerInfo("Exmaple", "Example description"))
 				.build();
 
@@ -78,4 +97,4 @@ public class Sample {
 }
 ```
 
-For instructions on how to access the captured network data, see [niddler-ui](https://github.com/icapps/niddler-ui)
+For instructions on how to access the captured network data, see [niddler-ui](https://github.com/Chimerapps/niddler-ui)
