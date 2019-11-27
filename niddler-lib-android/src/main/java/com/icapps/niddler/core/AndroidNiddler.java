@@ -53,6 +53,9 @@ public final class AndroidNiddler extends Niddler implements Niddler.PlatformNid
 			mLifeCycleWatcher = new NiddlerServiceLifeCycleWatcher(new ServiceConnection() {
 				@Override
 				public void onServiceConnected(final ComponentName name, final IBinder service) {
+					if (!(service instanceof NiddlerService.NiddlerBinder)) //We are under test or something?
+						return;
+
 					mNiddlerService = ((NiddlerService.NiddlerBinder) service).getService();
 					mNiddlerService.initialize(niddler, mAutoStopAfter);
 				}
