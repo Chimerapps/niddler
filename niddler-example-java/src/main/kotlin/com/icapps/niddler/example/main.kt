@@ -9,7 +9,11 @@ import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
+import java.io.ByteArrayOutputStream
+import java.util.*
 import java.util.logging.LogManager
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 
 
 /**
@@ -59,6 +63,10 @@ fun main(args: Array<String>) {
             .url("http://httpbin.org/post")
             .post(RequestBody.create(MediaType.parse("application/json"),"{\"nullValue\":null}"))
             .build()
+    val request6 = Request.Builder()
+            .url("http://httpbin.org/post")
+            .post(RequestBody.create(MediaType.parse("application/octet-stream"), binaryBlob()))
+            .build()
 
     val response1 = okHttp.newCall(request).execute()
     println("Request 1 executed (" + response1.code() + ")")
@@ -70,10 +78,28 @@ fun main(args: Array<String>) {
     println("Request 4 executed (" + response4.code() + ")")
     val response5 = okHttp.newCall(request5).execute()
     println("Request 5 executed (" + response5.code() + ")")
+    val response6 = okHttp.newCall(request6).execute()
+    println("Request 6 executed (" + response6.code() + ")")
 
     println("Press return to stop")
     System.`in`.read()
 
     println("Stopping niddler")
     niddler.close()
+}
+
+private fun binaryBlob() : ByteArray {
+    val out = ByteArrayOutputStream()
+    val zipOut = ZipOutputStream(out)
+    zipOut.putNextEntry(ZipEntry("Example file 1"))
+
+    val binaryBytes = ByteArray(100)
+    Random().nextBytes(binaryBytes)
+
+    zipOut.write(binaryBytes)
+
+    zipOut.closeEntry()
+    zipOut.close()
+
+    return out.toByteArray()
 }

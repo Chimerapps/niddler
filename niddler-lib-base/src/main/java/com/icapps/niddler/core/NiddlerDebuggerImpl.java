@@ -49,6 +49,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 	private static final String MESSAGE_REMOVE_BLACKLIST = "removeBlacklist";
 	private static final String MESSAGE_ADD_DEFAULT_RESPONSE = "addDefaultResponse";
 	private static final String MESSAGE_DEBUG_REPLY = "debugReply";
+	private static final String MESSAGE_DEBUG_REQUEST = "debugRequest";
 	private static final String MESSAGE_ADD_REQUEST = "addRequest";
 	private static final String MESSAGE_REMOVE_REQUEST = "removeRequest";
 	private static final String MESSAGE_ADD_RESPONSE = "addResponse";
@@ -139,6 +140,9 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 					break;
 				case MESSAGE_ADD_DEFAULT_RESPONSE:
 					mDebuggerConfiguration.addRequestAction(new DefaultResponseAction(body));
+					break;
+				case MESSAGE_DEBUG_REQUEST:
+					onDebugRequest(envelopeObject.getString(KEY_MESSAGE_ID), parseRequestOverride(body));
 					break;
 				case MESSAGE_DEBUG_REPLY:
 					onDebugResponse(envelopeObject.getString(KEY_MESSAGE_ID), parseResponse(body));
@@ -345,6 +349,19 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 			return null;
 		}
 		return DebuggerConfiguration.sendHandleRequestOverride(request, connection, mWaitingRequests);
+	}
+
+	private void onDebugRequest(@NonNull final String messageId, @Nullable final DebugRequest request) {
+		final CompletableFuture<DebugRequest> future;
+		synchronized (mWaitingRequests) {
+			future = mWaitingRequests.get(messageId);
+			if (future != null) {
+				mWaitingRequests.remove(messageId);
+			}
+		}
+		if (future != null) {
+			future.offer(request);
+		}
 	}
 
 	private void onDebugResponse(@NonNull final String messageId, @Nullable final DebugResponse response) {
@@ -916,7 +933,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 
 			mRegex = regexString == null ? null : Pattern.compile(regexString);
 			mMethod = object.optString("matchMethod", null);
-			mDebugRequest = parseResponseOverride(object);
+			mDebugRequest = parseRequestOverride(object);
 		}
 
 		@Nullable
@@ -989,7 +1006,10 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 	}
 
 	@NonNull
-	static DebugRequest parseResponseOverride(@NonNull final JSONObject config) throws JSONException {
+	static DebugRequest parseRequestOverride(@Nullable final JSONObject config) throws JSONException {
+		if (config == null) {
+			return null;
+		}
 		return new DebugRequest(config.getString("url"),
 				config.getString("method"),
 				parseHeaders(config.optJSONObject("headers")),
