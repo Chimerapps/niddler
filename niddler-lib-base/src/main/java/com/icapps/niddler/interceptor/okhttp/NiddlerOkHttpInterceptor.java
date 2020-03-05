@@ -37,6 +37,7 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 
     private static final int FLAG_MODIFIED_RESPONSE = 1;
     private static final int FLAG_TIME              = 2;
+    private static final int FLAG_MODIFIED_REQUEST  = 4;
 
     @NonNull
     private final Niddler                            mNiddler;
@@ -151,7 +152,7 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
         final Request finalRequest = (overriddenRequest == null) ? origRequest : makeRequest(overriddenRequest);
 
         final NiddlerRequest niddlerRequest = (overriddenRequest == null)
-                ? origNiddlerRequest : new NiddlerOkHttpRequest(finalRequest, uuid, buildExtraNiddlerHeaders(changedTime ? FLAG_TIME : 0), traces, requestContext);
+                ? origNiddlerRequest : new NiddlerOkHttpRequest(finalRequest, uuid, buildExtraNiddlerHeaders((changedTime ? FLAG_TIME : 0) + FLAG_MODIFIED_REQUEST), traces, requestContext);
 
         mNiddler.logRequest(niddlerRequest);
 
@@ -279,7 +280,7 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
         if ((flags & FLAG_TIME) != 0) {
             extra.put(NIDDLER_DEBUG_TIMING_RESPONSE_HEADER, "true");
         }
-        if ((flags & FLAG_MODIFIED_RESPONSE) != 0) {
+        if ((flags & FLAG_MODIFIED_RESPONSE) != 0 || (flags & FLAG_MODIFIED_REQUEST) != 0) {
             extra.put(NIDDLER_DEBUG_RESPONSE_HEADER, "true");
         }
 
