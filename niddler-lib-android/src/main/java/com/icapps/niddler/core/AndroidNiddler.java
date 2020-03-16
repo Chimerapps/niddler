@@ -3,8 +3,11 @@ package com.icapps.niddler.core;
 import android.app.Application;
 import android.content.ComponentName;
 import android.content.ServiceConnection;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.IBinder;
+import android.support.annotation.Nullable;
 
 import com.icapps.niddler.service.NiddlerService;
 import com.icapps.niddler.util.AndroidLogUtil;
@@ -22,7 +25,7 @@ public final class AndroidNiddler extends Niddler implements Niddler.PlatformNid
 	private NiddlerService mNiddlerService;
 
 	private AndroidNiddler(final String password, final int port, final long cacheSize,
-						   final NiddlerServerInfo niddlerServerInfo, final int maxStackTraceSize) {
+			final NiddlerServerInfo niddlerServerInfo, final int maxStackTraceSize) {
 		super(password, port, cacheSize, niddlerServerInfo, maxStackTraceSize);
 		mNiddlerImpl.setPlatform(this);
 	}
@@ -54,7 +57,9 @@ public final class AndroidNiddler extends Niddler implements Niddler.PlatformNid
 				@Override
 				public void onServiceConnected(final ComponentName name, final IBinder service) {
 					if (!(service instanceof NiddlerService.NiddlerBinder)) //We are under test or something?
+					{
 						return;
+					}
 
 					mNiddlerService = ((NiddlerService.NiddlerBinder) service).getService();
 					mNiddlerService.initialize(niddler, mAutoStopAfter);
@@ -80,13 +85,24 @@ public final class AndroidNiddler extends Niddler implements Niddler.PlatformNid
 	}
 
 	/**
-	 * Creates a server info based on the application's package name and some device fields
+	 * Creates a server info based on the application's package name and some device fields.
+	 * To provide a session icon, you can use meta data in the AndroidManifest. Eg: {@code <meta-data android:name="com.niddler.icon" android:value="android"/>}
 	 *
 	 * @param application The application niddler is instrumenting
 	 * @return A server info document to use in the {@link Niddler.Builder}
 	 */
 	public static Niddler.NiddlerServerInfo fromApplication(final Application application) {
-		return new Niddler.NiddlerServerInfo(application.getPackageName(), Build.MANUFACTURER + " " + Build.PRODUCT);
+		return new Niddler.NiddlerServerInfo(application.getPackageName(), Build.MANUFACTURER + " " + Build.PRODUCT, getIconFromMeta(application));
+	}
+
+	@Nullable
+	private static String getIconFromMeta(final Application application) {
+		try {
+			final ApplicationInfo app = application.getPackageManager().getApplicationInfo(application.getPackageName(), PackageManager.GET_META_DATA);
+			return app.metaData.getString("com.niddler.icon");
+		} catch (final Throwable e) {
+			return null;
+		}
 	}
 
 	public static class Builder extends Niddler.Builder<AndroidNiddler> {

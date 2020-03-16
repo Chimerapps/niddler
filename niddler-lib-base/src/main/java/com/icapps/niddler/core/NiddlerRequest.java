@@ -10,14 +10,14 @@ import java.util.List;
  */
 public interface NiddlerRequest extends NiddlerMessageBase {
 
-    String getUrl();
+	String getUrl();
 
-    String getMethod();
+	String getMethod();
 
-    @Nullable
-    StackTraceElement[] getRequestStackTrace();
+	@Nullable
+	StackTraceElement[] getRequestStackTrace();
 
-    @Nullable
-    List<String> getRequestContext();
+	@Nullable
+	List<String> getRequestContext();
 
 }

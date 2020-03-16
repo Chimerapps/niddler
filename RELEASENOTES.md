@@ -1,3 +1,9 @@
+### 1.1.0 ###
+
+* Support for session icons and tag reporting (for automatic connection in IDE)
+* Support loading session icon from AndroidManifest
+
+
 ### 1.0.0-alpha10 ###
 
 * Breaking change!

@@ -10,7 +10,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
 import java.io.ByteArrayOutputStream
-import java.util.*
+import java.util.Random
 import java.util.logging.LogManager
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -30,7 +30,7 @@ fun main(args: Array<String>) {
             .setPort(0)
             .setCacheSize(1024L * 1024L)
             .setNiddlerInformation(Niddler.NiddlerServerInfo("Niddler-Example",
-                    "Example java niddler application", "download"))
+                                                             "Example java niddler application", "download"))
             .build()
 
     niddler.start()
@@ -57,11 +57,11 @@ fun main(args: Array<String>) {
             .build()
     val request4 = Request.Builder()
             .get()
-            .url(HttpUrl.parse("http://httpbin.org/xml")!!.newBuilder().addQueryParameter("param","=102:~19em/%;").build())
+            .url(HttpUrl.parse("http://httpbin.org/xml")!!.newBuilder().addQueryParameter("param", "=102:~19em/%;").build())
             .build()
     val request5 = Request.Builder()
             .url("http://httpbin.org/post")
-            .post(RequestBody.create(MediaType.parse("application/json"),"{\"nullValue\":null}"))
+            .post(RequestBody.create(MediaType.parse("application/json"), "{\"nullValue\":null}"))
             .build()
     val request6 = Request.Builder()
             .url("http://httpbin.org/post")
@@ -88,7 +88,7 @@ fun main(args: Array<String>) {
     niddler.close()
 }
 
-private fun binaryBlob() : ByteArray {
+private fun binaryBlob(): ByteArray {
     val out = ByteArrayOutputStream()
     val zipOut = ZipOutputStream(out)
     zipOut.putNextEntry(ZipEntry("Example file 1"))

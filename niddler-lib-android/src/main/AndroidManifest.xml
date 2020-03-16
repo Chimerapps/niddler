@@ -1,8 +1,11 @@
-<manifest
-        xmlns:android="http://schemas.android.com/apk/res/android" package="com.icapps.niddler">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.icapps.niddler">
 
     <application>
-        <service android:name=".service.NiddlerService" android:exported="false" android:label="Niddler server"/>
+        <service
+            android:name=".service.NiddlerService"
+            android:exported="false"
+            android:label="Niddler server" />
     </application>
 
 </manifest>

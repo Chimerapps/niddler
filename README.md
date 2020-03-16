@@ -25,7 +25,7 @@ class NiddlerSampleApplication : Application() {
 
         val niddler = AndroidNiddler.Builder()
                     .setPort(0) //Use port 0 to prevent conflicting ports, auto-discovery will find it anyway!
-                    .setNiddlerInformation(AndroidNiddler.fromApplication(this))
+                    .setNiddlerInformation(AndroidNiddler.fromApplication(this)) //Set com.niddler.icon in AndroidManifest meta-data to an icon you wish to use for this session
                     .setMaxStackTraceSize(10)
                     .build()
 
@@ -67,9 +67,9 @@ Using the service is not required. You can also call `niddler.start()` and `nidd
 ## Example use (Java)
 build.gradle:
 ```
-//Ensure jcenter is in the repo list (1.0.0-alpha10 is the latest semi stable version)
-debugCompile 'com.icapps.niddler:niddler-java:1.0.0-alpha10'
-releaseCompile 'com.icapps.niddler:niddler-java-noop:1.0.0-alpha10'
+//Ensure jcenter is in the repo list (1.1.1 is the latest stable version)
+debugCompile 'com.icapps.niddler:niddler-java:1.1.1'
+releaseCompile 'com.icapps.niddler:niddler-java-noop:1.1.1'
 ```
 
 Use with java application:
@@ -98,3 +98,26 @@ public class Sample {
 ```
 
 For instructions on how to access the captured network data, see [niddler-ui](https://github.com/Chimerapps/niddler-ui)
+
+## Session icons
+Niddler supports reporting session icons to the UI since version 1.1.0. These icons provide an extra visual cue when browsing running sessions. You can pass the icon by 
+passing it to the NiddlerServerInfo when building the niddler instance.
+
+By default the following 4 icons are supported by the plugin: android, apple, dart, flutter. To use custom icons, place them in the .idea/niddler folder (square 20x20 or 40x40 @2x) with the 
+name of file, the name of the icon
+
+### Android specific
+Since v 1.1.1
+
+
+When using the convenience method to create NiddlerServerInfo from an android application context, you can pass the icon by setting it in the com.niddler.icon meta-data of the manifest.
+
+Eg:
+```xml
+ <application
+        android:name=".NiddlerSampleApplication">
+
+        <meta-data android:name="com.niddler.icon" android:value="android"/>
+
+</application>
+```  

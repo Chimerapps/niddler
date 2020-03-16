@@ -1,7 +1,6 @@
 package com.icapps.niddler.core;
 
 import android.app.Application;
-import android.os.Build;
 
 /**
  * @author Nicola Verbeeck
@@ -39,13 +38,14 @@ public final class AndroidNiddler extends Niddler implements Niddler.PlatformNid
 	}
 
 	/**
-	 * Creates a server info based on the application's package name and some device fields
+	 * Creates a server info based on the application's package name and some device fields.
+	 * To provide a session icon, you can use meta data in the AndroidManifest. Eg: {@code <meta-data android:name="com.niddler.icon" android:value="android"/>}
 	 *
 	 * @param application The application niddler is instrumenting
 	 * @return A server info document to use in the {@link Niddler.Builder}
 	 */
 	public static NiddlerServerInfo fromApplication(final Application application) {
-		return new NiddlerServerInfo(application.getPackageName(), Build.MANUFACTURER + " " + Build.PRODUCT);
+		return new NiddlerServerInfo("", "");
 	}
 
 	public static class Builder extends Niddler.Builder<AndroidNiddler> {
