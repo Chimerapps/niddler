@@ -20,6 +20,7 @@ import java.nio.channels.NotYetConnectedException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @author Maarten Van Giel
@@ -36,6 +37,7 @@ class NiddlerServer extends WebSocketServer {
     private final NiddlerDebuggerImpl                         mNiddlerDebugger;
     private final NiddlerServerAnnouncementManager            mServerAnnouncementManager;
     private final NiddlerImpl.StaticBlacklistDispatchListener mStaticBlacklistListener;
+    private final String                                      mTag;
 
     private NiddlerServer(final String password, final InetSocketAddress address, final String packageName, @Nullable final String icon,
                           final WebSocketListener listener, final NiddlerImpl.StaticBlacklistDispatchListener blacklistListener) {
@@ -45,8 +47,13 @@ class NiddlerServer extends WebSocketServer {
         mPassword = password;
         mConnections = new LinkedList<>();
         mNiddlerDebugger = new NiddlerDebuggerImpl();
-        mServerAnnouncementManager = new NiddlerServerAnnouncementManager(packageName, icon, this);
+        mServerAnnouncementManager = new NiddlerServerAnnouncementManager(packageName, this);
         mStaticBlacklistListener = blacklistListener;
+        mTag = UUID.randomUUID().toString().substring(0, 6);
+
+        if (icon != null)
+            mServerAnnouncementManager.addExtension(new NiddlerServerAnnouncementManager.IconAnnouncementExtension(icon));
+        mServerAnnouncementManager.addExtension(new NiddlerServerAnnouncementManager.TagAnnouncementExtension(mTag));
     }
 
     NiddlerServer(final String password, final int port, final String packageName, @Nullable final String icon,
@@ -103,6 +110,7 @@ class NiddlerServer extends WebSocketServer {
     public void onStart() {
         mServerAnnouncementManager.stop();
         mServerAnnouncementManager.start();
+        LogUtil.niddlerLogStartup("Niddler Server running on " + getPort() + " [" + mTag + "]");
     }
 
     private static final String MESSAGE_AUTH                    = "authReply";

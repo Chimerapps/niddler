@@ -27,10 +27,10 @@ fun main(args: Array<String>) {
             .use { `is` -> logManager.readConfiguration(`is`) }
 
     val niddler = JavaNiddler.Builder()
-            .setPort(10299)
+            .setPort(0)
             .setCacheSize(1024L * 1024L)
             .setNiddlerInformation(Niddler.NiddlerServerInfo("Niddler-Example",
-                    "Example java niddler application"))
+                    "Example java niddler application", "download"))
             .build()
 
     niddler.start()

@@ -65,6 +65,17 @@ public abstract class LogUtil {
 		}
 	}
 
+	public static void niddlerLogStartup(String message) {
+		final LogUtil current = instance;
+		if (current != null) {
+			current.doLogStartup(message);
+		} else {
+			System.out.println(message);
+		}
+	}
+
+	protected abstract void doLogStartup(String message);
+
 	protected abstract void doLog(final int level, final String tag, final String message, final Throwable error);
 
 	protected abstract boolean doIsLoggable(final String tag, final int level);

@@ -35,4 +35,10 @@ public class AndroidLogUtil extends LogUtil {
 	protected boolean doIsLoggable(final String tag, final int level) {
 		return Log.isLoggable(tag, level);
 	}
+
+    @Override
+    protected void doLogStartup(String message) {
+        Log.i("Niddler", message);
+        System.out.println(message);
+    }
 }

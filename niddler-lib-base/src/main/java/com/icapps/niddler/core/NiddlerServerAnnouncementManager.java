@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.icapps.niddler.util.LogUtil;
+import com.icapps.niddler.util.StringUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,6 +15,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -32,36 +34,44 @@ class NiddlerServerAnnouncementManager implements Runnable {
     private static final String LOG_TAG = NiddlerServerAnnouncementManager.class.getSimpleName();
 
     private static final int ANNOUNCEMENT_SOCKET_PORT = 6394;
-    private static final int REQUEST_QUERY            = 0x01;
-    private static final int REQUEST_ANNOUNCE         = 0x02;
-    private static final int ANNOUNCEMENT_VERSION     = 2;
+    private static final int REQUEST_QUERY = 0x01;
+    private static final int REQUEST_ANNOUNCE = 0x02;
+    private static final int ANNOUNCEMENT_VERSION = 3;
 
-    private static final long MAX_JOIN_WAIT         = 60L;
-    private static final int  SLAVE_READ_TIMEOUT    = 10;
-    private static final int  MASTER_ACCEPT_TIMEOUT = 1000;
+    private static final long MAX_JOIN_WAIT = 60L;
+    private static final int SLAVE_READ_TIMEOUT = 10;
+    private static final int MASTER_ACCEPT_TIMEOUT = 1000;
 
-    private final    AtomicBoolean mIsRunning = new AtomicBoolean(false);
+    public static final int EXTENSION_TYPE_ICON = 1;
+    public static final int EXTENSION_TYPE_TAG = 2;
+
+    private final AtomicBoolean mIsRunning = new AtomicBoolean(false);
     @Nullable
-    private volatile ServerSocket  mMasterSocket;
+    private volatile ServerSocket mMasterSocket;
     @Nullable
-    private volatile Socket        mSlaveSocket;
+    private volatile Socket mSlaveSocket;
     @Nullable
-    private          Thread        mThread;
+    private Thread mThread;
 
     @NonNull
-    private final String        mPackageName;
-    @Nullable
-    private final String        mIcon;
+    private final String mPackageName;
     @NonNull
     private final NiddlerServer mServer;
     @NonNull
-    private final List<Slave>   mSlaves;
+    private final List<Slave> mSlaves;
+    @NonNull
+    private final List<AnnouncementExtension> mExtensions = new ArrayList<>();
 
-    NiddlerServerAnnouncementManager(@NonNull final String packageName, @Nullable final String icon, @NonNull final NiddlerServer server) {
+    NiddlerServerAnnouncementManager(@NonNull final String packageName, @NonNull final NiddlerServer server) {
         mPackageName = packageName;
-        mIcon = icon;
         mServer = server;
         mSlaves = new ArrayList<>();
+    }
+
+    public void addExtension(@NonNull final AnnouncementExtension extension){
+        synchronized (mExtensions) {
+            mExtensions.add(extension);
+        }
     }
 
     void start() {
@@ -177,7 +187,18 @@ class NiddlerServerAnnouncementManager implements Runnable {
             selfDescriptor.put("port", mServer.getPort());
             selfDescriptor.put("pid", -1);
             selfDescriptor.put("protocol", Niddler.NiddlerServerInfo.PROTOCOL_VERSION);
-            selfDescriptor.put("icon", mIcon);
+
+            final JSONArray extensionArray = new JSONArray();
+            synchronized (mExtensions) {
+                for (final AnnouncementExtension extension : mExtensions) {
+                    final JSONObject object = new JSONObject();
+                    object.put("name", extension.getName());
+                    object.put("data", StringUtil.toString(extension.getBytes()));
+                    extensionArray.put(object);
+                }
+            }
+
+            selfDescriptor.put("extensions", extensionArray);
         } catch (final JSONException ignored) {
         }
         responseArray.put(selfDescriptor);
@@ -190,7 +211,16 @@ class NiddlerServerAnnouncementManager implements Runnable {
                     slaveDescriptor.put("port", slave.mPort);
                     slaveDescriptor.put("pid", slave.mPid);
                     slaveDescriptor.put("protocol", slave.mNiddlerProtocolVersion);
-                    slaveDescriptor.put("icon", slave.mIcon);
+
+                    final JSONArray extensionArray = new JSONArray();
+                    for (final AnnouncementExtension extension : slave.mExtensions) {
+                        final JSONObject object = new JSONObject();
+                        object.put("name",extension.getName());
+                        object.put("data", StringUtil.toString(extension.getBytes()));
+                        extensionArray.put(object);
+                    }
+
+                    slaveDescriptor.put("extensions", extensionArray);
                 } catch (final JSONException ignored) {
                 }
                 responseArray.put(slaveDescriptor);
@@ -222,13 +252,32 @@ class NiddlerServerAnnouncementManager implements Runnable {
         } catch (final IOException ignored) {
         }
 
-        String icon = null;
-        if (version > 1) {
+        final List<AnnouncementExtension> extensions = new ArrayList<>();
+        if (version == 2) {
             final int iconSize = dataInput.readInt();
             if (iconSize > 0) {
                 final byte[] iconName = new byte[iconSize];
                 dataInput.readFully(iconName);
-                icon = new String(iconName, "UTF-8");
+                String icon = new String(iconName, "UTF-8");
+
+                extensions.add(new IconAnnouncementExtension(icon));
+            }
+        } else if (version > 2) {
+            final int numExtensions = dataInput.readShort();
+            for (int i = 0; i < numExtensions; ++i){
+                final int type = dataInput.readShort();
+                final int length = dataInput.readShort();
+                final byte[] bytes = new byte[length];
+                dataInput.readFully(bytes);
+
+                switch (type){
+                    case EXTENSION_TYPE_TAG:
+                        extensions.add(new TagAnnouncementExtension(new String(bytes, "UTF-8")));
+                        break;
+                    case EXTENSION_TYPE_ICON:
+                        extensions.add(new IconAnnouncementExtension(new String(bytes, "UTF-8")));
+                        break;
+                }
             }
         }
 
@@ -244,19 +293,19 @@ class NiddlerServerAnnouncementManager implements Runnable {
             }
         }
 
-        registerChild(child, dataInput, new String(name, "UTF-8"), icon, port, pid, niddlerProtoVersion);
+        registerChild(child, dataInput, new String(name, "UTF-8"), port, pid, niddlerProtoVersion, extensions);
     }
 
     private void registerChild(@NonNull final Socket child,
                                @NonNull final InputStream in,
                                @NonNull final String packageName,
-                               @Nullable final String icon,
                                final int port,
                                final int pid,
-                               final int niddlerProtocolVersion) {
+                               final int niddlerProtocolVersion,
+                               List<AnnouncementExtension> extensions) {
         LogUtil.niddlerLogDebug(LOG_TAG, "Got announcement for " + packageName);
         synchronized (mSlaves) {
-            mSlaves.add(new Slave(child, in, packageName, port, pid, niddlerProtocolVersion, icon));
+            mSlaves.add(new Slave(child, in, packageName, port, pid, niddlerProtocolVersion, extensions));
         }
     }
 
@@ -297,12 +346,11 @@ class NiddlerServerAnnouncementManager implements Runnable {
             out.writeInt(mServer.getPort());
             out.writeInt(-1);
             out.writeInt(Niddler.NiddlerServerInfo.PROTOCOL_VERSION);
-            if (mIcon == null) {
-                out.writeInt(-1);
-            } else {
-                final byte[] iconBytes = mIcon.getBytes("UTF-8");
-                out.writeInt(iconBytes.length);
-                out.write(iconBytes);
+            out.writeShort(mExtensions.size());
+            for (final AnnouncementExtension extension : mExtensions) {
+                out.writeShort(extension.getType());
+                out.writeShort(extension.getLength());
+                out.write(extension.getBytes());
             }
             out.flush();
 
@@ -342,26 +390,93 @@ class NiddlerServerAnnouncementManager implements Runnable {
     private static class Slave {
 
         @NonNull
-        final Socket      mChild;
+        final Socket mChild;
         @NonNull
         final InputStream mIn;
         @NonNull
-        final String      mPackageName;
-        final int         mPort;
-        final int         mPid;
-        final int         mNiddlerProtocolVersion;
-        @Nullable
-        final String      mIcon;
+        final String mPackageName;
+        final int mPort;
+        final int mPid;
+        final int mNiddlerProtocolVersion;
+        @NonNull
+        final List<AnnouncementExtension> mExtensions;
 
-        Slave(@NonNull final Socket child, @NonNull final InputStream in, final @NonNull String packageName, final int port, final int pid, final int niddlerProtocolVersion,
-              @Nullable final String icon) {
+        Slave(@NonNull final Socket child, @NonNull final InputStream in,
+              final @NonNull String packageName, final int port, final int pid,
+              final int niddlerProtocolVersion,
+              @NonNull final List<AnnouncementExtension> extensions) {
             mChild = child;
             mIn = in;
             mPackageName = packageName;
             mPort = port;
             mPid = pid;
             mNiddlerProtocolVersion = niddlerProtocolVersion;
-            mIcon = icon;
+            mExtensions = extensions;
+        }
+    }
+
+    public static abstract class AnnouncementExtension {
+        private final int mType;
+        @NonNull
+        private final String mName;
+
+        protected AnnouncementExtension(final int type, @NonNull final String name) {
+            mType = type;
+            mName = name;
+        }
+
+        public abstract int getLength();
+
+        @NonNull
+        public abstract byte[] getBytes();
+
+        public int getType() {
+            return mType;
+        }
+
+        @NonNull
+        public String getName() {
+            return mName;
+        }
+
+    }
+
+    public static abstract class StringAnnouncementExtension extends AnnouncementExtension {
+
+        private final byte[] mData;
+
+        public StringAnnouncementExtension(final int type, @NonNull final String name, @NonNull final String data) {
+            super(type, name);
+            try {
+                mData = data.getBytes("UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public int getLength() {
+            return mData.length;
+        }
+
+        @NonNull
+        @Override
+        public byte[] getBytes() {
+            return mData;
+        }
+    }
+
+    public static class IconAnnouncementExtension extends StringAnnouncementExtension {
+
+        public IconAnnouncementExtension(String icon) {
+            super(EXTENSION_TYPE_ICON, "icon", icon);
+        }
+    }
+
+    public static class TagAnnouncementExtension extends StringAnnouncementExtension {
+
+        public TagAnnouncementExtension(String tag) {
+            super(EXTENSION_TYPE_TAG, "tag", tag);
         }
     }
 }

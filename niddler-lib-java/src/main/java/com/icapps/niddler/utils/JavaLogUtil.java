@@ -20,6 +20,11 @@ public class JavaLogUtil extends LogUtil {
 	}
 
 	@Override
+	protected void doLogStartup(String message) {
+		System.out.println(message);
+	}
+
+	@Override
 	protected boolean doIsLoggable(final String tag, final int level) {
 		return Logger.getLogger(tag).isLoggable(mapLevel(level));
 	}
