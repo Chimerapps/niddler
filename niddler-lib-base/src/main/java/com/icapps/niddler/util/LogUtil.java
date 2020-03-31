@@ -1,6 +1,6 @@
 package com.icapps.niddler.util;
 
-import android.support.annotation.RestrictTo;
+import androidx.annotation.RestrictTo;
 
 /**
  * @author Nicola Verbeeck

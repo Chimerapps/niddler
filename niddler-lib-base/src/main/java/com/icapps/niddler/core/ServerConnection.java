@@ -1,6 +1,6 @@
 package com.icapps.niddler.core;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import org.java_websocket.WebSocket;
 

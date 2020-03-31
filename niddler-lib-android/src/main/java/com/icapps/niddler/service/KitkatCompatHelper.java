@@ -3,7 +3,7 @@ package com.icapps.niddler.service;
 import android.annotation.TargetApi;
 import android.app.Notification;
 import android.os.Build;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * @author Nicola Verbeeck

@@ -1,7 +1,7 @@
 package com.icapps.niddler.core;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.icapps.niddler.core.debug.NiddlerDebugger;
 import com.icapps.niddler.util.LogUtil;

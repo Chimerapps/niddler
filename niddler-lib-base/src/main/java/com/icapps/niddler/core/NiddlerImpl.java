@@ -1,6 +1,6 @@
 package com.icapps.niddler.core;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.icapps.niddler.core.debug.NiddlerDebugger;
 import com.icapps.niddler.util.LogUtil;

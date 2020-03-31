@@ -16,15 +16,15 @@ def artifactName = "niddler-java"
 group "$artifactGroup"
 version "$artifactVersion"
 
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'maven-publish'
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
 dependencies {
-    compile "org.json:json:20080701"
-    compile project(':niddler-lib-base')
+    implementation "org.json:json:20080701"
+    api project(':niddler-lib-base')
 }
 
 task sourceJar(type: Jar, dependsOn: classes) {

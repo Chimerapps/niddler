@@ -17,7 +17,7 @@ def artifactName = "niddler-base"
 group "$artifactGroup"
 version "$artifactVersion"
 
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'maven-publish'
 
 sourceCompatibility = 1.7
@@ -41,11 +41,11 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.java-websocket:Java-WebSocket:1.4.0'
+    implementation 'org.java-websocket:Java-WebSocket:1.4.1'
 
     compileOnly 'com.squareup.okhttp3:okhttp:3.11.0'
     compileOnly 'com.squareup.retrofit2:retrofit:2.5.0'
-    compileOnly 'com.android.support:support-annotations:28.0.0'
+    compileOnly 'androidx.annotation:annotation:1.1.0'
     compileOnly 'org.json:json:20080701'
 }
 

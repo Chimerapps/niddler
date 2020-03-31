@@ -15,7 +15,7 @@
  */
 package com.icapps.niddler.util;
 
-import android.support.annotation.RestrictTo;
+import androidx.annotation.RestrictTo;
 
 /**
  * Class that implements the condition variable locking paradigm.

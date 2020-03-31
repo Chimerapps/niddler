@@ -1,6 +1,6 @@
 package com.icapps.niddler.interceptor.okhttp;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.icapps.niddler.core.Niddler;
 

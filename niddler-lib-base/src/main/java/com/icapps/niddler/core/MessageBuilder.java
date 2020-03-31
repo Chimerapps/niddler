@@ -1,6 +1,6 @@
 package com.icapps.niddler.core;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.icapps.niddler.util.LogUtil;
 import com.icapps.niddler.util.StringUtil;
@@ -106,6 +106,7 @@ final class MessageBuilder {
 			object.put("type", "serverInfo");
 			object.put("serverName", serverInfo.name);
 			object.put("serverDescription", serverInfo.description);
+			object.put("icon", serverInfo.icon);
 		} catch (final JSONException e) {
 			LogUtil.niddlerLogError("MessageBuilder", "Failed to create json: ", e);
 
