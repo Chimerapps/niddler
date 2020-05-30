@@ -10,6 +10,7 @@ import com.icapps.sampleapplication.R
 import com.icapps.sampleapplication.api.ExampleJsonApi
 import com.icapps.sampleapplication.api.ExampleXMLApi
 import com.icapps.sampleapplication.api.Post
+import com.icapps.sampleapplication.api.TimeoutApi
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -20,20 +21,22 @@ import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var mJsonApi: ExampleJsonApi
-    private lateinit var mXMLApi: ExampleXMLApi
+    private lateinit var jsonApi: ExampleJsonApi
+    private lateinit var theXMLApi: ExampleXMLApi
+    private lateinit var timeoutApi: TimeoutApi
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        mJsonApi = (application as NiddlerSampleApplication).jsonPlaceholderApi
-        mXMLApi = (application as NiddlerSampleApplication).xmlPlaceholderApi
+        jsonApi = (application as NiddlerSampleApplication).jsonPlaceholderApi
+        theXMLApi = (application as NiddlerSampleApplication).xmlPlaceholderApi
+        timeoutApi = (application as NiddlerSampleApplication).timeoutApi
 
         findViewById<View>(R.id.newActivity).setOnClickListener { startActivity(Intent(this@MainActivity, MainActivity::class.java)) }
 
         findViewById<View>(R.id.buttonJson).setOnClickListener {
-            mJsonApi.posts.enqueue(object : Callback<List<Post>> {
+            jsonApi.posts.enqueue(object : Callback<List<Post>> {
                 override fun onResponse(call: Call<List<Post>>, response: Response<List<Post>>) {
                     Log.w("Response", "Got JSON response")
                 }
@@ -45,7 +48,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<View>(R.id.buttonXML).setOnClickListener {
-            mXMLApi.menu.enqueue(object : Callback<ResponseBody> {
+            theXMLApi.menu.enqueue(object : Callback<ResponseBody> {
                 override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                     Log.w("Response", "Got xml response")
                 }
@@ -57,13 +60,49 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<View>(R.id.buttonPost).setOnClickListener {
-            mJsonApi.createPost(makeMessage(), makeAttachment()).enqueue(object : Callback<ResponseBody> {
+            jsonApi.createPost(makeMessage(), makeAttachment()).enqueue(object : Callback<ResponseBody> {
                 override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                     Log.w("Response", "Got xml response")
                 }
 
                 override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                     Log.e("Response", "Got xml response failure!", t)
+                }
+            })
+        }
+
+        findViewById<View>(R.id.buttonTimeoutOk).setOnClickListener {
+            timeoutApi.getOk().enqueue(object : Callback<ResponseBody> {
+                override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                    Log.w("Response", "Got timeout response: ${response.code()}")
+                }
+
+                override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                    Log.e("Response", "Got timeout response failure!", t)
+                }
+            })
+        }
+
+        findViewById<View>(R.id.buttonTimeoutNotFound).setOnClickListener {
+            timeoutApi.getNotFound().enqueue(object : Callback<ResponseBody> {
+                override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                    Log.w("Response", "Got timeout response ${response.code()}")
+                }
+
+                override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                    Log.e("Response", "Got timeout response failure!", t)
+                }
+            })
+        }
+
+        findViewById<View>(R.id.buttonTimeoutTimeout).setOnClickListener {
+            timeoutApi.getOkTimeout().enqueue(object : Callback<ResponseBody> {
+                override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                    Log.w("Response", "Got timeout response: ${response.code()}")
+                }
+
+                override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                    Log.e("Response", "Got timeout response failure!", t)
                 }
             })
         }

@@ -32,6 +32,18 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 		// Dummy implementation
 	}
 
+	/**
+	 * Creates the authenticator that will report messages to the provided niddler. The name is only
+	 * used for identification purposes on the client
+	 *
+	 * @param niddler The niddler instance to report to
+	 * @param name    A name for this interceptor
+	 * @param reportTimeouts Report socket timeouts to niddler as responses with code 0
+	 */
+	public NiddlerOkHttpInterceptor(@NonNull final Niddler niddler, @NonNull final String name, final boolean reportTimeouts) {
+		// Dummy implementation
+	}
+
 	public NiddlerOkHttpInterceptor blacklist(@NonNull final String urlPattern) {
 		//Dummy implementation
 		return this;

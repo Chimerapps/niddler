@@ -41,6 +41,24 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="POST" />
+
+        <Button
+            android:id="@+id/buttonTimeoutOk"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="200" />
+
+        <Button
+            android:id="@+id/buttonTimeoutNotFound"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="404" />
+
+        <Button
+            android:id="@+id/buttonTimeoutTimeout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Timeout" />
     </LinearLayout>
 
 </RelativeLayout>
