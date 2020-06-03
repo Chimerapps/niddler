@@ -75,7 +75,7 @@ class NiddlerServiceLifeCycleWatcher implements Application.ActivityLifecycleCal
 		try {
 			activity.startService(serviceIntent);
 			activity.bindService(serviceIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
-		}catch(final Throwable ignore){
+		} catch(final Throwable ignore) {
 		}
 	}
 
