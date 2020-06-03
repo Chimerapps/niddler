@@ -38,9 +38,9 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 	 *
 	 * @param niddler The niddler instance to report to
 	 * @param name    A name for this interceptor
-	 * @param reportTimeouts Report socket timeouts to niddler as responses with code 0
+	 * @param reportErrors  Report exceptions thrown by deeper layers and log them as responses with code 0
 	 */
-	public NiddlerOkHttpInterceptor(@NonNull final Niddler niddler, @NonNull final String name, final boolean reportTimeouts) {
+	public NiddlerOkHttpInterceptor(@NonNull final Niddler niddler, @NonNull final String name, final boolean reportErrors) {
 		// Dummy implementation
 	}
 

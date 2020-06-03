@@ -7,7 +7,6 @@ import com.icapps.niddler.core.debug.NiddlerDebugger;
 import com.icapps.niddler.util.StringUtil;
 
 import java.io.IOException;
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,7 +47,7 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 	private final List<Niddler.StaticBlackListEntry> mBlacklist;
 	@NonNull
 	private final NiddlerDebugger mDebugger;
-	private final boolean mReportTimeouts;
+	private final boolean mReportErrors;
 
 	/**
 	 * Deprecated, use {@link #NiddlerOkHttpInterceptor(Niddler, String)} instead
@@ -60,7 +59,7 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 
 	/**
 	 * Creates the authenticator that will report messages to the provided niddler. The name is only
-	 * used for identification purposes on the client
+	 * used for identification purposes on the client. Does not report errors by default
 	 *
 	 * @param niddler The niddler instance to report to
 	 * @param name    A name for this interceptor
@@ -73,17 +72,17 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 	 * Creates the authenticator that will report messages to the provided niddler. The name is only
 	 * used for identification purposes on the client
 	 *
-	 * @param niddler        The niddler instance to report to
-	 * @param name           A name for this interceptor
-	 * @param reportTimeouts Report socket timeouts to niddler as responses with code 0
+	 * @param niddler       The niddler instance to report to
+	 * @param name          A name for this interceptor
+	 * @param reportErrors  Report exceptions thrown by deeper layers and log them as responses with code 0
 	 */
-	public NiddlerOkHttpInterceptor(@NonNull final Niddler niddler, @NonNull final String name, final boolean reportTimeouts) {
+	public NiddlerOkHttpInterceptor(@NonNull final Niddler niddler, @NonNull final String name, final boolean reportErrors) {
 		mNiddler = niddler;
 		mBlacklist = new CopyOnWriteArrayList<>();
 		mDebugger = niddler.debugger();
 		mName = name;
 		mId = UUID.randomUUID().toString();
-		mReportTimeouts = reportTimeouts;
+		mReportErrors = reportErrors;
 
 		mNiddler.registerBlacklistListener(new Niddler.StaticBlacklistListener() {
 
@@ -177,11 +176,11 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 		final Response response;
 		try {
 			response = (debugResponse != null) ? debugResponse : chain.proceed(finalRequest);
-		}catch(SocketTimeoutException timeout) {
-			if (mReportTimeouts) {
-				mNiddler.logResponse(new NiddlerOkHttpTimeoutResponse(uuid));
+		} catch(final Throwable error) {
+			if (mReportErrors) {
+				mNiddler.logResponse(new NiddlerOkHttpErrorResponse(uuid, error));
 			}
-			throw timeout;
+			throw error;
 		}
 
 		final long now = System.currentTimeMillis();

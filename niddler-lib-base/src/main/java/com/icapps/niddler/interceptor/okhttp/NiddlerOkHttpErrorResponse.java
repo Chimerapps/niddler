@@ -3,7 +3,9 @@ package com.icapps.niddler.interceptor.okhttp;
 import com.icapps.niddler.core.NiddlerRequest;
 import com.icapps.niddler.core.NiddlerResponse;
 
+import java.io.IOException;
 import java.io.OutputStream;
+import java.net.SocketTimeoutException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -15,16 +17,26 @@ import androidx.annotation.Nullable;
 /**
  * @author Nicola Verbeeck
  */
-final class NiddlerOkHttpTimeoutResponse implements NiddlerResponse {
+final class NiddlerOkHttpErrorResponse implements NiddlerResponse {
 
 	private final String mRequestId;
 	private final String mMessageId;
 	private final long mTimestamp;
+	private final String mStatusLine;
+	private final StackTraceElement[] mStackTrace;
 
-	NiddlerOkHttpTimeoutResponse(final String requestId) {
+	NiddlerOkHttpErrorResponse(@NonNull final String requestId, @NonNull final Throwable error) {
 		mRequestId = requestId;
 		mMessageId = UUID.randomUUID().toString();
 		mTimestamp = System.currentTimeMillis();
+
+		mStackTrace = error.getStackTrace().clone();
+
+		if (error instanceof SocketTimeoutException) {
+			mStatusLine = "TIMEOUT";
+		} else {
+			mStatusLine = error.getMessage();
+		}
 	}
 
 	@Override
@@ -67,7 +79,7 @@ final class NiddlerOkHttpTimeoutResponse implements NiddlerResponse {
 	@NonNull
 	@Override
 	public String getStatusLine() {
-		return "TIMEOUT";
+		return mStatusLine;
 	}
 
 	@NonNull
@@ -95,4 +107,9 @@ final class NiddlerOkHttpTimeoutResponse implements NiddlerResponse {
 	public void writeBody(final OutputStream stream) {
 	}
 
+	@Nullable
+	@Override
+	public StackTraceElement[] getErrorStackTrace() {
+		return mStackTrace;
+	}
 }
