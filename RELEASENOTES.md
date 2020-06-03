@@ -1,3 +1,9 @@
+### 1.2.0 ###
+
+* Added an option to the okhttp interceptor to also report downstream exceptions
+* Don't crash when android does not allow us to start the service
+
+
 ### 1.1.0 ###
 
 * Support for session icons and tag reporting (for automatic connection in IDE)
