@@ -7,10 +7,12 @@ import com.icapps.niddler.interceptor.okhttp.NiddlerOkHttpInterceptor
 import com.icapps.niddler.retrofit.NiddlerRetrofitCallInjector
 import com.icapps.sampleapplication.api.ExampleJsonApi
 import com.icapps.sampleapplication.api.ExampleXMLApi
+import com.icapps.sampleapplication.api.TimeoutApi
 
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 
 /**
  * Created by maartenvangiel on 10/11/2016.
@@ -21,6 +23,7 @@ class NiddlerSampleApplication : Application() {
         private set
     lateinit var xmlPlaceholderApi: ExampleXMLApi
         private set
+    lateinit var timeoutApi: TimeoutApi
 
     override fun onCreate() {
         super.onCreate()
@@ -33,10 +36,13 @@ class NiddlerSampleApplication : Application() {
 
         niddler.attachToApplication(this)
 
-        val okHttpInterceptor = NiddlerOkHttpInterceptor(niddler, "Default")
+        val okHttpInterceptor = NiddlerOkHttpInterceptor(niddler, "Default", true)
         okHttpInterceptor.blacklist(".*raw\\.githubusercontent\\.com.*")
 
         val okHttpClient = OkHttpClient.Builder()
+                .readTimeout(3, TimeUnit.SECONDS)
+                .connectTimeout(3, TimeUnit.SECONDS)
+                .writeTimeout(3, TimeUnit.SECONDS)
                 .addInterceptor(okHttpInterceptor)
                 .build()
 
@@ -53,6 +59,12 @@ class NiddlerSampleApplication : Application() {
                 .client(okHttpClient)
                 .build()
         xmlPlaceholderApi = xmlRetrofit.create(ExampleXMLApi::class.java)
+
+        val timeoutRetrofit = Retrofit.Builder()
+                .baseUrl("https://httpstat.us/")
+                .client(okHttpClient)
+                .build()
+        timeoutApi = timeoutRetrofit.create(TimeoutApi::class.java)
     }
 
 }

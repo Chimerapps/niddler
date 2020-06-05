@@ -91,4 +91,10 @@ public class NiddlerOkHttpResponse implements NiddlerResponse {
 	public int getWaitTime() {
 		return -1;
 	}
+
+	@Nullable
+	@Override
+	public StackTraceElement[] getErrorStackTrace() {
+		return null;
+	}
 }

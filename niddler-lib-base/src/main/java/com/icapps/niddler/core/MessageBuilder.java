@@ -91,6 +91,13 @@ final class MessageBuilder {
 			object.put("waitTime", response.getWaitTime());
 			object.put("httpVersion", response.getHttpVersion());
 			object.put("statusLine", response.getStatusLine());
+
+			final StackTraceElement[] trace = response.getErrorStackTrace();
+			if (trace != null) {
+				for (final StackTraceElement stackTraceElement : trace) {
+					object.append("trace", (stackTraceElement.toString()));
+				}
+			}
 		} catch (final JSONException e) {
 			LogUtil.niddlerLogError("MessageBuilder", "Failed to create json: ", e);
 

@@ -147,4 +147,9 @@ final class NiddlerOkHttpResponse implements NiddlerResponse {
 		}
 	}
 
+	@Nullable
+	@Override
+	public StackTraceElement[] getErrorStackTrace() {
+		return null;
+	}
 }
