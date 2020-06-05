@@ -72,8 +72,11 @@ class NiddlerServiceLifeCycleWatcher implements Application.ActivityLifecycleCal
 	@Override
 	public void onActivityStarted(final Activity activity) {
 		final Intent serviceIntent = new Intent(activity, NiddlerService.class);
-		activity.startService(serviceIntent);
-		activity.bindService(serviceIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
+		try {
+			activity.startService(serviceIntent);
+			activity.bindService(serviceIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
+		} catch(final Throwable ignore) {
+		}
 	}
 
 	@Override
@@ -90,7 +93,7 @@ class NiddlerServiceLifeCycleWatcher implements Application.ActivityLifecycleCal
 	public void onActivityStopped(final Activity activity) {
 		try {
 			activity.unbindService(mServiceConnection);
-		} catch (final IllegalArgumentException ignored) {
+		} catch (final Throwable ignored) {
 			//Ignore
 		}
 	}

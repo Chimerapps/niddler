@@ -23,6 +23,9 @@ public interface NiddlerResponse extends NiddlerMessageBase {
 	@Nullable
 	NiddlerResponse actualNetworkReply();
 
+	@Nullable
+	StackTraceElement[] getErrorStackTrace();
+
 	int getWriteTime();
 
 	int getReadTime();
