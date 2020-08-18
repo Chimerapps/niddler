@@ -111,7 +111,7 @@ class NiddlerServer extends WebSocketServer {
 	public void onStart() {
 		mServerAnnouncementManager.stop();
 		mServerAnnouncementManager.start();
-		LogUtil.niddlerLogStartup("Niddler Server running on " + getPort() + " [" + mTag + "]");
+		LogUtil.niddlerLogStartup("Niddler Server running on " + getPort() + " [" + mTag + "][waitingForDebugger=" + mNiddlerDebugger.isWaitingForConnection() + "]");
 	}
 
 	private static final String MESSAGE_AUTH = "authReply";
