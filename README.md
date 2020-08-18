@@ -10,7 +10,7 @@ Niddler is a collaboration of [icapps](http://www.icapps.com) and [Chimerapps](h
 
 ## Example use (Android)
 build.gradle:
-```
+``` groovy
 //Ensure jcenter is in the repo list
 debugCompile 'com.icapps.niddler:niddler:{latest version}'
 releaseCompile 'com.icapps.niddler:niddler-noop:{latest version}'
@@ -66,7 +66,7 @@ Using the service is not required. You can also call `niddler.start()` and `nidd
 
 ## Example use (Java)
 build.gradle:
-```
+``` groovy
 //Ensure jcenter is in the repo list (1.1.1 is the latest stable version)
 debugCompile 'com.icapps.niddler:niddler-java:1.1.1'
 releaseCompile 'com.icapps.niddler:niddler-java-noop:1.1.1'
@@ -79,7 +79,7 @@ public class Sample {
     public static void main(final String[] args) {
         final JavaNiddlerNiddler niddler = new JavaNiddler.Builder("superSecretPassword")
                         .setPort(0)
-                        .setNiddlerInformation(Niddler.NiddlerServerInfo("Exmaple", "Example description"))
+                        .setNiddlerInformation(Niddler.NiddlerServerInfo("Example", "Example description"))
                         .build();
 
         final OkHttpClient okHttpClient = new OkHttpClient.Builder()
@@ -101,7 +101,7 @@ For instructions on how to access the captured network data, see [niddler-ui](ht
 
 ## Session icons
 Niddler supports reporting session icons to the UI since version 1.1.0. These icons provide an extra visual cue when browsing running sessions. You can pass the icon by 
-passing it to the NiddlerServerInfo when building the niddler instance.
+passing it to the `NiddlerServerInfo` when building the niddler instance.
 
 By default the following 4 icons are supported by the plugin: android, apple, dart, flutter. To use custom icons, place them in the .idea/niddler folder (square 20x20 or 40x40 @2x) with the 
 name of file, the name of the icon
@@ -110,11 +110,11 @@ name of file, the name of the icon
 Since v 1.1.1
 
 
-When using the convenience method to create NiddlerServerInfo from an android application context, you can pass the icon by setting it in the com.niddler.icon meta-data of the manifest.
+When using the convenience method to create `NiddlerServerInfo` from an Android application context, you can pass the icon by setting it in the `com.niddler.icon` `meta-data` of the manifest.
 
 Eg:
 ```xml
- <application
+<application
         android:name=".NiddlerSampleApplication">
 
         <meta-data android:name="com.niddler.icon" android:value="android"/>
