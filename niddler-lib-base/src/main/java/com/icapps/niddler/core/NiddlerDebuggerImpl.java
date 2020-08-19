@@ -334,21 +334,21 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 	}
 
 	@Nullable
-	CompletableFuture<DebugResponse> sendHandleRequest(@NonNull final NiddlerRequest request, @Nullable final NiddlerResponse response) {
+	CompletableFuture<DebugResponse> sendHandleRequest(@NonNull final String actionId, @NonNull final NiddlerRequest request, @Nullable final NiddlerResponse response) {
 		final ServerConnection connection = mServerConnection;
 		if (connection == null) {
 			return null;
 		}
-		return DebuggerConfiguration.sendHandleResponse(request, response, connection, mWaitingResponses);
+		return DebuggerConfiguration.sendHandleResponse(actionId, request, response, connection, mWaitingResponses);
 	}
 
 	@Nullable
-	CompletableFuture<DebugRequest> sendHandleRequestOverride(@NonNull final NiddlerRequest request) {
+	CompletableFuture<DebugRequest> sendHandleRequestOverride(@NonNull final String actionId, @NonNull final NiddlerRequest request) {
 		final ServerConnection connection = mServerConnection;
 		if (connection == null) {
 			return null;
 		}
-		return DebuggerConfiguration.sendHandleRequestOverride(request, connection, mWaitingRequests);
+		return DebuggerConfiguration.sendHandleRequestOverride(actionId, request, connection, mWaitingRequests);
 	}
 
 	private void onDebugRequest(@NonNull final String messageId, @Nullable final DebugRequest request) {
@@ -634,7 +634,8 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		}
 
 		@SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-		static CompletableFuture<DebugResponse> sendHandleResponse(@NonNull final NiddlerRequest request,
+		static CompletableFuture<DebugResponse> sendHandleResponse(@NonNull final String actionId,
+				@NonNull final NiddlerRequest request,
 				@Nullable final NiddlerResponse response,
 				@NonNull final ServerConnection connection,
 				@NonNull final Map<String, CompletableFuture<DebugResponse>> waitingResponses) {
@@ -644,7 +645,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 				waitingResponses.put(request.getMessageId(), future);
 			}
 			try {
-				connection.send(makeDebugRequestMessage(request, response));
+				connection.send(makeDebugRequestMessage(actionId, request, response));
 			} catch (final JSONException e) {
 				future.offer(null);
 				if (LogUtil.isLoggable(TAG, LogUtil.WARN)) {
@@ -655,7 +656,8 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		}
 
 		@SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-		static CompletableFuture<DebugRequest> sendHandleRequestOverride(@NonNull final NiddlerRequest request,
+		static CompletableFuture<DebugRequest> sendHandleRequestOverride(@NonNull final String actionId,
+				@NonNull final NiddlerRequest request,
 				@NonNull final ServerConnection connection,
 				@NonNull final Map<String, CompletableFuture<DebugRequest>> waitingRequests) {
 			final CompletableFuture<DebugRequest> future = new CompletableFuture<>();
@@ -664,7 +666,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 				waitingRequests.put(request.getMessageId(), future);
 			}
 			try {
-				connection.send(makeDebugRequestOverrideMessage(request));
+				connection.send(makeDebugRequestOverrideMessage(actionId, request));
 			} catch (final JSONException e) {
 				future.offer(null);
 				if (LogUtil.isLoggable(TAG, LogUtil.WARN)) {
@@ -867,7 +869,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 				return null;
 			}
 
-			return debugger.sendHandleRequest(request, null);
+			return debugger.sendHandleRequest(id, request, null);
 		}
 	}
 
@@ -914,7 +916,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 				return null;
 			}
 
-			return debugger.sendHandleRequest(request, response);
+			return debugger.sendHandleRequest(id, request, response);
 		}
 	}
 
@@ -989,7 +991,7 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 				return null;
 			}
 
-			return debugger.sendHandleRequestOverride(request);
+			return debugger.sendHandleRequestOverride(id, request);
 		}
 	}
 
@@ -1041,10 +1043,11 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 	}
 
 	@NonNull
-	static String makeDebugRequestMessage(@NonNull final NiddlerRequest request, @Nullable final NiddlerResponse response) throws JSONException {
+	static String makeDebugRequestMessage(@NonNull final String actionId, @NonNull final NiddlerRequest request, @Nullable final NiddlerResponse response) throws JSONException {
 		final JSONObject object = new JSONObject();
 		object.put("type", "debugRequest");
 		object.put("requestId", request.getMessageId());
+		object.put("actionId", actionId);
 		if (response != null) {
 			object.put("response", MessageBuilder.buildMessageJson(response));
 		}
@@ -1052,11 +1055,12 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 	}
 
 	@NonNull
-	static String makeDebugRequestOverrideMessage(@NonNull final NiddlerRequest request) throws JSONException {
+	static String makeDebugRequestOverrideMessage(@NonNull final String actionId, @NonNull final NiddlerRequest request) throws JSONException {
 		final JSONObject requestObj = MessageBuilder.buildMessageJson(request, maxStackTraceDepth);
 
 		final JSONObject object = new JSONObject();
 		object.put("type", "debugRequest");
+		object.put("actionId", actionId);
 		object.put("request", requestObj);
 
 		return object.toString();
