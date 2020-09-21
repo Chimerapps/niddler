@@ -1,8 +1,5 @@
 package com.icapps.niddler.interceptor.okhttp;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import com.icapps.niddler.core.NiddlerRequest;
 import com.icapps.niddler.core.NiddlerResponse;
 
@@ -13,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okio.Buffer;
@@ -128,6 +127,16 @@ final class NiddlerOkHttpResponse implements NiddlerResponse {
 	@Override
 	public int getWaitTime() {
 		return mWaitTime;
+	}
+
+	@Override
+	public long estimateBodySize() {
+		final ResponseBody body = mResponse.body();
+		if (body == null) {
+			return 0;
+		}
+		final long size = body.contentLength();
+		return size;
 	}
 
 	@Override

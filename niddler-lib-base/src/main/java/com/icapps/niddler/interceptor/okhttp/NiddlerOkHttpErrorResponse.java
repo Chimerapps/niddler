@@ -3,7 +3,6 @@ package com.icapps.niddler.interceptor.okhttp;
 import com.icapps.niddler.core.NiddlerRequest;
 import com.icapps.niddler.core.NiddlerResponse;
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.net.SocketTimeoutException;
 import java.util.Collections;
@@ -105,6 +104,11 @@ final class NiddlerOkHttpErrorResponse implements NiddlerResponse {
 
 	@Override
 	public void writeBody(final OutputStream stream) {
+	}
+
+	@Override
+	public long estimateBodySize() {
+		return 0;
 	}
 
 	@Nullable

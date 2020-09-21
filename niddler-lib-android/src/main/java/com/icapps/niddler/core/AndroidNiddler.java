@@ -7,11 +7,12 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.IBinder;
-import androidx.annotation.Nullable;
 
 import com.icapps.niddler.service.NiddlerService;
 import com.icapps.niddler.util.AndroidLogUtil;
 import com.icapps.niddler.util.LogUtil;
+
+import androidx.annotation.Nullable;
 
 /**
  * @author Nicola Verbeeck
@@ -25,8 +26,8 @@ public final class AndroidNiddler extends Niddler implements Niddler.PlatformNid
 	private NiddlerService mNiddlerService;
 
 	private AndroidNiddler(final String password, final int port, final long cacheSize,
-			final NiddlerServerInfo niddlerServerInfo, final int maxStackTraceSize) {
-		super(password, port, cacheSize, niddlerServerInfo, maxStackTraceSize);
+			final NiddlerServerInfo niddlerServerInfo, final int maxStackTraceSize, final long maxBodySize) {
+		super(password, port, cacheSize, niddlerServerInfo, maxStackTraceSize, maxBodySize);
 		mNiddlerImpl.setPlatform(this);
 	}
 
@@ -113,7 +114,7 @@ public final class AndroidNiddler extends Niddler implements Niddler.PlatformNid
 
 		@Override
 		public AndroidNiddler build() {
-			return new AndroidNiddler(mPassword, mPort, mCacheSize, mNiddlerServerInfo, mMaxStackTraceSize);
+			return new AndroidNiddler(mPassword, mPort, mCacheSize, mNiddlerServerInfo, mMaxStackTraceSize, getMaxBodySize());
 		}
 	}
 }

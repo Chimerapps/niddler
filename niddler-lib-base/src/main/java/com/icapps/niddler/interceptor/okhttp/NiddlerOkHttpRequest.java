@@ -106,6 +106,19 @@ final class NiddlerOkHttpRequest implements NiddlerRequest {
 	}
 
 	@Override
+	public long estimateBodySize() {
+		final RequestBody body = mRequest.body();
+		if (body == null) return 0;
+
+		try {
+			final long size = body.contentLength();
+			if (size >= 0) return size;
+		}catch(final IOException ignored){
+		}
+		return -1;
+	}
+
+	@Override
 	public void writeBody(final OutputStream stream) {
 		try {
 			final BufferedSink buffer = Okio.buffer(Okio.sink(stream));

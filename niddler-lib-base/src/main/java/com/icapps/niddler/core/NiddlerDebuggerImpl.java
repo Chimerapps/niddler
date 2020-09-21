@@ -1,8 +1,5 @@
 package com.icapps.niddler.core;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import com.icapps.niddler.core.debug.NiddlerDebugger;
 import com.icapps.niddler.util.ConditionVariable;
 import com.icapps.niddler.util.LogUtil;
@@ -26,6 +23,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import static com.icapps.niddler.core.NiddlerDebuggerImpl.DebugAction.extractId;
 
@@ -1049,14 +1049,14 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 		object.put("requestId", request.getMessageId());
 		object.put("actionId", actionId);
 		if (response != null) {
-			object.put("response", MessageBuilder.buildMessageJson(response));
+			object.put("response", MessageBuilder.buildMessageJson(response, Long.MAX_VALUE)); //We always need the body in debug requests/responses
 		}
 		return object.toString();
 	}
 
 	@NonNull
 	static String makeDebugRequestOverrideMessage(@NonNull final String actionId, @NonNull final NiddlerRequest request) throws JSONException {
-		final JSONObject requestObj = MessageBuilder.buildMessageJson(request, maxStackTraceDepth);
+		final JSONObject requestObj = MessageBuilder.buildMessageJson(request, maxStackTraceDepth, Long.MAX_VALUE); //We always need the body in debug requests/responses
 
 		final JSONObject object = new JSONObject();
 		object.put("type", "debugRequest");

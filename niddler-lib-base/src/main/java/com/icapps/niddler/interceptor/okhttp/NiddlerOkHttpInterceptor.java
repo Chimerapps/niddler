@@ -72,9 +72,9 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 	 * Creates the authenticator that will report messages to the provided niddler. The name is only
 	 * used for identification purposes on the client
 	 *
-	 * @param niddler       The niddler instance to report to
-	 * @param name          A name for this interceptor
-	 * @param reportErrors  Report exceptions thrown by deeper layers and log them as responses with code 0
+	 * @param niddler      The niddler instance to report to
+	 * @param name         A name for this interceptor
+	 * @param reportErrors Report exceptions thrown by deeper layers and log them as responses with code 0
 	 */
 	public NiddlerOkHttpInterceptor(@NonNull final Niddler niddler, @NonNull final String name, final boolean reportErrors) {
 		mNiddler = niddler;
@@ -168,7 +168,10 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 				? origNiddlerRequest : new NiddlerOkHttpRequest(finalRequest, uuid, buildExtraNiddlerHeaders((changedTime ? FLAG_TIME : 0) + FLAG_MODIFIED_REQUEST), traces,
 				requestContext);
 
-		mNiddler.logRequest(niddlerRequest);
+		try {
+			mNiddler.logRequest(niddlerRequest);
+		} catch (final Throwable ignore) {
+		}
 
 		final NiddlerDebugger.DebugResponse debuggerBeforeExecuteOverride = mDebugger.handleRequest(niddlerRequest);
 		Response debugResponse = makeResponse(debuggerBeforeExecuteOverride, finalRequest, null);
@@ -176,7 +179,7 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 		final Response response;
 		try {
 			response = (debugResponse != null) ? debugResponse : chain.proceed(finalRequest);
-		} catch(final Throwable error) {
+		} catch (final Throwable error) {
 			if (mReportErrors) {
 				mNiddler.logResponse(new NiddlerOkHttpErrorResponse(uuid, error));
 			}
@@ -206,7 +209,10 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 			debugFromResponse = mDebugger.handleResponse(niddlerRequest, niddlerResponse);
 		}
 		if (debugFromResponse == null) {
-			mNiddler.logResponse(niddlerResponse);
+			try {
+				mNiddler.logResponse(niddlerResponse);
+			} catch (final Throwable ignore) {
+			}
 			return response;
 		} else {
 			final int newWait = (int) (System.currentTimeMillis() - sentAt);
@@ -218,7 +224,10 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 					null,
 					writeTime, newReadTime, newWait, buildExtraNiddlerHeaders(FLAG_MODIFIED_RESPONSE + (changedTime ? FLAG_TIME : 0)));
 
-			mNiddler.logResponse(debugNiddlerResponse);
+			try {
+				mNiddler.logResponse(debugNiddlerResponse);
+			} catch (final Throwable ignore) {
+			}
 			return debugResp;
 		}
 	}

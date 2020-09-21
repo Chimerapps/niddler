@@ -1,8 +1,5 @@
 package com.icapps.niddler.core;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import com.icapps.niddler.core.debug.NiddlerDebugger;
 
 import java.io.Closeable;
@@ -15,6 +12,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * @author Maarten Van Giel
@@ -33,9 +33,11 @@ public abstract class Niddler implements Closeable {
 
 	final NiddlerImpl mNiddlerImpl;
 	private final int mStackTraceMaxDepth;
+	private final long mMaxBodySize;
 
 	protected Niddler(final String password, final int port, final long cacheSize,
-			final NiddlerServerInfo niddlerServerInfo, final int stackTraceMaxDepth) {
+			final NiddlerServerInfo niddlerServerInfo, final int stackTraceMaxDepth,
+			final long maxBodySize) {
 		mBlacklistListeners = new HashSet<>();
 		mNiddlerImpl = new NiddlerImpl(password, port, cacheSize, niddlerServerInfo, new NiddlerImpl.StaticBlacklistDispatchListener() {
 
@@ -53,14 +55,15 @@ public abstract class Niddler implements Closeable {
 		mStackTraceMaxDepth = stackTraceMaxDepth;
 		NiddlerDebuggerImpl.maxStackTraceDepth = stackTraceMaxDepth;
 		mStackTraceMap = new LinkedHashMap<>();
+		mMaxBodySize = maxBodySize;
 	}
 
 	public void logRequest(final NiddlerRequest request) {
-		mNiddlerImpl.send(MessageBuilder.buildMessage(request, mStackTraceMaxDepth));
+		mNiddlerImpl.send(MessageBuilder.buildMessage(request, mStackTraceMaxDepth, mMaxBodySize));
 	}
 
 	public void logResponse(final NiddlerResponse response) {
-		mNiddlerImpl.send(MessageBuilder.buildMessage(response));
+		mNiddlerImpl.send(MessageBuilder.buildMessage(response, mMaxBodySize));
 	}
 
 	public boolean isStackTracingEnabled() {
@@ -199,6 +202,7 @@ public abstract class Niddler implements Closeable {
 		protected NiddlerServerInfo mNiddlerServerInfo = null;
 		protected String mPassword;
 		protected int mMaxStackTraceSize = 0;
+		protected long mMaxBodySize = Long.MIN_VALUE;
 
 		/**
 		 * Creates a new builder with a given password to use for the niddler server authentication
@@ -249,6 +253,18 @@ public abstract class Niddler implements Closeable {
 		}
 
 		/**
+		 * Sets the maximum size for bodies to be serialized. Bodies exceeding this size will be marked as 'missing/truncated'. By default this value
+		 * will be calculated based on the cache size, see {@link Builder<T>.setCacheSize}
+		 *
+		 * @param size The maximum size in bytes
+		 * @return Builder
+		 */
+		public Builder<T> setMaxBodySize(final long size) {
+			mMaxBodySize = size;
+			return this;
+		}
+
+		/**
 		 * Sets additional information about this Niddler server which will be shown on the client side
 		 *
 		 * @param niddlerServerInfo The additional information about this Niddler server
@@ -265,6 +281,18 @@ public abstract class Niddler implements Closeable {
 		 * @return a Niddler instance
 		 */
 		public abstract T build();
+
+		/**
+		 * Calculates the max body size if it has not been set
+		 *
+		 * @return  The maximum size of the body
+		 */
+		protected long getMaxBodySize() {
+			if (mMaxBodySize == Long.MIN_VALUE) {
+				mMaxBodySize = mCacheSize / 8; //Max body size is cache size / 8 to account for base64 encoding and having enough storage space for multiple messages
+			}
+			return mMaxBodySize;
+		}
 
 	}
 

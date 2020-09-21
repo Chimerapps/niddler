@@ -1,7 +1,5 @@
 package com.icapps.niddler.core;
 
-import androidx.annotation.NonNull;
-
 import com.icapps.niddler.util.LogUtil;
 import com.icapps.niddler.util.StringUtil;
 
@@ -10,10 +8,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * @author Nicola Verbeeck
@@ -25,22 +25,22 @@ final class MessageBuilder {
 		//Utility class
 	}
 
-	static String buildMessage(final NiddlerRequest request, final int stackTraceMaxDepth) {
-		final JSONObject object = buildMessageJson(request, stackTraceMaxDepth);
+	static String buildMessage(final NiddlerRequest request, final int stackTraceMaxDepth, final long maxBodySize) {
+		final JSONObject object = buildMessageJson(request, stackTraceMaxDepth, maxBodySize);
 		if (object == null) {
 			return null;
 		}
 		return object.toString();
 	}
 
-	static JSONObject buildMessageJson(final NiddlerRequest request, final int stackTraceMaxDepth) {
+	static JSONObject buildMessageJson(final NiddlerRequest request, final int stackTraceMaxDepth, final long maxBodySize) {
 		if (request == null) {
 			return null;
 		}
 		final JSONObject object = new JSONObject();
 		try {
 			object.put("type", "request");
-			initGeneric(object, request);
+			initGeneric(object, request, maxBodySize);
 			object.put("method", request.getMethod());
 			object.put("url", request.getUrl());
 
@@ -67,25 +67,25 @@ final class MessageBuilder {
 		return object;
 	}
 
-	static String buildMessage(final NiddlerResponse response) {
-		final JSONObject object = buildMessageJson(response);
+	static String buildMessage(final NiddlerResponse response, final long maxBodySize) {
+		final JSONObject object = buildMessageJson(response, maxBodySize);
 		if (object == null) {
 			return null;
 		}
 		return object.toString();
 	}
 
-	static JSONObject buildMessageJson(final NiddlerResponse response) {
+	static JSONObject buildMessageJson(final NiddlerResponse response, final long maxBodySize) {
 		if (response == null) {
 			return null;
 		}
 		final JSONObject object = new JSONObject();
 		try {
 			object.put("type", "response");
-			initGeneric(object, response);
+			initGeneric(object, response, maxBodySize);
 			object.put("statusCode", response.getStatusCode());
-			object.put("networkRequest", buildMessageJson(response.actualNetworkRequest(), 0));
-			object.put("networkReply", buildMessageJson(response.actualNetworkReply()));
+			object.put("networkRequest", buildMessageJson(response.actualNetworkRequest(), 0, maxBodySize));
+			object.put("networkReply", buildMessageJson(response.actualNetworkReply(), maxBodySize));
 			object.put("writeTime", response.getWriteTime());
 			object.put("readTime", response.getReadTime());
 			object.put("waitTime", response.getWaitTime());
@@ -170,28 +170,41 @@ final class MessageBuilder {
 		return object.toString();
 	}
 
-	private static void initGeneric(final JSONObject object, final NiddlerMessageBase base) throws JSONException {
+	private static void initGeneric(final JSONObject object, final NiddlerMessageBase base, final long maxBodySize) throws JSONException {
 		object.put("messageId", base.getMessageId());
 		object.put("requestId", base.getRequestId());
 		object.put("timestamp", base.getTimestamp());
 		object.put("headers", createHeadersObject(base));
-		object.put("body", createBody(base));
+		object.put("body", createBody(base, maxBodySize));
 	}
 
-	private static String createBody(final NiddlerMessageBase base) {
+	@Nullable
+	private static String createBody(final NiddlerMessageBase base, final long maxBodySize) {
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();
+		final long estimate = base.estimateBodySize();
+		if (estimate > maxBodySize) {
+			return "0000";
+		}
+
 		try {
 			base.writeBody(out);
-		} catch (final IOException e) {
+		} catch (final Throwable e) {
 			LogUtil.niddlerLogError("MessageBuilder", "Failed to write body", e);
 
-			return null;
+			return "0000";
 		}
 		final byte[] bytes = out.toByteArray();
-		if (bytes == null) {
+		if (bytes.length == 0) {
 			return null;
 		}
-		return StringUtil.toString(bytes);
+		if (bytes.length > maxBodySize) {
+			return "0000";
+		}
+		try {
+			return StringUtil.toString(bytes);
+		} catch (final Throwable e) {
+			return "0000";
+		}
 	}
 
 	private static JSONObject createHeadersObject(final NiddlerMessageBase base) throws JSONException {

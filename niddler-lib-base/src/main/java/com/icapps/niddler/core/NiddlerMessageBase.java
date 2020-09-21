@@ -21,4 +21,6 @@ public interface NiddlerMessageBase {
 
 	void writeBody(final OutputStream stream) throws IOException;
 
+	long estimateBodySize();
+
 }

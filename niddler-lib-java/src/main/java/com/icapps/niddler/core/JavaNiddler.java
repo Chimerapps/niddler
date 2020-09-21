@@ -10,8 +10,9 @@ import com.icapps.niddler.utils.JavaLogUtil;
 public class JavaNiddler extends Niddler implements Niddler.PlatformNiddler {
 
 	JavaNiddler(final String password, final int port, final long cacheSize,
-			final NiddlerServerInfo niddlerServerInfo, final int maxStackTraceSize) {
-		super(password, port, cacheSize, niddlerServerInfo, maxStackTraceSize);
+			final NiddlerServerInfo niddlerServerInfo, final int maxStackTraceSize,
+			final long maxBodySize) {
+		super(password, port, cacheSize, niddlerServerInfo, maxStackTraceSize, maxBodySize);
 		mNiddlerImpl.setPlatform(this);
 	}
 
@@ -27,7 +28,7 @@ public class JavaNiddler extends Niddler implements Niddler.PlatformNiddler {
 
 		@Override
 		public JavaNiddler build() {
-			return new JavaNiddler(mPassword, mPort, mCacheSize, mNiddlerServerInfo, mMaxStackTraceSize);
+			return new JavaNiddler(mPassword, mPort, mCacheSize, mNiddlerServerInfo, mMaxStackTraceSize, getMaxBodySize());
 		}
 
 	}
