@@ -6,7 +6,10 @@ import com.icapps.niddler.core.NiddlerResponse;
 import com.icapps.niddler.core.debug.NiddlerDebugger;
 import com.icapps.niddler.util.StringUtil;
 
+import org.json.JSONTokener;
+
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -72,9 +75,9 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 	 * Creates the authenticator that will report messages to the provided niddler. The name is only
 	 * used for identification purposes on the client
 	 *
-	 * @param niddler       The niddler instance to report to
-	 * @param name          A name for this interceptor
-	 * @param reportErrors  Report exceptions thrown by deeper layers and log them as responses with code 0
+	 * @param niddler      The niddler instance to report to
+	 * @param name         A name for this interceptor
+	 * @param reportErrors Report exceptions thrown by deeper layers and log them as responses with code 0
 	 */
 	public NiddlerOkHttpInterceptor(@NonNull final Niddler niddler, @NonNull final String name, final boolean reportErrors) {
 		mNiddler = niddler;
@@ -176,7 +179,7 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 		final Response response;
 		try {
 			response = (debugResponse != null) ? debugResponse : chain.proceed(finalRequest);
-		} catch(final Throwable error) {
+		} catch (final Throwable error) {
 			if (mReportErrors) {
 				mNiddler.logResponse(new NiddlerOkHttpErrorResponse(uuid, error));
 			}
@@ -253,7 +256,18 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 		}
 
 		if (!StringUtil.isEmpty(debugResponse.encodedBody)) {
-			builder.body(ResponseBody.create(MediaType.parse(debugResponse.bodyMimeType), StringUtil.fromBase64(debugResponse.encodedBody)));
+			if (debugResponse.bodyMimeType == null) {
+				final byte[] bodyBytes = StringUtil.fromBase64(debugResponse.encodedBody);
+				try {
+					//noinspection CharsetObjectCanBeUsed
+					new JSONTokener(new String(bodyBytes, Charset.forName("UTF-8"))).more();
+					builder.body(ResponseBody.create(MediaType.parse("application/json"), bodyBytes));
+				} catch (final Throwable ignore) {
+					builder.body(ResponseBody.create(null, bodyBytes));
+				}
+			} else {
+				builder.body(ResponseBody.create(MediaType.parse(debugResponse.bodyMimeType), StringUtil.fromBase64(debugResponse.encodedBody)));
+			}
 		}
 		builder.sentRequestAtMillis(System.currentTimeMillis());
 		builder.request(request);
@@ -272,7 +286,11 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 	private static Request makeRequest(@NonNull final NiddlerDebugger.DebugRequest debugRequest) {
 		final RequestBody body;
 		if (!StringUtil.isEmpty(debugRequest.encodedBody)) {
-			body = RequestBody.create(MediaType.parse(debugRequest.bodyMimeType), StringUtil.fromBase64(debugRequest.encodedBody));
+			if (debugRequest.bodyMimeType == null) {
+				body = RequestBody.create(null, StringUtil.fromBase64(debugRequest.encodedBody));
+			} else {
+				body = RequestBody.create(MediaType.parse(debugRequest.bodyMimeType), StringUtil.fromBase64(debugRequest.encodedBody));
+			}
 		} else {
 			body = null;
 		}
