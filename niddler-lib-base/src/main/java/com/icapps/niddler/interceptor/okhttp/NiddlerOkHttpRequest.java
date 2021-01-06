@@ -1,7 +1,5 @@
 package com.icapps.niddler.interceptor.okhttp;
 
-import androidx.annotation.Nullable;
-
 import com.icapps.niddler.core.NiddlerRequest;
 
 import java.io.IOException;
@@ -9,8 +7,11 @@ import java.io.OutputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import okhttp3.MediaType;
 import okhttp3.Protocol;
 import okhttp3.Request;
@@ -34,9 +35,12 @@ final class NiddlerOkHttpRequest implements NiddlerRequest {
 	private final StackTraceElement[] mStackTraceElements;
 	@Nullable
 	private final NiddlerOkHttpInterceptor.NiddlerRequestContext mRequestContext;
+	private final Map<String, String> mMetadata;
 
 	NiddlerOkHttpRequest(final Request request, final String requestId, @Nullable final Map<String, String> extraHeaders,
-			@Nullable final StackTraceElement[] stackTraceElements, @Nullable final NiddlerOkHttpInterceptor.NiddlerRequestContext requestContext) {
+			@Nullable final StackTraceElement[] stackTraceElements,
+			@Nullable final NiddlerOkHttpInterceptor.NiddlerRequestContext requestContext,
+			@Nullable final Map<String, String> metadata) {
 		mRequest = request;
 		mRequestId = requestId;
 		mMessageId = UUID.randomUUID().toString();
@@ -44,13 +48,24 @@ final class NiddlerOkHttpRequest implements NiddlerRequest {
 		mExtraHeaders = extraHeaders;
 		mStackTraceElements = stackTraceElements;
 		mRequestContext = requestContext;
+		mMetadata = new TreeMap<>();
+
+		if (metadata != null) {
+			mMetadata.putAll(metadata);
+		}
 	}
 
+	public void addMetadata(@NonNull final String key, @NonNull final String value) {
+		mMetadata.put(key, value);
+	}
+
+	@NonNull
 	@Override
 	public String getMessageId() {
 		return mMessageId;
 	}
 
+	@NonNull
 	@Override
 	public String getRequestId() {
 		return mRequestId;
@@ -61,11 +76,19 @@ final class NiddlerOkHttpRequest implements NiddlerRequest {
 		return mTimestamp;
 	}
 
+	@NonNull
 	@Override
 	public String getUrl() {
 		return mRequest.url().toString();
 	}
 
+	@NonNull
+	@Override
+	public Map<String, String> getMetadata() {
+		return mMetadata;
+	}
+
+	@NonNull
 	@Override
 	public Map<String, List<String>> getHeaders() {
 		final Map<String, List<String>> headers = mRequest.headers().toMultimap();
@@ -91,6 +114,7 @@ final class NiddlerOkHttpRequest implements NiddlerRequest {
 		return mStackTraceElements;
 	}
 
+	@NonNull
 	@Override
 	public String getMethod() {
 		return mRequest.method();
@@ -106,7 +130,7 @@ final class NiddlerOkHttpRequest implements NiddlerRequest {
 	}
 
 	@Override
-	public void writeBody(final OutputStream stream) {
+	public void writeBody(@NonNull final OutputStream stream) {
 		try {
 			final BufferedSink buffer = Okio.buffer(Okio.sink(stream));
 

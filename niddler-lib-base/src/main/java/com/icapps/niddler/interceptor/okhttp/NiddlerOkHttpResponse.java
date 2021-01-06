@@ -1,8 +1,5 @@
 package com.icapps.niddler.interceptor.okhttp;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import com.icapps.niddler.core.NiddlerRequest;
 import com.icapps.niddler.core.NiddlerResponse;
 
@@ -11,8 +8,11 @@ import java.io.OutputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okio.Buffer;
@@ -37,6 +37,7 @@ final class NiddlerOkHttpResponse implements NiddlerResponse {
 	private final int mWaitTime;
 	@Nullable
 	private final Map<String, String> mExtraHeaders;
+	private final Map<String, String> mMetadata;
 
 	NiddlerOkHttpResponse(final Response response,
 			final String requestId,
@@ -45,7 +46,8 @@ final class NiddlerOkHttpResponse implements NiddlerResponse {
 			final int writeTime,
 			final int readTime,
 			final int waitTime,
-			@Nullable final Map<String, String> extraHeaders) {
+			@Nullable final Map<String, String> extraHeaders,
+			@Nullable final Map<String, String> metadata) {
 		mResponse = response;
 		mRequestId = requestId;
 		mActualNetworkRequest = actualNetworkRequest;
@@ -56,13 +58,23 @@ final class NiddlerOkHttpResponse implements NiddlerResponse {
 		mMessageId = UUID.randomUUID().toString();
 		mTimestamp = System.currentTimeMillis();
 		mExtraHeaders = extraHeaders;
+		mMetadata = new TreeMap<>();
+		if (metadata != null) {
+			mMetadata.putAll(metadata);
+		}
 	}
 
+	public void addMetadata(@NonNull final String key, @NonNull final String value) {
+		mMetadata.put(key, value);
+	}
+
+	@NonNull
 	@Override
 	public String getMessageId() {
 		return mMessageId;
 	}
 
+	@NonNull
 	@Override
 	public String getRequestId() {
 		return mRequestId;
@@ -73,6 +85,7 @@ final class NiddlerOkHttpResponse implements NiddlerResponse {
 		return mTimestamp;
 	}
 
+	@NonNull
 	@Override
 	public Map<String, List<String>> getHeaders() {
 		final Map<String, List<String>> finalHeaders = mResponse.headers().toMultimap();
@@ -86,6 +99,13 @@ final class NiddlerOkHttpResponse implements NiddlerResponse {
 		return finalHeaders;
 	}
 
+	@NonNull
+	@Override
+	public Map<String, String> getMetadata() {
+		return mMetadata;
+	}
+
+	@NonNull
 	@Override
 	public Integer getStatusCode() {
 		return mResponse.code();
@@ -131,7 +151,7 @@ final class NiddlerOkHttpResponse implements NiddlerResponse {
 	}
 
 	@Override
-	public void writeBody(final OutputStream stream) {
+	public void writeBody(@NonNull final OutputStream stream) {
 		final ResponseBody body = mResponse.body();
 		try {
 			if (body != null) {

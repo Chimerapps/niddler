@@ -9,6 +9,7 @@ import java.net.SocketTimeoutException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 
 import androidx.annotation.NonNull;
@@ -24,6 +25,7 @@ final class NiddlerOkHttpErrorResponse implements NiddlerResponse {
 	private final long mTimestamp;
 	private final String mStatusLine;
 	private final StackTraceElement[] mStackTrace;
+	private final Map<String, String> mMetadata;
 
 	NiddlerOkHttpErrorResponse(@NonNull final String requestId, @NonNull final Throwable error) {
 		mRequestId = requestId;
@@ -37,13 +39,26 @@ final class NiddlerOkHttpErrorResponse implements NiddlerResponse {
 		} else {
 			mStatusLine = error.getMessage();
 		}
+		mMetadata = new TreeMap<>();
 	}
 
+	public void addMetadata(@NonNull final String key, @NonNull final String value) {
+		mMetadata.put(key, value);
+	}
+
+	@NonNull
+	@Override
+	public Map<String, String> getMetadata() {
+		return mMetadata;
+	}
+
+	@NonNull
 	@Override
 	public String getMessageId() {
 		return mMessageId;
 	}
 
+	@NonNull
 	@Override
 	public String getRequestId() {
 		return mRequestId;
@@ -54,11 +69,13 @@ final class NiddlerOkHttpErrorResponse implements NiddlerResponse {
 		return mTimestamp;
 	}
 
+	@NonNull
 	@Override
 	public Map<String, List<String>> getHeaders() {
 		return Collections.emptyMap();
 	}
 
+	@NonNull
 	@Override
 	public Integer getStatusCode() {
 		return 0;
@@ -104,7 +121,7 @@ final class NiddlerOkHttpErrorResponse implements NiddlerResponse {
 	}
 
 	@Override
-	public void writeBody(final OutputStream stream) {
+	public void writeBody(@NonNull final OutputStream stream) {
 	}
 
 	@Nullable

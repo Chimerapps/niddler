@@ -1,3 +1,13 @@
+### 1.4.0 ###
+
+* Don't crash cache if we serve a debug response in network-interceptor mode. Fixes #20
+* Add metadata to protocol to send agnostic metadata to the plugin. Replaces injected headers.
+* Check if a response was served purely from cache and mark it as such in the metadata. Fixes #19
+
+### 1.3.x ###
+
+* Minor enhancements
+
 ### 1.2.0 ###
 
 * Added an option to the okhttp interceptor to also report downstream exceptions
