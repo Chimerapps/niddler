@@ -8,10 +8,12 @@ import com.icapps.niddler.retrofit.NiddlerRetrofitCallInjector
 import com.icapps.sampleapplication.api.ExampleJsonApi
 import com.icapps.sampleapplication.api.ExampleXMLApi
 import com.icapps.sampleapplication.api.TimeoutApi
+import okhttp3.Cache
 
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.File
 import java.util.concurrent.TimeUnit
 
 /**
@@ -43,6 +45,7 @@ class NiddlerSampleApplication : Application() {
                 .readTimeout(3, TimeUnit.SECONDS)
                 .connectTimeout(3, TimeUnit.SECONDS)
                 .writeTimeout(3, TimeUnit.SECONDS)
+                .cache(Cache(cacheDir,10485760L))
                 .addInterceptor(okHttpInterceptor)
                 .build()
 

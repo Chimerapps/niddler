@@ -325,10 +325,10 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 		return builder.build();
 	}
 
-	@Nullable
+	@NonNull
 	private static Map<String, String> buildExtraNiddlerMetadata(final int flags) {
 		if (flags == 0) {
-			return null;
+			return new HashMap<>();
 		}
 
 		final Map<String, String> extra = new HashMap<>();
