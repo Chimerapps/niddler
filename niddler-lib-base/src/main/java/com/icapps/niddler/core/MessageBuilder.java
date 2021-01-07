@@ -175,6 +175,7 @@ final class MessageBuilder {
 		object.put("requestId", base.getRequestId());
 		object.put("timestamp", base.getTimestamp());
 		object.put("headers", createHeadersObject(base));
+		object.put("metadata", createMetadataObject(base));
 		object.put("body", createBody(base));
 	}
 
@@ -207,6 +208,19 @@ final class MessageBuilder {
 				array.put(s);
 			}
 			object.put(headerEntry.getKey().toLowerCase(Locale.getDefault()), array);
+		}
+		return object;
+	}
+
+	private static JSONObject createMetadataObject(final NiddlerMessageBase base) throws JSONException {
+		final Map<String, String> headers = base.getMetadata();
+		if (headers == null || headers.isEmpty()) {
+			return null;
+		}
+
+		final JSONObject object = new JSONObject();
+		for (final Map.Entry<String, String> entry : headers.entrySet()) {
+			object.put(entry.getKey(), entry.getValue());
 		}
 		return object;
 	}

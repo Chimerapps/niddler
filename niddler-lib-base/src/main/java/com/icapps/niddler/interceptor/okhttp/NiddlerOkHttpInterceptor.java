@@ -29,8 +29,9 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
-import static com.icapps.niddler.core.Niddler.NIDDLER_DEBUG_RESPONSE_HEADER;
-import static com.icapps.niddler.core.Niddler.NIDDLER_DEBUG_TIMING_RESPONSE_HEADER;
+import static com.icapps.niddler.core.Niddler.NIDDLER_DEBUG_RESPONSE_METADATA;
+import static com.icapps.niddler.core.Niddler.NIDDLER_DEBUG_TIMING_RESPONSE_METADATA;
+import static com.icapps.niddler.core.Niddler.NIDDLER_FROM_DISK_METADATA;
 
 /**
  * @author Nicola Verbeeck
@@ -162,14 +163,14 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 
 		final String uuid = UUID.randomUUID().toString();
 
-		final NiddlerRequest origNiddlerRequest = new NiddlerOkHttpRequest(origRequest, uuid, buildExtraNiddlerHeaders(changedTime ? FLAG_TIME : 0), traces, requestContext);
+		final NiddlerRequest origNiddlerRequest = new NiddlerOkHttpRequest(origRequest, uuid, null, traces, requestContext, buildExtraNiddlerMetadata(changedTime ? FLAG_TIME : 0));
 		final NiddlerDebugger.DebugRequest overriddenRequest = mDebugger.overrideRequest(origNiddlerRequest);
 
 		final Request finalRequest = (overriddenRequest == null) ? origRequest : makeRequest(overriddenRequest);
 
 		final NiddlerRequest niddlerRequest = (overriddenRequest == null)
-				? origNiddlerRequest : new NiddlerOkHttpRequest(finalRequest, uuid, buildExtraNiddlerHeaders((changedTime ? FLAG_TIME : 0) + FLAG_MODIFIED_REQUEST), traces,
-				requestContext);
+				? origNiddlerRequest : new NiddlerOkHttpRequest(finalRequest, uuid, null, traces,
+				requestContext, buildExtraNiddlerMetadata((changedTime ? FLAG_TIME : 0) + FLAG_MODIFIED_REQUEST));
 
 		mNiddler.logRequest(niddlerRequest);
 
@@ -194,15 +195,19 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 		final int readTime = (int) (now - sentAt); //Unknown-ish
 
 		final Response networkResponse = response.networkResponse();
+		final boolean pureFromCache = response.cacheResponse() != null && networkResponse == null;
 		final Request networkRequest = (networkResponse == null) ? null : networkResponse.request();
 
 		changedTime = mDebugger.ensureCallTime(callStartTime);
-		final Map<String, String> extraHeaders = buildExtraNiddlerHeaders((changedTime ? FLAG_TIME : 0) + (debuggerBeforeExecuteOverride != null ? FLAG_MODIFIED_RESPONSE : 0));
+		final Map<String, String> metadata = buildExtraNiddlerMetadata((changedTime ? FLAG_TIME : 0) + (debuggerBeforeExecuteOverride != null ? FLAG_MODIFIED_RESPONSE : 0));
+		if (pureFromCache) {
+			metadata.put(NIDDLER_FROM_DISK_METADATA, "true");
+		}
 
 		final NiddlerResponse niddlerResponse = new NiddlerOkHttpResponse(response, uuid,
-				(networkRequest == null) ? null : new NiddlerOkHttpRequest(networkRequest, uuid, null, null, null),
-				(networkResponse == null) ? null : new NiddlerOkHttpResponse(networkResponse, uuid, null, null, writeTime, readTime, wait, null),
-				writeTime, readTime, wait, extraHeaders);
+				(networkRequest == null) ? null : new NiddlerOkHttpRequest(networkRequest, uuid, null, null, null, null),
+				(networkResponse == null) ? null : new NiddlerOkHttpResponse(networkResponse, uuid, null, null, writeTime, readTime, wait, null, null),
+				writeTime, readTime, wait, null, metadata);
 
 		NiddlerDebugger.DebugResponse debugFromResponse = null;
 		if (debugResponse == null) {
@@ -219,7 +224,8 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 			final NiddlerResponse debugNiddlerResponse = new NiddlerOkHttpResponse(debugResp, uuid,
 					null,
 					null,
-					writeTime, newReadTime, newWait, buildExtraNiddlerHeaders(FLAG_MODIFIED_RESPONSE + (changedTime ? FLAG_TIME : 0)));
+					writeTime, newReadTime, newWait, null,
+					buildExtraNiddlerMetadata(FLAG_MODIFIED_RESPONSE + (changedTime ? FLAG_TIME : 0)));
 
 			mNiddler.logResponse(debugNiddlerResponse);
 			return debugResp;
@@ -241,9 +247,18 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 			return null;
 		}
 
-		final Response.Builder builder = new Response.Builder()
+		//By building upon the old response we ensure required fields for cache etc are set
+		//Only relevant if we are a network interceptor instead of an application layer interceptor. We do zero out some data
+		final Response.Builder builder = (response == null ? new Response.Builder() : response.newBuilder())
+				.headers(Headers.of())
+				.body(null)
 				.code(debugResponse.code)
 				.message(debugResponse.message);
+		if (response == null) {
+			if (request.isHttps()) { //This will crash the cache if enabled. Inject fake vary header to prevent saving. Sorry
+				builder.addHeader("Vary", "*");
+			}
+		}
 
 		if (debugResponse.headers != null) {
 			final Headers.Builder headers = new Headers.Builder();
@@ -310,18 +325,18 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 		return builder.build();
 	}
 
-	@Nullable
-	private static Map<String, String> buildExtraNiddlerHeaders(final int flags) {
+	@NonNull
+	private static Map<String, String> buildExtraNiddlerMetadata(final int flags) {
 		if (flags == 0) {
-			return null;
+			return new HashMap<>();
 		}
 
 		final Map<String, String> extra = new HashMap<>();
 		if ((flags & FLAG_TIME) != 0) {
-			extra.put(NIDDLER_DEBUG_TIMING_RESPONSE_HEADER, "true");
+			extra.put(NIDDLER_DEBUG_TIMING_RESPONSE_METADATA, "true");
 		}
 		if ((flags & FLAG_MODIFIED_RESPONSE) != 0 || (flags & FLAG_MODIFIED_REQUEST) != 0) {
-			extra.put(NIDDLER_DEBUG_RESPONSE_HEADER, "true");
+			extra.put(NIDDLER_DEBUG_RESPONSE_METADATA, "true");
 		}
 
 		return extra;

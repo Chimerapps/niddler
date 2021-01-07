@@ -23,9 +23,10 @@ import java.util.regex.Pattern;
 @SuppressWarnings("WeakerAccess")
 public abstract class Niddler implements Closeable {
 
-	public static final String NIDDLER_DEBUG_RESPONSE_HEADER = "X-Niddler-Debug";
-	public static final String NIDDLER_DEBUG_TIMING_RESPONSE_HEADER = "X-Niddler-Debug-Timing";
+	public static final String NIDDLER_DEBUG_RESPONSE_METADATA = "X-Niddler-Debug";
+	public static final String NIDDLER_DEBUG_TIMING_RESPONSE_METADATA= "X-Niddler-Debug-Timing";
 	public static final String INTENT_EXTRA_WAIT_FOR_DEBUGGER = "Niddler-Wait-For-Debugger";
+	public static final String NIDDLER_FROM_DISK_METADATA = "X-Niddler-FromDiskCache";
 	private static final int MAX_TRACE_CACHE_SIZE = 100;
 
 	private final LinkedHashMap<StackTraceKey, StackTraceElement[]> mStackTraceMap;
