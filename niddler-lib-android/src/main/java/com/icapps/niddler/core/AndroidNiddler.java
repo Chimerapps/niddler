@@ -86,7 +86,8 @@ public final class AndroidNiddler extends Niddler implements Niddler.PlatformNid
 
 	/**
 	 * Creates a server info based on the application's package name and some device fields.
-	 * To provide a session icon, you can use meta data in the AndroidManifest. Eg: {@code <meta-data android:name="com.niddler.icon" android:value="android"/>}
+	 * To provide a session icon, you can use meta data in the AndroidManifest. Eg: {@code <meta-data android:name="com.niddler.icon" android:value="android"/>}.
+	 * Icons can be names which will be resolved inside the UI or from plugin 2.9.9 and up base64 encoded images
 	 *
 	 * @param application The application niddler is instrumenting
 	 * @return A server info document to use in the {@link Niddler.Builder}

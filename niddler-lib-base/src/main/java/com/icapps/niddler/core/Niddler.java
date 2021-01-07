@@ -1,8 +1,5 @@
 package com.icapps.niddler.core;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import com.icapps.niddler.core.debug.NiddlerDebugger;
 
 import java.io.Closeable;
@@ -16,6 +13,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 /**
  * @author Maarten Van Giel
  * @author Nicola Verbeeck
@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 public abstract class Niddler implements Closeable {
 
 	public static final String NIDDLER_DEBUG_RESPONSE_METADATA = "X-Niddler-Debug";
-	public static final String NIDDLER_DEBUG_TIMING_RESPONSE_METADATA= "X-Niddler-Debug-Timing";
+	public static final String NIDDLER_DEBUG_TIMING_RESPONSE_METADATA = "X-Niddler-Debug-Timing";
 	public static final String INTENT_EXTRA_WAIT_FOR_DEBUGGER = "Niddler-Wait-For-Debugger";
 	public static final String NIDDLER_FROM_DISK_METADATA = "X-Niddler-FromDiskCache";
 	private static final int MAX_TRACE_CACHE_SIZE = 100;
@@ -180,12 +180,22 @@ public abstract class Niddler implements Closeable {
 		@Nullable
 		final String icon;
 
+		/**
+		 * @param name        The name to use to identify this application/session
+		 * @param description A small description of this application/session/device
+		 * @param icon        Optional icon to show in the UI. Can be a predefined name (eg: flutter, android, ...),
+		 *                    an icon you provide in the .idea/niddler folder or a base64 encoded image
+		 */
 		public NiddlerServerInfo(final String name, final String description, @Nullable final String icon) {
 			this.name = name;
 			this.description = description;
 			this.icon = icon;
 		}
 
+		/**
+		 * Deprecated, use the 3 argument constructor instead
+		 */
+		@Deprecated
 		public NiddlerServerInfo(final String name, final String description) {
 			this(name, description, null);
 		}
