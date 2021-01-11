@@ -37,6 +37,7 @@ android {
 
 dependencies {
     debugImplementation project(':niddler-lib-android')
+    debugImplementation project(':niddler-lib-urlconnection')
     releaseImplementation project(':niddler-lib-android-noop')
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'com.squareup.retrofit2:retrofit:2.6.1'
