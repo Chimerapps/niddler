@@ -15,6 +15,8 @@ import javax.net.ssl.HttpsURLConnection;
 import androidx.annotation.NonNull;
 
 /**
+ * Helper class for installing niddler as the URL handler for http and https connections
+ *
  * @author Nicola Verbeeck
  */
 public final class NiddlerUrlConnectionHandler {
@@ -26,12 +28,16 @@ public final class NiddlerUrlConnectionHandler {
 	/**
 	 * Registers niddler to the URL handlers for HTTP and HTTPS. This method only works correctly when it is used before any other factories have been set for HTTP and HTTPs.
 	 * <p>
-	 * Note that this method uses some reflection tricks to get the default delegates.
+	 * Note that this method uses some reflection tricks to get the default delegates, if this fails, we use quasi-recursion
+	 * Note: If niddler is in no-op mode, this method does nothing
 	 *
 	 * @param niddler The niddler instance to use
 	 * @throws IOException When installing fails
 	 */
 	public static void install(@NonNull final Niddler niddler) throws IOException {
+		if (!Niddler.enabled()) {
+			return;
+		}
 		if (installWithDelegatesFromURL(niddler)) {
 			return;
 		} else if (installWithDelegatesFromAndroid(niddler)) {
@@ -43,6 +49,23 @@ public final class NiddlerUrlConnectionHandler {
 		throw new IOException("Failed to find any valid alternatives to install");
 	}
 
+	/**
+	 * Registers niddler to the URL handlers for HTTP and HTTPS. This convenience method allows you to specify the handlers for http and https that will be used.
+	 * <p>
+	 * Note: If niddler is in no-op mode, this method does nothing
+	 *
+	 * @param niddler      The niddler instance to use
+	 * @param httpHandler  The URLStreamHandler for http connections
+	 * @param httpsHandler The URLStreamHandler for https connections
+	 */
+	public static void install(@NonNull final Niddler niddler, @NonNull final URLStreamHandler httpHandler, @NonNull final URLStreamHandler httpsHandler) {
+		if (!Niddler.enabled()) {
+			return;
+		}
+		installFactoryWithDelegates(niddler, httpHandler, httpsHandler);
+	}
+
+	@SuppressWarnings("PrivateApi")
 	private static boolean installWithDelegatesFromAndroid(@NonNull final Niddler niddler) {
 		try {
 			final URLStreamHandler httpDelegate = (URLStreamHandler) Class.forName("com.android.okhttp.HttpHandler").newInstance();
@@ -72,7 +95,7 @@ public final class NiddlerUrlConnectionHandler {
 		}
 	}
 
-	private static void installFactoryWithDelegates(@NonNull final Niddler niddler, final URLStreamHandler httpDelegate, final URLStreamHandler httpsDelegate) {
+	private static void installFactoryWithDelegates(@NonNull final Niddler niddler, @NonNull final URLStreamHandler httpDelegate, @NonNull final URLStreamHandler httpsDelegate) {
 		URL.setURLStreamHandlerFactory(new URLStreamHandlerFactory() {
 			@Override
 			public URLStreamHandler createURLStreamHandler(final String protocol) {
@@ -121,12 +144,10 @@ public final class NiddlerUrlConnectionHandler {
 
 									if ("http".equals(protocol)) {
 										return new DelegatingHttpUrlConnection(url, niddler);
-									} else if ("https".equals(protocol)) {
+									} else {
 										return new DelegatingHttpsUrlConnection(url, niddler);
 									}
-									throw new IllegalStateException("Failed miserably!");
 								} finally {
-
 									URL.setURLStreamHandlerFactory(parent);
 								}
 							}
@@ -140,12 +161,10 @@ public final class NiddlerUrlConnectionHandler {
 
 									if ("http".equals(protocol)) {
 										return new DelegatingHttpUrlConnection(url, proxy, niddler);
-									} else if ("https".equals(protocol)) {
+									} else {
 										return new DelegatingHttpsUrlConnection(url, proxy, niddler);
 									}
-									throw new IllegalStateException("Failed miserably!");
 								} finally {
-
 									URL.setURLStreamHandlerFactory(parent);
 								}
 							}
