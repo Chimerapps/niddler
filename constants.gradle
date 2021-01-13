@@ -1,4 +1,4 @@
 project.ext {
     releaseVersion = '1.4.0'
-    urlConnectionReleaseVersion = '0.0.1'
+    urlConnectionReleaseVersion = '0.0.2'
 }

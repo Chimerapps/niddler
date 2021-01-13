@@ -45,23 +45,36 @@ class DelegatingHttpUrlConnection extends HttpURLConnection {
 	private boolean bufferIsError;
 	private boolean outputFinished = false;
 	private boolean sentRequest = false;
-	private boolean sendResponse = false;
+	private boolean sentResponse = false;
+	private final boolean blacklisted;
 	private String requestId;
 	@NonNull
 	private final Niddler niddler;
+	@NonNull
+	private final NiddlerUrlConnectionHandler connectionHandler;
 
-	public DelegatingHttpUrlConnection(@NonNull final URL url, @NonNull final HttpURLConnection delegate, @NonNull final Niddler niddler) {
+	public DelegatingHttpUrlConnection(@NonNull final URL url,
+			@NonNull final HttpURLConnection delegate,
+			@NonNull final Niddler niddler,
+			@NonNull final NiddlerUrlConnectionHandler connectionHandler) {
 		super(url);
 		this.delegate = delegate;
 		this.niddler = niddler;
+		this.connectionHandler = connectionHandler;
+		blacklisted = connectionHandler.isBlacklisted(url.toString());
 	}
 
-	public DelegatingHttpUrlConnection(@NonNull final URL url, @NonNull final Niddler niddler) throws IOException {
-		this(url, (HttpURLConnection) url.openConnection(), niddler);
+	public DelegatingHttpUrlConnection(@NonNull final URL url,
+			@NonNull final Niddler niddler,
+			@NonNull final NiddlerUrlConnectionHandler connectionHandler) throws IOException {
+		this(url, (HttpURLConnection) url.openConnection(), niddler, connectionHandler);
 	}
 
-	public DelegatingHttpUrlConnection(@NonNull final URL url, Proxy proxy, @NonNull final Niddler niddler) throws IOException {
-		this(url, (HttpURLConnection) url.openConnection(proxy), niddler);
+	public DelegatingHttpUrlConnection(@NonNull final URL url,
+			@NonNull final Proxy proxy,
+			@NonNull final Niddler niddler,
+			@NonNull final NiddlerUrlConnectionHandler connectionHandler) throws IOException {
+		this(url, (HttpURLConnection) url.openConnection(proxy), niddler, connectionHandler);
 	}
 
 	@Override
@@ -495,7 +508,7 @@ class DelegatingHttpUrlConnection extends HttpURLConnection {
 	}
 
 	private void maybeSendRequest() {
-		if (sentRequest) {
+		if (sentRequest || blacklisted) {
 			return;
 		}
 		if (doOutput && !outputFinished) {
@@ -520,10 +533,10 @@ class DelegatingHttpUrlConnection extends HttpURLConnection {
 	}
 
 	private void maybeSendResponse() {
-		if (sendResponse) {
+		if (sentResponse || blacklisted) {
 			return;
 		}
-		sendResponse = true;
+		sentResponse = true;
 
 		int responseCode = -1;
 		try {

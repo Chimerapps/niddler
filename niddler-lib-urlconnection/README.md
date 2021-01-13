@@ -3,5 +3,6 @@ Helper library that allows inspection (no debugging support yet) of http(s) requ
 
 ## Example use
 ```java
-    NiddlerUrlConnectionHandler.install(niddler);
+    NiddlerUrlConnectionHandler handler = NiddlerUrlConnectionHandler.install(niddler);
+    handler.blacklist(".*raw\\.githubusercontent\\.com.*");
 ```

@@ -30,18 +30,26 @@ class DelegatingHttpsUrlConnection extends HttpsURLConnection {
 	private final HttpsURLConnection delegate;
 	private final DelegatingHttpUrlConnection httpDelegate;
 
-	public DelegatingHttpsUrlConnection(@NonNull final URL url, @NonNull final HttpsURLConnection delegate, @NonNull final Niddler niddler) {
+	public DelegatingHttpsUrlConnection(@NonNull final URL url,
+			@NonNull final HttpsURLConnection delegate,
+			@NonNull final Niddler niddler,
+			@NonNull final NiddlerUrlConnectionHandler connectionHandler) {
 		super(url);
 		this.delegate = delegate;
-		this.httpDelegate = new DelegatingHttpUrlConnection(url, delegate, niddler);
+		this.httpDelegate = new DelegatingHttpUrlConnection(url, delegate, niddler, connectionHandler);
 	}
 
-	public DelegatingHttpsUrlConnection(@NonNull final URL url, @NonNull final Niddler niddler) throws IOException {
-		this(url, (HttpsURLConnection) url.openConnection(), niddler);
+	public DelegatingHttpsUrlConnection(@NonNull final URL url,
+			@NonNull final Niddler niddler,
+			@NonNull final NiddlerUrlConnectionHandler connectionHandler) throws IOException {
+		this(url, (HttpsURLConnection) url.openConnection(), niddler, connectionHandler);
 	}
 
-	public DelegatingHttpsUrlConnection(@NonNull final URL url, Proxy proxy, @NonNull final Niddler niddler) throws IOException {
-		this(url, (HttpsURLConnection) url.openConnection(proxy), niddler);
+	public DelegatingHttpsUrlConnection(@NonNull final URL url,
+			@NonNull final Proxy proxy,
+			@NonNull final Niddler niddler,
+			@NonNull final NiddlerUrlConnectionHandler connectionHandler) throws IOException {
+		this(url, (HttpsURLConnection) url.openConnection(proxy), niddler, connectionHandler);
 	}
 
 	@Override
