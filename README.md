@@ -1,12 +1,10 @@
-# Niddler [![Download](https://api.bintray.com/packages/nicolaverbeeck/maven/niddler/images/download.svg)](https://bintray.com/nicolaverbeeck/maven/niddler/_latestVersion)
+# Niddler [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.chimerapps.niddler/niddler/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.chimerapps.niddler/niddler)
 
 ![Logo](niddler_logo.png)
 
 Niddler is a network debugging utility for Android and java apps that caches network requests/responses, and exposes them over a websocket based protocol. It comes with a convenient interceptor for Square's [OkHttpClient](http://square.github.io/okhttp/), as well as a no-op interceptor for use in release scenario's.
 
 Niddler is meant to be used with [Niddler-ui](https://github.com/Chimerapps/niddler-ui), which is a plugin for IntelliJ/Android Studio. When used together it allows you to visualize network activity, easily navigate JSON/XML responses, debug, ...
-
-Niddler is a collaboration of [icapps](http://www.icapps.com) and [Chimerapps](http://www.chimerapps.com/).
 
 ## Example use (Android)
 build.gradle:

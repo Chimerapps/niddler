@@ -1,3 +1,12 @@
+### 1.5.0 ###
+
+* First package release on maven central
+
+#### BREAKING CHANGE
+
+* Niddler now resides under `com.chimerapps` instead of `com.icapps`. Please update your dependency AND package names accordingly. Sorry
+
+
 ### 1.4.0 ###
 
 * Don't crash cache if we serve a debug response in network-interceptor mode. Fixes #20
