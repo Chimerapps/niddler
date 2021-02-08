@@ -5,6 +5,7 @@ import android.app.Application
 import com.icapps.niddler.core.AndroidNiddler
 import com.icapps.niddler.interceptor.okhttp.NiddlerOkHttpInterceptor
 import com.icapps.niddler.retrofit.NiddlerRetrofitCallInjector
+import com.icapps.niddler.urlconnection.NiddlerUrlConnectionHandler
 import com.icapps.sampleapplication.api.ExampleJsonApi
 import com.icapps.sampleapplication.api.ExampleXMLApi
 import com.icapps.sampleapplication.api.TimeoutApi
@@ -37,6 +38,8 @@ class NiddlerSampleApplication : Application() {
                 .build()
 
         niddler.attachToApplication(this)
+
+        NiddlerUrlConnectionHandler.install(niddler);
 
         val okHttpInterceptor = NiddlerOkHttpInterceptor(niddler, "Default", true)
         okHttpInterceptor.blacklist(".*raw\\.githubusercontent\\.com.*")

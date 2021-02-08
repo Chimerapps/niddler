@@ -18,6 +18,7 @@ import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.net.URL
 
 class MainActivity : AppCompatActivity() {
 
@@ -105,6 +106,15 @@ class MainActivity : AppCompatActivity() {
                     Log.e("Response", "Got timeout response failure!", t)
                 }
             })
+        }
+
+        findViewById<View>(R.id.buttonUrlConnection).setOnClickListener {
+            Thread {
+                val connection = URL("https://jsonplaceholder.typicode.com/posts").openConnection()
+                connection.setRequestProperty("X-Debug", "true");
+                Log.d("Response", connection
+                        .getInputStream().bufferedReader().readText());
+            }.start()
         }
     }
 
