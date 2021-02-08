@@ -1,5 +1,7 @@
 # Niddler [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.chimerapps.niddler/niddler/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.chimerapps.niddler/niddler)
 
+## Niddler has migrated on maven central to `com.chimerapps.niddler:...`!!!
+
 ![Logo](niddler_logo.png)
 
 Niddler is a network debugging utility for Android and java apps that caches network requests/responses, and exposes them over a websocket based protocol. It comes with a convenient interceptor for Square's [OkHttpClient](http://square.github.io/okhttp/), as well as a no-op interceptor for use in release scenario's.
