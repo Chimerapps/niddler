@@ -12,8 +12,8 @@ Niddler is a collaboration of [icapps](http://www.icapps.com) and [Chimerapps](h
 build.gradle:
 ``` groovy
 //Ensure jcenter is in the repo list
-debugCompile 'com.icapps.niddler:niddler:{latest version}'
-releaseCompile 'com.icapps.niddler:niddler-noop:{latest version}'
+debugCompile 'com.chimerapps.niddler:niddler:{latest version}'
+releaseCompile 'com.chimerapps.niddler:niddler-noop:{latest version}'
 ```
 
 Example usage with Android Application:
@@ -68,8 +68,8 @@ Using the service is not required. You can also call `niddler.start()` and `nidd
 build.gradle:
 ``` groovy
 //Ensure jcenter is in the repo list (1.1.1 is the latest stable version)
-debugCompile 'com.icapps.niddler:niddler-java:1.1.1'
-releaseCompile 'com.icapps.niddler:niddler-java-noop:1.1.1'
+debugCompile 'com.chimerapps.niddler:niddler-java:1.1.1'
+releaseCompile 'com.chimerapps.niddler:niddler-java-noop:1.1.1'
 ```
 
 Use with java application:

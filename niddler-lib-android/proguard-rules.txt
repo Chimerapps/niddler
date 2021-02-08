@@ -1,1 +1,1 @@
--assumenosideeffects class com.icapps.niddler.**
+-assumenosideeffects class com.chimerapps.niddler.**

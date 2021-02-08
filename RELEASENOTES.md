@@ -24,10 +24,10 @@
 
 * Breaking change!
     * Split up library in android and java versions
-        * Android dependency: `com.icapps.niddler:niddler:1.0.0-alpha10`
-        * Android no-op dependency: `com.icapps.niddler:niddler-noop:1.0.0-alpha10`
-        * Java dependency: `com.icapps.niddler:niddler-java:1.0.0-alpha10`
-        * Java no-op dependency: `com.icapps.niddler:niddler-java-noop:1.0.0-alpha10`
+        * Android dependency: `com.chimerapps.niddler:niddler:1.0.0-alpha10`
+        * Android no-op dependency: `com.chimerapps.niddler:niddler-noop:1.0.0-alpha10`
+        * Java dependency: `com.chimerapps.niddler:niddler-java:1.0.0-alpha10`
+        * Java no-op dependency: `com.chimerapps.niddler:niddler-java-noop:1.0.0-alpha10`
     * Initialize niddler using:
         * `new AndroidNiddler.Builder()...`
         * `new JavaNiddler.Builder()...`
