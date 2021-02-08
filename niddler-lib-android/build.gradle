@@ -1,15 +1,6 @@
-apply plugin: 'com.jfrog.bintray'
 apply from: '../constants.gradle'
 
-def artifactVersion = project.ext.releaseVersion
-def artifactGroup = 'com.chimerapps.niddler'
-def artifactName = "niddler"
-
-group "$artifactGroup"
-version "$artifactVersion"
-
 apply plugin: 'com.android.library'
-apply plugin: 'maven-publish'
 
 sourceCompatibility = 1.7
 
@@ -32,127 +23,15 @@ dependencies {
     compileOnly 'androidx.annotation:annotation:1.1.0'
 }
 
-android.libraryVariants.all { variant ->
-    def name = variant.buildType.name
-    if (!name.equals("release")) {
-        return
-    }
-    task("generateJavadoc", type: Javadoc) {
-        source = android.sourceSets.main.java.getSrcDirs()
-        options {
-            links "http://docs.oracle.com/javase/7/docs/api/"
-            linksOffline "https://developer.android.com/reference",
-                    "${android.sdkDirectory}/docs/reference"
-            encoding = "UTF-8"
-        }
-        exclude "**/BuildConfig.java"
-        exclude "**/R.java"
-        doFirst {
-            classpath =
-                    files(
-                            android.sourceSets.main.java.srcDirs,
-                            project.android.getBootClasspath(),
-                            project.file("../niddler-lib-base/src/main/java"))
-        }
-        failOnError false
-    }
-
-    task("androidJavadocsJar", type: Jar, dependsOn: generateJavadoc) {
-        classifier = 'javadoc'
-        from generateJavadoc.destinationDir
-    }
+ext {
+    artifactVersion = project.ext.releaseVersion
+    artifactName = 'niddler'
+    artifactGroup = 'com.chimerapps.niddler'
+    artifactDescription = 'Niddler network inspector library for android'
 }
 
-task sourceJar(type: Jar) {
-    from android.sourceSets.main.java.getSrcDirs()
-}
+apply from: "${rootProject.projectDir}/scripts/publish-mavencentral-android.gradle"
 
-bintray {
-    user = System.getenv('BINTRAY_USER')
-    key = System.getenv('BINTRAY_KEY')
-    pkg {
-        repo = 'maven'
-        name = "$artifactName"
-        licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/icapps/niddler'
-
-        version {
-            name = "$artifactVersion"
-            desc = "Niddler network inspector library"
-            released = new Date()
-        }
-    }
-    publications = ['MyPublication']
-}
-
-def pomConfig = {
-    licenses {
-        license {
-            name "The Apache Software License, Version 2.0"
-            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
-            distribution "repo"
-        }
-    }
-    developers {
-        developer {
-            name "Nicola Verbeeck"
-            email "nicola@chimerapps.com"
-            organization "Chimerapps"
-        }
-        developer {
-            name "Maarten Van Giel"
-            email "contact@maarten.vg"
-            organization "iCapps"
-        }
-    }
-}
-
-
-publishing {
-    publications {
-        MyPublication(MavenPublication) {
-            artifact("$buildDir/outputs/aar/niddler-lib-android-release.aar")
-            artifact sourceJar {
-                classifier "sources"
-            }
-            afterEvaluate {
-                artifact androidJavadocsJar
-            }
-            groupId "$artifactGroup"
-            version "$artifactVersion"
-            artifactId "$artifactName"
-
-            pom.withXml {
-                def root = asNode()
-                root.appendNode('description', 'Niddler network inspector library')
-                root.appendNode('name', "$artifactName")
-                root.appendNode('url', 'https://github.com/icapps/niddler')
-                root.children().last() + pomConfig
-
-                def dependenciesNode = root.appendNode('dependencies')
-
-                //Iterate over the compile dependencies (we don't want the test ones), adding a <dependency> node for each
-                configurations.api.allDependencies.each {
-                    if (it instanceof ExternalModuleDependency) {
-                        def dependencyNode = dependenciesNode.appendNode('dependency')
-                        dependencyNode.appendNode('groupId', it.group)
-                        dependencyNode.appendNode('artifactId', it.name)
-                        dependencyNode.appendNode('version', it.version)
-                    }
-                }
-                configurations.implementation.allDependencies.each {
-                    if (it instanceof ExternalModuleDependency) {
-                        def dependencyNode = dependenciesNode.appendNode('dependency')
-                        dependencyNode.appendNode('groupId', it.group)
-                        dependencyNode.appendNode('artifactId', it.name)
-                        dependencyNode.appendNode('version', it.version)
-                    }
-                }
-                def dependencyNode = dependenciesNode.appendNode('dependency')
-                dependencyNode.appendNode('groupId', artifactGroup)
-                dependencyNode.appendNode('artifactId', "niddler-base")
-                dependencyNode.appendNode('version', artifactVersion)
-            }
-        }
-    }
+signReleasePublication {
+    dependsOn assemble
 }

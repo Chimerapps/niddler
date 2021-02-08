@@ -2,26 +2,14 @@ buildscript {
 
     repositories {
         mavenCentral()
-        jcenter()
-
     }
 }
-apply plugin: 'com.jfrog.bintray'
 
 apply from: '../constants.gradle'
 
-def artifactVersion = project.ext.releaseVersion
-def artifactGroup = 'com.chimerapps.niddler'
-def artifactName = "niddler-noop-base"
-
-group "$artifactGroup"
-version "$artifactVersion"
-
 apply plugin: 'java'
-apply plugin: 'maven-publish'
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
     compileOnly 'androidx.annotation:annotation:1.1.0'
     compileOnly 'com.squareup.okhttp3:okhttp:3.11.0'
     compileOnly 'com.squareup.retrofit2:retrofit:2.5.0'
@@ -30,72 +18,11 @@ dependencies {
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
 
-
-task sourceJar(type: Jar, dependsOn: classes) {
-    classifier 'sources'
-    from sourceSets.main.allSource
+ext {
+    artifactVersion = project.ext.releaseVersion
+    artifactName = 'niddler-noop-base'
+    artifactGroup = 'com.chimerapps.niddler'
+    artifactDescription = 'Niddler network inspector base no-op library'
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-}
-
-bintray {
-    user = System.getenv('BINTRAY_USER')
-    key = System.getenv('BINTRAY_KEY')
-    pkg {
-        repo = 'maven'
-        name = "$artifactName"
-        licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/icapps/niddler'
-
-        version {
-            name = "$artifactVersion"
-            desc = "Niddler network inspector base no-op library"
-            released = new Date()
-        }
-    }
-    publications = ['maven']
-}
-
-def pomConfig = {
-    licenses {
-        license {
-            name "The Apache Software License, Version 2.0"
-            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
-            distribution "repo"
-        }
-    }
-    developers {
-        developer {
-            name "Nicola Verbeeck"
-            email "nicola@chimerapps.com"
-            organization "Chimerapps"
-        }
-    }
-}
-
-publishing {
-    publications {
-        maven(MavenPublication) {
-            groupId "$artifactGroup"
-            artifactId "$artifactName"
-            version "$artifactVersion"
-
-            from components.java
-
-            artifact sourceJar
-            artifact javadocJar
-
-            pom.withXml {
-                def root = asNode()
-                root.appendNode('description', 'Niddler network inspector base no-op library')
-                root.appendNode('name', "$artifactName")
-                root.appendNode('url', 'https://github.com/icapps/niddler')
-                root.children().last() + pomConfig
-            }
-        }
-    }
-}
-
+apply from: "${rootProject.projectDir}/scripts/publish-mavencentral.gradle"
