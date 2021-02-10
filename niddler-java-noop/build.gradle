@@ -12,7 +12,7 @@ sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
 
 dependencies {
-    api project(':niddler-lib-base-noop')
+    api project(':niddler-noop-base')
 }
 
 ext {

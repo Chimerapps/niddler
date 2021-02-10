@@ -1,16 +1,16 @@
-package com.chimerapps.sampleapplication.activity
+package com.icapps.sampleapplication.activity
 
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.chimerapps.sampleapplication.NiddlerSampleApplication
-import com.chimerapps.sampleapplication.R
-import com.chimerapps.sampleapplication.api.ExampleJsonApi
-import com.chimerapps.sampleapplication.api.ExampleXMLApi
-import com.chimerapps.sampleapplication.api.Post
-import com.chimerapps.sampleapplication.api.TimeoutApi
+import com.icapps.sampleapplication.NiddlerSampleApplication
+import com.icapps.sampleapplication.R
+import com.icapps.sampleapplication.api.ExampleJsonApi
+import com.icapps.sampleapplication.api.ExampleXMLApi
+import com.icapps.sampleapplication.api.Post
+import com.icapps.sampleapplication.api.TimeoutApi
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody

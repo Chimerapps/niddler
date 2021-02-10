@@ -19,7 +19,7 @@ android {
 }
 
 dependencies {
-    api project(':niddler-lib-base')
+    api project(':niddler-base')
     compileOnly 'androidx.annotation:annotation:1.1.0'
 }
 

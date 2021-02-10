@@ -4,7 +4,7 @@ apply from: '../constants.gradle'
 apply plugin: 'com.android.library'
 
 dependencies {
-    api project(':niddler-lib-base-noop')
+    api project(':niddler-noop-base')
     compileOnly 'androidx.annotation:annotation:1.1.0'
 }
 

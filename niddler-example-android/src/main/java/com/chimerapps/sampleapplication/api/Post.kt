@@ -1,4 +1,4 @@
-package com.chimerapps.sampleapplication.api
+package com.icapps.sampleapplication.api
 
 /**
  * Created by maartenvangiel on 14/11/2016.

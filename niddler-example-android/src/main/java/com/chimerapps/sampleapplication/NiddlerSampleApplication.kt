@@ -1,4 +1,4 @@
-package com.chimerapps.sampleapplication
+package com.icapps.sampleapplication
 
 import android.app.Application
 
@@ -6,9 +6,9 @@ import com.chimerapps.niddler.core.AndroidNiddler
 import com.chimerapps.niddler.interceptor.okhttp.NiddlerOkHttpInterceptor
 import com.chimerapps.niddler.retrofit.NiddlerRetrofitCallInjector
 import com.chimerapps.niddler.urlconnection.NiddlerUrlConnectionHandler
-import com.chimerapps.sampleapplication.api.ExampleJsonApi
-import com.chimerapps.sampleapplication.api.ExampleXMLApi
-import com.chimerapps.sampleapplication.api.TimeoutApi
+import com.icapps.sampleapplication.api.ExampleJsonApi
+import com.icapps.sampleapplication.api.ExampleXMLApi
+import com.icapps.sampleapplication.api.TimeoutApi
 import okhttp3.Cache
 
 import okhttp3.OkHttpClient

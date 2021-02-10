@@ -1,4 +1,4 @@
-package com.chimerapps.sampleapplication.api
+package com.icapps.sampleapplication.api
 
 import okhttp3.ResponseBody
 import retrofit2.Call
