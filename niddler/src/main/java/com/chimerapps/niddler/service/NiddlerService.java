@@ -28,7 +28,7 @@ public class NiddlerService extends Service {
 	private static final int NOTIFICATION_ID = 147;
 	private static final long PORT_WAIT_DELAY = 500L;
 
-	private final IBinder mBinder = new NiddlerBinder();
+	private IBinder mBinder;
 	private NotificationManager mNotificationManager;
 	private Niddler mNiddler;
 	private int mBindCount;
@@ -99,6 +99,7 @@ public class NiddlerService extends Service {
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		mBinder = new NiddlerBinder();
 		mHandler = new Handler(Looper.getMainLooper());
 		mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		Log.d(LOG_TAG, "NiddlerService created!");
@@ -108,6 +109,7 @@ public class NiddlerService extends Service {
 	public void onDestroy() {
 		super.onDestroy();
 		removeNotification();
+		mBinder = null;
 		Log.d(LOG_TAG, "NiddlerService destroyed!");
 	}
 

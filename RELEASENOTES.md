@@ -1,3 +1,11 @@
+### 1.5.2 ###
+
+* Don't retain links to destroyed service. Fixes #25
+
+### 1.5.1 ###
+
+* Fixed broken package references
+
 ### 1.5.0 ###
 
 * First package release on maven central
