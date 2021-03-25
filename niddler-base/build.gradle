@@ -1,0 +1,37 @@
+buildscript {
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+apply from: '../constants.gradle'
+
+apply plugin: 'java-library'
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+repositories {
+    google()
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    implementation 'org.java-websocket:Java-WebSocket:1.4.1'
+
+    compileOnly 'com.squareup.okhttp3:okhttp:3.11.0'
+    compileOnly 'com.squareup.retrofit2:retrofit:2.5.0'
+    compileOnly 'androidx.annotation:annotation:1.1.0'
+    compileOnly 'org.json:json:20080701'
+}
+
+ext {
+    artifactVersion = project.ext.releaseVersion
+    artifactName = 'niddler-base'
+    artifactGroup = 'com.chimerapps.niddler'
+    artifactDescription = 'Niddler network inspector base library'
+}
+
+apply from: "${rootProject.projectDir}/scripts/publish-mavencentral.gradle"

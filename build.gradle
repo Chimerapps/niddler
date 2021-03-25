@@ -2,7 +2,7 @@ group 'com.icapps'
 version '1'
 
 buildscript {
-    ext.kotlin_version = '1.4.10'
+    ext.kotlin_version = '1.4.30'
 
     repositories {
         mavenCentral()
@@ -10,7 +10,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.0.1'
+        classpath 'com.android.tools.build:gradle:4.1.2'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
@@ -19,8 +19,8 @@ buildscript {
 allprojects {
     repositories {
         mavenCentral()
-        jcenter()
         google()
+        jcenter()
     }
 }
 

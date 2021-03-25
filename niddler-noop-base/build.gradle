@@ -1,0 +1,28 @@
+buildscript {
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+apply from: '../constants.gradle'
+
+apply plugin: 'java'
+
+dependencies {
+    compileOnly 'androidx.annotation:annotation:1.1.0'
+    compileOnly 'com.squareup.okhttp3:okhttp:3.11.0'
+    compileOnly 'com.squareup.retrofit2:retrofit:2.5.0'
+}
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"
+
+ext {
+    artifactVersion = project.ext.releaseVersion
+    artifactName = 'niddler-noop-base'
+    artifactGroup = 'com.chimerapps.niddler'
+    artifactDescription = 'Niddler network inspector base no-op library'
+}
+
+apply from: "${rootProject.projectDir}/scripts/publish-mavencentral.gradle"

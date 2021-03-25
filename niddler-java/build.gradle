@@ -1,0 +1,28 @@
+buildscript {
+
+    repositories {
+        mavenCentral()
+        jcenter()
+
+    }
+}
+apply from: '../constants.gradle'
+
+apply plugin: 'java-library'
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+dependencies {
+    implementation "org.json:json:20080701"
+    api project(':niddler-base')
+}
+
+ext {
+    artifactVersion = project.ext.releaseVersion
+    artifactName = 'niddler-java'
+    artifactGroup = 'com.chimerapps.niddler'
+    artifactDescription = 'Niddler network inspector java library'
+}
+
+apply from: "${rootProject.projectDir}/scripts/publish-mavencentral.gradle"

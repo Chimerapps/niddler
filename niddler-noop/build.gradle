@@ -1,0 +1,35 @@
+
+apply from: '../constants.gradle'
+
+apply plugin: 'com.android.library'
+
+dependencies {
+    api project(':niddler-noop-base')
+    compileOnly 'androidx.annotation:annotation:1.1.0'
+}
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"
+
+android {
+    compileSdkVersion 28
+    buildToolsVersion '28.0.3'
+
+    defaultConfig {
+        consumerProguardFiles 'proguard-rules.txt'
+        minSdkVersion 14
+    }
+}
+
+ext {
+    artifactVersion = project.ext.releaseVersion
+    artifactName = 'niddler-noop'
+    artifactGroup = 'com.chimerapps.niddler'
+    artifactDescription = 'Niddler network inspector library for android - noop version'
+}
+
+apply from: "${rootProject.projectDir}/scripts/publish-mavencentral-android.gradle"
+
+signReleasePublication {
+    dependsOn assemble
+}

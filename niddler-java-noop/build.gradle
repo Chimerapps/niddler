@@ -1,0 +1,25 @@
+buildscript {
+
+    repositories {
+        mavenCentral()
+    }
+}
+apply from: '../constants.gradle'
+
+apply plugin: 'java-library'
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"
+
+dependencies {
+    api project(':niddler-noop-base')
+}
+
+ext {
+    artifactVersion = project.ext.releaseVersion
+    artifactName = 'niddler-java-noop'
+    artifactGroup = 'com.chimerapps.niddler'
+    artifactDescription = 'Niddler network inspector java no-op library'
+}
+
+apply from: "${rootProject.projectDir}/scripts/publish-mavencentral.gradle"

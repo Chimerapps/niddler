@@ -15,7 +15,7 @@ apply plugin: 'kotlin'
 apply plugin: 'application'
 apply plugin: 'com.github.johnrengelman.shadow'
 
-mainClassName = "com.icapps.niddler.example.MainKt"
+mainClassName = "com.chimerapps.niddler.example.MainKt"
 
 repositories {
     mavenCentral()
@@ -33,7 +33,7 @@ compileTestKotlin {
 }
 
 dependencies {
-    implementation project(':niddler-lib-java')
+    implementation project(':niddler-java')
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
 }

@@ -1,0 +1,94 @@
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+group = artifactGroup
+version = artifactVersion
+
+ext["signing.keyId"] = ''
+ext["signing.password"] = ''
+ext["signing.secretKeyRingFile"] = ''
+ext["ossrhUsername"] = ''
+ext["ossrhPassword"] = ''
+ext["sonatypeStagingProfileId"] = ''
+
+def secretPropsFile = project.rootProject.file('signing.properties')
+if (secretPropsFile.exists()) {
+    Properties p = new Properties()
+    new FileInputStream(secretPropsFile).withCloseable { is ->
+        p.load(is)
+    }
+    p.each { name, value ->
+        ext[name] = value
+    }
+} else {
+    ext["signing.keyId"] = System.getenv('SIGNING_KEY_ID')
+    ext["signing.password"] = System.getenv('SIGNING_PASSWORD')
+    ext["signing.secretKeyRingFile"] = System.getenv('SIGNING_SECRET_KEY_RING_FILE')
+    ext["ossrhUsername"] = System.getenv('OSSRH_USERNAME')
+    ext["ossrhPassword"] = System.getenv('OSSRH_PASSWORD')
+    ext["sonatypeStagingProfileId"] = System.getenv('SONATYPE_STAGING_PROFILE_ID')
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        release(MavenPublication) {
+            groupId "$artifactGroup"
+            artifactId "$artifactName"
+            version "$artifactVersion"
+
+            from components.java
+
+            pom {
+                name = artifactName
+                description = artifactDescription
+                url = 'https://github.com/Chimerapps/niddler'
+
+                licenses {
+                    license {
+                        name = "The Apache Software License, Version 2.0"
+                        url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                    }
+                }
+                developers {
+                    developer {
+                        name = "Nicola Verbeeck"
+                        email = "nicola@chimerapps.com"
+                        organization = "Chimerapps"
+                    }
+                    developer {
+                        name = "Maarten Van Giel"
+                        email = "contact@maarten.vg"
+                    }
+                }
+
+                scm {
+                    connection = 'scm:git:github.com/Chimerapps/niddler.git'
+                    developerConnection = 'scm:git:ssh://github.com/Chimerapps/niddler.git'
+                    url = 'https://github.com/Chimerapps/niddler'
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            // This is an arbitrary name, you may also use "mavencentral" or
+            // any other name that's descriptive for you
+            name = "sonatype"
+            url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            credentials {
+                username ossrhUsername
+                password ossrhPassword
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications
+}

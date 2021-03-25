@@ -1,4 +1,6 @@
-# Niddler [![Download](https://api.bintray.com/packages/nicolaverbeeck/maven/niddler/images/download.svg)](https://bintray.com/nicolaverbeeck/maven/niddler/_latestVersion)
+# Niddler [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.chimerapps.niddler/niddler/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.chimerapps.niddler/niddler)
+
+## Niddler has migrated on maven central to `com.chimerapps.niddler:...`!!!
 
 ![Logo](niddler_logo.png)
 
@@ -6,14 +8,12 @@ Niddler is a network debugging utility for Android and java apps that caches net
 
 Niddler is meant to be used with [Niddler-ui](https://github.com/Chimerapps/niddler-ui), which is a plugin for IntelliJ/Android Studio. When used together it allows you to visualize network activity, easily navigate JSON/XML responses, debug, ...
 
-Niddler is a collaboration of [icapps](http://www.icapps.com) and [Chimerapps](http://www.chimerapps.com/).
-
 ## Example use (Android)
 build.gradle:
 ``` groovy
 //Ensure jcenter is in the repo list
-debugCompile 'com.icapps.niddler:niddler:{latest version}'
-releaseCompile 'com.icapps.niddler:niddler-noop:{latest version}'
+debugCompile 'com.chimerapps.niddler:niddler:{latest version}'
+releaseCompile 'com.chimerapps.niddler:niddler-noop:{latest version}'
 ```
 
 Example usage with Android Application:
@@ -68,8 +68,8 @@ Using the service is not required. You can also call `niddler.start()` and `nidd
 build.gradle:
 ``` groovy
 //Ensure jcenter is in the repo list (1.1.1 is the latest stable version)
-debugCompile 'com.icapps.niddler:niddler-java:1.1.1'
-releaseCompile 'com.icapps.niddler:niddler-java-noop:1.1.1'
+debugCompile 'com.chimerapps.niddler:niddler-java:1.1.1'
+releaseCompile 'com.chimerapps.niddler:niddler-java-noop:1.1.1'
 ```
 
 Use with java application:
