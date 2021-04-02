@@ -1,3 +1,7 @@
+### 1.5.3 ###
+
+* Don't retain links to destroyed service. Fixes #25
+
 ### 1.5.2 ###
 
 * Don't retain links to destroyed service. Fixes #25
