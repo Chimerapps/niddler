@@ -13,6 +13,8 @@ import com.chimerapps.niddler.service.NiddlerService;
 import com.chimerapps.niddler.util.AndroidLogUtil;
 import com.chimerapps.niddler.util.LogUtil;
 
+import java.lang.ref.WeakReference;
+
 /**
  * @author Nicola Verbeeck
  * @version 1
@@ -22,7 +24,7 @@ public final class AndroidNiddler extends Niddler implements Niddler.PlatformNid
 	private long mAutoStopAfter = -1;
 	private NiddlerServiceLifeCycleWatcher mLifeCycleWatcher = null;
 
-	private NiddlerService mNiddlerService;
+	private WeakReference<NiddlerService> mNiddlerService;
 
 	private AndroidNiddler(final String password, final int port, final long cacheSize,
 			final NiddlerServerInfo niddlerServerInfo, final int maxStackTraceSize) {
@@ -61,8 +63,9 @@ public final class AndroidNiddler extends Niddler implements Niddler.PlatformNid
 						return;
 					}
 
-					mNiddlerService = ((NiddlerService.NiddlerBinder) service).getService();
-					mNiddlerService.initialize(niddler, mAutoStopAfter);
+					final NiddlerService innerService = ((NiddlerService.NiddlerBinder) service).getService();
+					mNiddlerService = new WeakReference<>(innerService);
+					innerService.initialize(niddler, mAutoStopAfter);
 				}
 
 				@Override
@@ -77,7 +80,7 @@ public final class AndroidNiddler extends Niddler implements Niddler.PlatformNid
 
 	@Override
 	public void closePlatform() {
-		final NiddlerService niddlerService = mNiddlerService;
+		final NiddlerService niddlerService = mNiddlerService == null ? null : mNiddlerService.get();
 		if (niddlerService != null) {
 			niddlerService.stopSelf();
 			mNiddlerService = null;
