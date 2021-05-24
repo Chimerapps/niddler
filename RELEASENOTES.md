@@ -1,3 +1,7 @@
+### 1.5.4 ###
+
+* Ensure we catch WebSocket errors. Fixes #26
+
 ### 1.5.3 ###
 
 * Don't retain links to destroyed service. Fixes #25

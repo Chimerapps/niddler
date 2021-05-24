@@ -1,8 +1,10 @@
 package com.chimerapps.niddler.core;
 
-import androidx.annotation.Nullable;
+import com.chimerapps.niddler.util.LogUtil;
 
 import org.java_websocket.WebSocket;
+
+import androidx.annotation.Nullable;
 
 /**
  * @author Nicola Verbeeck
@@ -41,7 +43,11 @@ final class ServerConnection {
 	void sendAuthRequest(@Nullable final String packageName) {
 		mState = STATE_AUTH_REQ_SENT;
 		mAuthRequest = ServerAuth.generateAuthenticationRequest(packageName);
-		mSocket.send(MessageBuilder.buildMessage(mAuthRequest));
+		try {
+			mSocket.send(MessageBuilder.buildMessage(mAuthRequest));
+		} catch (Throwable e) {
+			LogUtil.niddlerLogError("ServerConnection", "Failed to send auth request:", e);
+		}
 	}
 
 	boolean checkAuthReply(final ServerAuth.AuthReply authReply, final String password) {
@@ -60,15 +66,27 @@ final class ServerConnection {
 	}
 
 	void send(final String message) {
-		mSocket.send(message);
+		try {
+			mSocket.send(message);
+		} catch (Throwable e) {
+			LogUtil.niddlerLogError("ServerConnection", "Failed to send message:", e);
+		}
 	}
 
 	private void sendProtocolInfo() {
-		mSocket.send(MessageBuilder.buildProtocolVersionMessage());
+		try {
+			mSocket.send(MessageBuilder.buildProtocolVersionMessage());
+		} catch (Throwable e) {
+			LogUtil.niddlerLogError("ServerConnection", "Failed to protocol info message:", e);
+		}
 	}
 
 	private void sendAuthSuccess() {
-		mSocket.send(MessageBuilder.buildAuthSuccess());
+		try {
+			mSocket.send(MessageBuilder.buildAuthSuccess());
+		} catch (Throwable e) {
+			LogUtil.niddlerLogError("ServerConnection", "Failed to send auth success message:", e);
+		}
 	}
 
 }
