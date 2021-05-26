@@ -1046,7 +1046,8 @@ final class NiddlerDebuggerImpl implements NiddlerDebugger {
 	static String makeDebugRequestMessage(@NonNull final String actionId, @NonNull final NiddlerRequest request, @Nullable final NiddlerResponse response) throws JSONException {
 		final JSONObject object = new JSONObject();
 		object.put("type", "debugRequest");
-		object.put("requestId", request.getMessageId());
+		object.put("messageId", request.getMessageId());
+		object.put("requestId", request.getRequestId());
 		object.put("actionId", actionId);
 		if (response != null) {
 			object.put("response", MessageBuilder.buildMessageJson(response));
