@@ -145,7 +145,7 @@ public class NiddlerService extends Service {
 
 		final Intent intent = new Intent(this, NiddlerService.class);
 		intent.setAction("STOP");
-		final PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+		final PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, MarshmallowCompatHelper.getPendingIntentFlags());
 
 		notificationBuilder.setContentTitle("Niddler")
 				.setContentText(getString(R.string.niddler_running_notification));
