@@ -99,6 +99,12 @@ public class Sample {
 
 For instructions on how to access the captured network data, see [niddler-ui](https://github.com/Chimerapps/niddler-ui)
 
+### Waiting for debugger attached
+When launching android apps instrumented with the automatic niddler service, you can pass an intent extra to the starting activity that will force the app to 'wait' until a niddler
+debugger is connected.
+
+You have to pass `--ei Niddler-Wait-For-Debugger 1` to the activity manager (see the run configuration options dropdown in Android Studio) to enable this.
+
 ## Session icons
 Niddler supports reporting session icons to the UI since version 1.1.0. These icons provide an extra visual cue when browsing running sessions. You can pass the icon by 
 passing it to the `NiddlerServerInfo` when building the niddler instance.
