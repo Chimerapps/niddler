@@ -44,6 +44,7 @@ class NiddlerServerAnnouncementManager implements Runnable {
 
 	public static final int EXTENSION_TYPE_ICON = 1;
 	public static final int EXTENSION_TYPE_TAG = 2;
+	public static final int EXTENSION_TYPE_USER = 256;
 
 	private final AtomicBoolean mIsRunning = new AtomicBoolean(false);
 	@Nullable
@@ -61,11 +62,13 @@ class NiddlerServerAnnouncementManager implements Runnable {
 	private final List<Slave> mSlaves;
 	@NonNull
 	private final List<AnnouncementExtension> mExtensions = new ArrayList<>();
+	private final int mPid;
 
-	NiddlerServerAnnouncementManager(@NonNull final String packageName, @NonNull final NiddlerServer server) {
+	NiddlerServerAnnouncementManager(@NonNull final String packageName, @NonNull final NiddlerServer server, int pid) {
 		mPackageName = packageName;
 		mServer = server;
 		mSlaves = new ArrayList<>();
+		mPid = pid;
 	}
 
 	public void addExtension(@NonNull final AnnouncementExtension extension) {
@@ -185,7 +188,7 @@ class NiddlerServerAnnouncementManager implements Runnable {
 		try {
 			selfDescriptor.put("packageName", mPackageName);
 			selfDescriptor.put("port", mServer.getPort());
-			selfDescriptor.put("pid", -1);
+			selfDescriptor.put("pid", mPid);
 			selfDescriptor.put("protocol", Niddler.NiddlerServerInfo.PROTOCOL_VERSION);
 
 			final JSONArray extensionArray = new JSONArray();
@@ -477,6 +480,12 @@ class NiddlerServerAnnouncementManager implements Runnable {
 
 		public TagAnnouncementExtension(String tag) {
 			super(EXTENSION_TYPE_TAG, "tag", tag);
+		}
+	}
+
+	public static class WaitingForDebuggerAnnouncementExtension extends StringAnnouncementExtension {
+		public WaitingForDebuggerAnnouncementExtension() {
+			super(EXTENSION_TYPE_USER+1, "WaitingForDebugger", "true");
 		}
 	}
 }

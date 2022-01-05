@@ -11,7 +11,7 @@ public class JavaNiddler extends Niddler implements Niddler.PlatformNiddler {
 
 	JavaNiddler(final String password, final int port, final long cacheSize,
 			final NiddlerServerInfo niddlerServerInfo, final int maxStackTraceSize) {
-		super(password, port, cacheSize, niddlerServerInfo, maxStackTraceSize);
+		super(password, port, cacheSize, niddlerServerInfo, maxStackTraceSize, -1);
 		mNiddlerImpl.setPlatform(this);
 	}
 

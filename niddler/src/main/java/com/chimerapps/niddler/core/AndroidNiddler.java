@@ -7,6 +7,8 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.Process;
+
 import androidx.annotation.Nullable;
 
 import com.chimerapps.niddler.service.NiddlerService;
@@ -28,7 +30,7 @@ public final class AndroidNiddler extends Niddler implements Niddler.PlatformNid
 
 	private AndroidNiddler(final String password, final int port, final long cacheSize,
 			final NiddlerServerInfo niddlerServerInfo, final int maxStackTraceSize) {
-		super(password, port, cacheSize, niddlerServerInfo, maxStackTraceSize);
+		super(password, port, cacheSize, niddlerServerInfo, maxStackTraceSize, Process.myPid());
 		mNiddlerImpl.setPlatform(this);
 	}
 

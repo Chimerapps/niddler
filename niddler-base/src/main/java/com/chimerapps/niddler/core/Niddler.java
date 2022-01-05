@@ -35,8 +35,12 @@ public abstract class Niddler implements Closeable {
 	final NiddlerImpl mNiddlerImpl;
 	private final int mStackTraceMaxDepth;
 
-	protected Niddler(final String password, final int port, final long cacheSize,
-			final NiddlerServerInfo niddlerServerInfo, final int stackTraceMaxDepth) {
+	protected Niddler(final String password,
+			final int port,
+			final long cacheSize,
+			final NiddlerServerInfo niddlerServerInfo,
+			final int stackTraceMaxDepth,
+			final int pid) {
 		mBlacklistListeners = new HashSet<>();
 		mNiddlerImpl = new NiddlerImpl(password, port, cacheSize, niddlerServerInfo, new NiddlerImpl.StaticBlacklistDispatchListener() {
 
@@ -50,7 +54,7 @@ public abstract class Niddler implements Closeable {
 					}
 				}
 			}
-		});
+		}, pid);
 		mStackTraceMaxDepth = stackTraceMaxDepth;
 		NiddlerDebuggerImpl.maxStackTraceDepth = stackTraceMaxDepth;
 		mStackTraceMap = new LinkedHashMap<>();

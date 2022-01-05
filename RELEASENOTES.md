@@ -1,3 +1,7 @@
+### 1.6.1 ###
+
+* Include process id
+
 ### 1.5.4 ###
 
 * Ensure we catch WebSocket errors. Fixes #26

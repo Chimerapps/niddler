@@ -39,15 +39,20 @@ class NiddlerServer extends WebSocketServer {
 	private final NiddlerImpl.StaticBlacklistDispatchListener mStaticBlacklistListener;
 	private final String mTag;
 
-	private NiddlerServer(final String password, final InetSocketAddress address, final String packageName, @Nullable final String icon,
-			final WebSocketListener listener, final NiddlerImpl.StaticBlacklistDispatchListener blacklistListener) {
+	private NiddlerServer(final String password,
+			final InetSocketAddress address,
+			final String packageName,
+			@Nullable final String icon,
+			final WebSocketListener listener,
+			final NiddlerImpl.StaticBlacklistDispatchListener blacklistListener,
+			final int pid) {
 		super(address);
 		mPackageName = packageName;
 		mListener = listener;
 		mPassword = password;
 		mConnections = new LinkedList<>();
 		mNiddlerDebugger = new NiddlerDebuggerImpl();
-		mServerAnnouncementManager = new NiddlerServerAnnouncementManager(packageName, this);
+		mServerAnnouncementManager = new NiddlerServerAnnouncementManager(packageName, this, pid);
 		mStaticBlacklistListener = blacklistListener;
 		mTag = UUID.randomUUID().toString().substring(0, 6);
 
@@ -57,9 +62,14 @@ class NiddlerServer extends WebSocketServer {
 		mServerAnnouncementManager.addExtension(new NiddlerServerAnnouncementManager.TagAnnouncementExtension(mTag));
 	}
 
-	NiddlerServer(final String password, final int port, final String packageName, @Nullable final String icon,
-			final WebSocketListener listener, final NiddlerImpl.StaticBlacklistDispatchListener blacklistListener) throws UnknownHostException {
-		this(password, new InetSocketAddress(port), packageName, icon, listener, blacklistListener);
+	NiddlerServer(final String password,
+			final int port,
+			final String packageName,
+			@Nullable final String icon,
+			final WebSocketListener listener,
+			final NiddlerImpl.StaticBlacklistDispatchListener blacklistListener,
+			final int pid) throws UnknownHostException {
+		this(password, new InetSocketAddress(port), packageName, icon, listener, blacklistListener, pid);
 	}
 
 	@Override

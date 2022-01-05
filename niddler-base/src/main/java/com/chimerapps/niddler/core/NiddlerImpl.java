@@ -33,10 +33,14 @@ class NiddlerImpl implements NiddlerServer.WebSocketListener {
 	private final Map<String, String> mStaticBlacklistMessage;
 
 
-	NiddlerImpl(final String password, final int port, final long cacheSize, final Niddler.NiddlerServerInfo niddlerServerInfo,
-			final StaticBlacklistDispatchListener blacklistListener) {
+	NiddlerImpl(final String password,
+			final int port,
+			final long cacheSize,
+			final Niddler.NiddlerServerInfo niddlerServerInfo,
+			final StaticBlacklistDispatchListener blacklistListener,
+			final int pid) {
 		try {
-			mServer = new NiddlerServer(password, port, niddlerServerInfo.name, niddlerServerInfo.icon, this, blacklistListener);
+			mServer = new NiddlerServer(password, port, niddlerServerInfo.name, niddlerServerInfo.icon, this, blacklistListener, pid);
 		} catch (final UnknownHostException ex) {
 			LogUtil.niddlerLogError(LOG_TAG, "Failed to start server: " + ex.getLocalizedMessage());
 		}
