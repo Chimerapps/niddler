@@ -204,9 +204,11 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 			metadata.put(NIDDLER_FROM_DISK_METADATA, "true");
 		}
 
+		final int networkWaitTime = (networkResponse != null) ? (int)(networkResponse.receivedResponseAtMillis() - networkResponse.sentRequestAtMillis()) : wait;
+
 		final NiddlerResponse niddlerResponse = new NiddlerOkHttpResponse(response, uuid,
 				(networkRequest == null) ? null : new NiddlerOkHttpRequest(networkRequest, uuid, null, null, null, null),
-				(networkResponse == null) ? null : new NiddlerOkHttpResponse(networkResponse, uuid, null, null, writeTime, readTime, wait, null, null),
+				(networkResponse == null) ? null : new NiddlerOkHttpResponse(networkResponse, uuid, null, null, writeTime, readTime, networkWaitTime, null, null),
 				writeTime, readTime, wait, null, metadata);
 
 		NiddlerDebugger.DebugResponse debugFromResponse = null;
@@ -228,6 +230,7 @@ public class NiddlerOkHttpInterceptor implements Interceptor {
 					buildExtraNiddlerMetadata(FLAG_MODIFIED_RESPONSE + (changedTime ? FLAG_TIME : 0)));
 
 			mNiddler.logResponse(debugNiddlerResponse);
+			assert debugResp != null;
 			return debugResp;
 		}
 	}
