@@ -162,6 +162,8 @@ final class NiddlerOkHttpResponse implements NiddlerResponse {
 				stream.write(buffer.clone().readByteArray());
 				stream.flush();
 			}
+		} catch (final IllegalStateException ignored) {
+			// Can't read this body anymore from okhttp 5.0.0-alpha7 and up
 		} catch (final IOException e) {
 			e.printStackTrace();
 		}
